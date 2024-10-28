@@ -6,10 +6,12 @@ export type IGenericErrorResponse = {
   message: string;
   errorMessages: IGenericErrorMessage[];
 };
+
 type UploadedFile = {
   filename: string;
   path: string;
 };
+
 export type RequestData = {
   files?: {
     [key: string]: Express.Multer.File[];  

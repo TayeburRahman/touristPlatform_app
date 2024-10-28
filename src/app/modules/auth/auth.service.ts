@@ -56,7 +56,7 @@ const registrationAccount = async (payload: IAuth) => {
   if (existingAuth && !existingAuth.isActive) {
     await Promise.all([
       existingAuth.role === "USER" && User.deleteOne({ authId: existingAuth._id }),
-      existingAuth.role === "PARTNER" && Partner.deleteOne({ authId: existingAuth._id }),
+      // existingAuth.role === "VENDOR" && Partner.deleteOne({ authId: existingAuth._id }),
       existingAuth.role === "ADMIN" && Admin.deleteOne({ authId: existingAuth._id }),
       Auth.deleteOne({ email }),
     ]);
@@ -72,7 +72,7 @@ const registrationAccount = async (payload: IAuth) => {
     expirationTime: Date.now() + 3 * 60 * 1000,
   };
 
-  if (role === "USER" || role === "PARTNER") {
+  if (role === "USER" || role === "VENDOR") {
     console.log("==============",auth);
     sendEmail({
       email: auth.email,
@@ -106,9 +106,9 @@ const registrationAccount = async (payload: IAuth) => {
     case ENUM_USER_ROLE.ADMIN:
       result = await Admin.create(other);
       break;
-    case ENUM_USER_ROLE.PARTNER:
-      result = await Partner.create(other);
-      break;
+    // case ENUM_USER_ROLE.VENDOR:
+    //   result = await Partner.create(other);
+    //   break;
     default:
       throw new ApiError(400, "Invalid role provided!");
   }
@@ -144,9 +144,11 @@ const activateAccount = async (payload: ActivationPayload) => {
     existAuth.role === ENUM_USER_ROLE.SUPER_ADMIN
   ) {
     result = await Admin.findOne({ authId: existAuth._id });
-  } else if (existAuth.role === ENUM_USER_ROLE.PARTNER) {
-    result = await Partner.findOne({ authId: existAuth._id });
-  } else {
+  } 
+  // else if (existAuth.role === ENUM_USER_ROLE.VENDOR) {
+  //   result = await Partner.findOne({ authId: existAuth._id });
+  // }
+   else {
     throw new ApiError(400, "Invalid role provided!");
   }
 
@@ -203,10 +205,10 @@ const loginAccount = async (payload: LoginPayload) => {
       userDetails = await User.findOne({ authId: isAuth._id }).populate("authId");
       role = ENUM_USER_ROLE.USER;
       break;
-    case ENUM_USER_ROLE.PARTNER:
-      userDetails = await Partner.findOne({ authId: isAuth._id }).populate("authId");
-      role = ENUM_USER_ROLE.PARTNER;
-      break;
+    // case ENUM_USER_ROLE.VENDOR:
+    //   userDetails = await Partner.findOne({ authId: isAuth._id }).populate("authId");
+    //   role = ENUM_USER_ROLE.VENDOR;
+    //   break;
     case ENUM_USER_ROLE.ADMIN:
       userDetails = await Admin.findOne({ authId: isAuth._id }).populate("authId");
       role = ENUM_USER_ROLE.ADMIN;

@@ -30,17 +30,13 @@ export type IReqUser = {
   userId: string;
   authId: string;
   role: string;
-};
-
-export type Ireting = {
-  userId: string;
-};
+}; 
 
 export type IAuth = Document & {
   name: string;
   email: string;
   password: string;
-  role: 'USER' | 'PARTNER' | 'ADMIN' | 'SUPER_ADMIN';
+  role: 'USER' | 'VENDOR' | 'ADMIN' | 'SUPER_ADMIN';
   verifyCode?: string;
   codeVerify?: boolean;
   activationCode?: string;
@@ -61,7 +57,6 @@ export interface ActivationPayload {
   activation_code: string;
   userEmail: string;
 }
-
 
 export interface LoginPayload {
   email: string;

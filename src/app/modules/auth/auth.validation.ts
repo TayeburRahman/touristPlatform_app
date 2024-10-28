@@ -23,7 +23,6 @@ const create = z.object({
   }),
 });
 
-
 const updateUserZodSchema = z.object({
   body: z.object({
     name: z

@@ -24,7 +24,7 @@ router.post("/reset-password", AuthController.resetPassword)
 router.patch("/change-password",
   auth(
     ENUM_USER_ROLE.USER,
-    // ENUM_USER_ROLE.PARTNER,
+    // ENUM_USER_ROLE.VENDOR,
     ENUM_USER_ROLE.SUPER_ADMIN
   ), AuthController.changePassword
 );
@@ -62,16 +62,16 @@ router.delete(
 );
 
 //------ Partner Route -----------------
-router.get("/profile", auth(ENUM_USER_ROLE.PARTNER), PartnerController.getProfile)
+router.get("/profile", auth(ENUM_USER_ROLE.VENDOR), PartnerController.getProfile)
 router.patch(
   "/edit-profile",
-  auth(ENUM_USER_ROLE.PARTNER),
+  auth(ENUM_USER_ROLE.VENDOR),
   uploadFile(),
   PartnerController.updateProfile
 )
 router.delete(
   "/delete-account",
-  auth(ENUM_USER_ROLE.PARTNER),
+  auth(ENUM_USER_ROLE.VENDOR),
   PartnerController.deleteMyAccount
 );
 

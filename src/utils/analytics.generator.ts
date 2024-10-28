@@ -37,7 +37,6 @@ export async function generatedLast12MonthData<T>(
 
     last12MonthsData.push({ month: monthYear, count });
   }
-
   return { last12MonthsData };
 }
 

@@ -14,7 +14,6 @@ const sendMessage: RequestHandler = catchAsync(
     });
   },
 );
-
 const getMessages: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
     const result = await messageService.getMessages(req, res);

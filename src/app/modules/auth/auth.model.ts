@@ -27,7 +27,7 @@ const AuthSchema: Schema<IAuth> = new Schema(
     },
     role: {
       type: String,
-      enum: ["USER", "PARTNER", "ADMIN", "SUPER_ADMIN"],
+      enum: ["USER", "VENDOR", "ADMIN", "SUPER_ADMIN"],
       required: true,
     },
     verifyCode: {

@@ -1,3 +1,5 @@
+import { SortOrder } from 'mongoose';
+
 export type IPaginationOptions = {
   page?: number;
   limit?: number;
@@ -15,7 +17,7 @@ export type IGenericResponse<T> = {
 export type IAcademicSemesterFilters = {
   searchTerm?: string;
 };
-import { SortOrder } from 'mongoose';
+ 
 
 export type IOptions = {
   page?: number;
