@@ -1,17 +1,23 @@
 import express from 'express';
-import { AuthRoutes } from '../modules/auth/auth.routes'; 
+import { AuthRoutes } from '../modules/auth/auth.routes';
 import { MessageRoutes } from '../modules/messages/message.routes';
-import { NotificationRoutes } from '../modules/notifications/notifications.routes'; 
+import { NotificationRoutes } from '../modules/notifications/notifications.routes';
+import { VendorRoutes } from '../modules/vendor/auth.routes';
 
 const router = express.Router();
 
 const moduleRoutes = [
-  // -- done
+  // -- padding
   {
     path: '/auth',
     route: AuthRoutes,
+  }, 
+  // -- padding
+  {
+    path: '/vendor',
+    route: VendorRoutes,
   },
-  // -- done
+  // -- padding
   {
     path: '/message',
     route: MessageRoutes,

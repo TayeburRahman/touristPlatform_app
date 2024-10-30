@@ -6,7 +6,7 @@ import ApiError from "../../../errors/ApiError";
 import { jwtHelpers } from "../../../helpers/jwtHelpers";   
 import { logger } from "../../../shared/logger";
 import Auth from "./auth.model"; 
-import Partner from "../partner/partner.model"; 
+import Partner from "../vendor/vendor.model"; 
  
 import sendEmail from "../../../utils/sendEmail";
 import { ENUM_USER_ROLE } from "../../../enums/user";
@@ -72,8 +72,7 @@ const registrationAccount = async (payload: IAuth) => {
     expirationTime: Date.now() + 3 * 60 * 1000,
   };
 
-  if (role === "USER" || role === "VENDOR") {
-    console.log("==============",auth);
+  if (role === "USER") { 
     sendEmail({
       email: auth.email,
       subject: "Activate Your Account",
@@ -93,9 +92,7 @@ const registrationAccount = async (payload: IAuth) => {
   }
 
   other.authId = createAuth._id;
-  other.email = email;
-
-  console.log("Account", auth)
+  other.email = email; 
 
   // Role-based user creation
   let result;

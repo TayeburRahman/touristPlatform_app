@@ -1,12 +1,12 @@
 /* eslint-disable @typescript-eslint/ban-ts-comment */
 import { Request } from 'express';
 import multer from 'multer';
+import fs from 'fs';
 
 export const uploadFile = () => {
   const storage = multer.diskStorage({
     destination: function (req, file, cb) {
-      let uploadPath = '';
-
+      let uploadPath = '';  
       if (
         file.fieldname === 'cover_image' ||
         file.fieldname === 'profile_image'
@@ -20,10 +20,14 @@ export const uploadFile = () => {
         uploadPath = 'uploads/images/message';
       } else if (file.fieldname === 'video') {
         uploadPath = 'uploads/video';
+      } else if (file.fieldname === 'banner') {
+        uploadPath = 'uploads/vendor';
       } else {
         uploadPath = 'uploads';
       }
-
+      if (!fs.existsSync(uploadPath)) {
+        fs.mkdirSync(uploadPath, { recursive: true });
+      } 
       if (
         file.mimetype === 'image/jpeg' ||
         file.mimetype === 'image/png' ||
@@ -53,7 +57,10 @@ export const uploadFile = () => {
       'thumbnail',
       'video_thumbnail',
       'message_img',
+      "banner"
     ];
+
+ 
 
     if (file.fieldname === undefined) {
       cb(null, true);
@@ -85,7 +92,9 @@ export const uploadFile = () => {
     { name: 'video', maxCount: 1 },
     { name: 'video_thumbnail', maxCount: 1 },
     { name: 'thumbnail', maxCount: 1 },
+    { name: 'banner', maxCount: 1 },
     { name: 'message_img', maxCount: 10 },
+     
   ]);
 
   return upload;

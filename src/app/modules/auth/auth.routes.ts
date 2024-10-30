@@ -7,7 +7,7 @@ import { validateRequest } from '../../middlewares/validateRequest';
 import { AdminValidation } from '../admin/admin.validation';
 import { AuthValidation } from './auth.validation';
 import { AuthController } from './auth.controller';
-import { PartnerController } from '../partner/partner.controller';
+import { VendorController } from '../vendor/vendor.controller';
 import { UserController } from '../user/user.controller';
 
 const router = express.Router();
@@ -30,49 +30,62 @@ router.patch("/change-password",
 );
 
 //------ User Router ---------------
-router.get("/profile", auth(ENUM_USER_ROLE.USER), UserController.getProfile)
+router.get("/user/profile", auth(ENUM_USER_ROLE.USER), UserController.getProfile)
 router.patch(
-  "/edit-profile",
+  "/user/edit-profile",
   auth(ENUM_USER_ROLE.USER),
   uploadFile(),
-  PartnerController.updateProfile
+  UserController.updateProfile
 )
 router.delete(
-  "/delete-account",
+  "/user/delete-account",
   auth(ENUM_USER_ROLE.USER),
-  PartnerController.deleteMyAccount
+  UserController.deleteMyAccount
 );
 
 //------ Admin Router ---------------
+router.post("/create_admin",
+  auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
+  AdminController.createAdminAccount);
 router.get(
-  "/profile",
+  "/admin/profile",
   auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
   AdminController.myProfile
-)
+);
 router.patch(
-  "/edit-profile",
+  "/admin/edit-profile",
   auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
   uploadFile(),
   AdminController.updateProfile
-)
+);
 router.delete(
-  "/delete_account",
+  "/admin/delete_account",
   auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
   AdminController.deleteMyAccount
 );
 
-//------ Partner Route -----------------
-router.get("/profile", auth(ENUM_USER_ROLE.VENDOR), PartnerController.getProfile)
+//------ Vendor Route -----------------
+router.post("/vendor/send-request",
+  // auth(ENUM_USER_ROLE.USER),
+  uploadFile(),
+  VendorController.sendVendorRequest);
+
+router.post("/vendor/accept-request/:id",
+  auth(ENUM_USER_ROLE.ADMIN),
+  VendorController.acceptRequest)
+
+router.get("/profile", auth(ENUM_USER_ROLE.VENDOR), VendorController.getProfile);
+
 router.patch(
   "/edit-profile",
   auth(ENUM_USER_ROLE.VENDOR),
   uploadFile(),
-  PartnerController.updateProfile
-)
+  VendorController.updateProfile
+);
 router.delete(
   "/delete-account",
   auth(ENUM_USER_ROLE.VENDOR),
-  PartnerController.deleteMyAccount
+  VendorController.deleteMyAccount
 );
 
 
