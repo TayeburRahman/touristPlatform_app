@@ -5,8 +5,7 @@ import httpStatus from "http-status";
 import ApiError from "../../../errors/ApiError"; 
 import { jwtHelpers } from "../../../helpers/jwtHelpers";   
 import { logger } from "../../../shared/logger";
-import Auth from "./auth.model"; 
-import Partner from "../vendor/vendor.model"; 
+import Auth from "./auth.model";  
  
 import sendEmail from "../../../utils/sendEmail";
 import { ENUM_USER_ROLE } from "../../../enums/user";
@@ -18,6 +17,7 @@ import { ActivationPayload, IAuth, LoginPayload } from "./auth.interface";
 import config from "../../../config";
 import User from "../user/user.model";
 import Admin from "../admin/admin.model";
+import Vendor from "../vendor/vendor.model";
 
 
 interface ForgotPasswordPayload {
@@ -176,6 +176,8 @@ const loginAccount = async (payload: LoginPayload) => {
 
   const isAuth = await Auth.isAuthExist(email);
 
+  console.log("isAuth", email, isAuth)
+
   if (!isAuth) {
     throw new ApiError(404, "User does not exist");
   }
@@ -196,16 +198,16 @@ const loginAccount = async (payload: LoginPayload) => {
   let userDetails : any;
   let role;
   
-  console.log("role", role)
+  console.log("role", userDetails)
   switch (isAuth.role) {
     case ENUM_USER_ROLE.USER:
       userDetails = await User.findOne({ authId: isAuth._id }).populate("authId");
       role = ENUM_USER_ROLE.USER;
       break;
-    // case ENUM_USER_ROLE.VENDOR:
-    //   userDetails = await Partner.findOne({ authId: isAuth._id }).populate("authId");
-    //   role = ENUM_USER_ROLE.VENDOR;
-    //   break;
+    case ENUM_USER_ROLE.VENDOR:
+      userDetails = await Vendor.findOne({ authId: isAuth._id }).populate("authId");
+      role = ENUM_USER_ROLE.VENDOR;
+      break;
     case ENUM_USER_ROLE.ADMIN:
       userDetails = await Admin.findOne({ authId: isAuth._id }).populate("authId");
       role = ENUM_USER_ROLE.ADMIN;
@@ -297,7 +299,6 @@ const checkIsValidForgetActivationCode = async (payload: {  email: string; code:
   await account.save();
   return update;
 };
-
 const resetPassword = async (req: { query: { email: string }; body: ResetPasswordPayload }) => {
   const { email } = req.query;
   const { newPassword, confirmPassword } = req.body;

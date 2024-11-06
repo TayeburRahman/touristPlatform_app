@@ -15,12 +15,22 @@ const createAdvertiseUsFrom = catchAsync(async (req: Request, res: Response) => 
   });
 });
 
+const getPaddingRequest = catchAsync(async (req: Request, res: Response) => {
+  const result = await VendorService.getPaddingRequest();
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Get successfully",
+    data: result,
+  });
+});
+
 const approveAdvertise = catchAsync(async (req: Request, res: Response) => {
   const result = await VendorService.approveAdvertise(req as any);
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Request send successfully",
+    message: "Approve successfully",
     data: result,
   });
 });
@@ -35,7 +45,7 @@ const declinedAdvertise = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-//  ---------------- 
+// ---------------- 
 const sendVendorRequest = catchAsync(async (req: Request, res: Response) => {
   const result = await VendorService.sendVendorRequest(req as any);
   sendResponse(res, {
@@ -46,8 +56,8 @@ const sendVendorRequest = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const acceptRequest = catchAsync(async (req: Request, res: Response) => {
-  const result = await VendorService.acceptRequest(req as any);
+const acceptVendorRequest = catchAsync(async (req: Request, res: Response) => {
+  const result = await VendorService.acceptVendorRequest(req as any);
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -55,6 +65,28 @@ const acceptRequest = catchAsync(async (req: Request, res: Response) => {
     data: result,
   });
 }); 
+
+const deleteVendorRequest = catchAsync(async (req: Request, res: Response) => {
+  const result = await VendorService.deleteVendorRequest(req as any);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Request delete successfully",
+    data: result,
+  });
+}); 
+
+const getAllPending = catchAsync(async (req: Request, res: Response) => {
+  const result = await VendorService.getAllPending();
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Get successfully",
+    data: result,
+  });
+});
+
+// -----------------
 
 const updateProfile = catchAsync(async (req: Request, res: Response) => {
   const result = await VendorService.updateProfile(req as any);
@@ -86,16 +118,18 @@ const deleteMyAccount = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
- 
 
 export const VendorController = {
   createAdvertiseUsFrom,
   declinedAdvertise,
   approveAdvertise,
   sendVendorRequest,
-  acceptRequest,
+  acceptVendorRequest,
   deleteMyAccount,
   getProfile,
   updateProfile,
+  deleteVendorRequest,
+  getPaddingRequest,
+  getAllPending
 };
  

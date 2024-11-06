@@ -22,6 +22,8 @@ export const uploadFile = () => {
         uploadPath = 'uploads/video';
       } else if (file.fieldname === 'banner') {
         uploadPath = 'uploads/vendor';
+      } else if (file.fieldname === 'event_image') {
+        uploadPath = 'uploads/events';
       } else {
         uploadPath = 'uploads';
       }
@@ -57,10 +59,9 @@ export const uploadFile = () => {
       'thumbnail',
       'video_thumbnail',
       'message_img',
-      "banner"
+      "banner",
+      'event_image'
     ];
-
- 
 
     if (file.fieldname === undefined) {
       cb(null, true);
@@ -94,6 +95,8 @@ export const uploadFile = () => {
     { name: 'thumbnail', maxCount: 1 },
     { name: 'banner', maxCount: 1 },
     { name: 'message_img', maxCount: 10 },
+    { name: 'event_image', maxCount: 10 },
+     
      
   ]);
 

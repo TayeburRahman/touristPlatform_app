@@ -1,19 +1,25 @@
 import httpStatus from 'http-status';
 import ApiError from '../../../errors/ApiError';
 import Auth from '../auth/auth.model';
-import { IAuth, IReqUser } from '../auth/auth.interface';
+import { IAuth, IAuthModel, IReqUser } from '../auth/auth.interface';
 import { RequestData } from '../../../interfaces/common';
 import Vendor, { Advertise } from './vendor.model';
 import { IAdvertise, IVendor } from './vendor.interface';
 import { sendResetEmail } from '../auth/sendResetMails';
+import User from '../user/user.model';
+import { jwtHelpers } from '../../../helpers/jwtHelpers';
+import config from '../../../config';
 
 interface DeleteAccountPayload {
   email: string;
   password: string;
 }
 
-
+// --- Advertise Us From ---------------
 const createAdvertiseUsFrom = async (req: RequestData) => {
+
+  // const {userId, authId} = req.user as IReqUser;
+
   const data = req.body as {
     name: string,
     phone: string,
@@ -21,9 +27,13 @@ const createAdvertiseUsFrom = async (req: RequestData) => {
     business_name: string,
     massage: string, 
     userId: any,
+    authId: any,
     }
 
-  const { email } = data   
+    // data.userId = userId;
+    // data.authId = authId;
+
+  const { email } = data;  
 
   const checkUser = await Advertise.findOne({ email });
   if (checkUser?.status === "approved"){
@@ -40,6 +50,11 @@ const createAdvertiseUsFrom = async (req: RequestData) => {
   return newAdvertise;
 }
 
+const getPaddingRequest = async () => {
+  const data = await Advertise.find({status: "pending"})
+  return data;
+}
+
 const approveAdvertise = async (req: RequestData) => {
   const { id }: any = req.params
   const data = req.body as {
@@ -50,7 +65,7 @@ const approveAdvertise = async (req: RequestData) => {
 
   if (!data.email || !data.verify_code) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Missing email or verify code");
-  }
+  };
 
   const update = await Advertise.findByIdAndUpdate(
     id,
@@ -194,9 +209,10 @@ const declinedAdvertise = async (req: RequestData) => {
   return update;
 };
 
-// -----------------
+// --- Vendor Request ---------------
 const sendVendorRequest = async (req: RequestData) => { 
-  const { files } = req;
+  const {userId, authId} = req.user as IReqUser;
+  const { files } = req; 
 
   const {
     vendor_name,
@@ -206,6 +222,12 @@ const sendVendorRequest = async (req: RequestData) => {
     latitude,
     longitude,
   } = req.body as any; 
+
+  const userExist = await Auth.findById(authId)  
+
+  if(!userExist){
+    throw new ApiError(httpStatus.NOT_FOUND, "Login user not found!");
+  }
  
   const dataDB = await Advertise.findOne({ email: vendor_email }) as IAdvertise;
   if (!dataDB) {
@@ -227,7 +249,9 @@ const sendVendorRequest = async (req: RequestData) => {
   if (dataDB.otp_verify) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Your vendor profile request has already been submitted. Please wait for admin approval.");
   } 
+  
   let banner: string | undefined;
+
   if (files?.banner) {
     banner = `/vendor/${files.banner[0].filename}`;
   } 
@@ -237,41 +261,135 @@ const sendVendorRequest = async (req: RequestData) => {
     coordinates: [longitude, latitude],
   };
  
-  const vendorData = {
-    userId: dataDB?.userId ? dataDB.userId : null, 
-    email: dataDB.email,
-    name: dataDB.name,
+  const vendorData = { 
+    email: userExist.email,  
+    vendor_email: dataDB.email,
+    name: userExist.name,
+    phone_number: dataDB?.phone,
     vendor_name,
     banner,
     location,
+    userId: userId,
+    authId: authId
   };
- 
+
   const newVendor = new Vendor(vendorData);
   const result = await newVendor.save();
 
   await Advertise.findByIdAndUpdate(dataDB._id, { otp_verify: true });
 
   return result;
-};
+}; 
 
-
-
-
-
- 
- 
-
-const acceptRequest = async (req: RequestData) => {
-  const authId = req.user.authId;
-  const { id } = req.params as any;
-
-  const vendor = await Vendor.findById(id) as IVendor;
+const acceptVendorRequest = async (req: RequestData) => { 
+  const { id } = req.params as { id: string }; 
+  const vendor = await Vendor.findById(id) as IVendor; 
   if (!vendor) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Vendor not found');
   }
+  const authCheckExists: any = await Auth.findById(vendor?.authId);
+  if (authCheckExists?.role === "VENDOR") {
+    throw new ApiError(httpStatus.NOT_ACCEPTABLE, 'This user already has a vendor account!');
+  }
+  const userCheckExists = await User.findById(vendor?.userId);
+  let vendorData: Partial<IVendor> = {};  
+  if (authCheckExists?.role === "USER") {  
+    if (userCheckExists) { 
+      await User.findOneAndUpdate({ email: vendor.email },  { status: "upgraded" }); 
+      // Create a new token (if you plan to use it)
+      const token = jwtHelpers.createToken(
+        {
+          authId: authCheckExists._id,
+          role: "VENDOR",
+          userId: userCheckExists._id,
+        },
+        config.jwt.secret as string,
+        config.jwt.expires_in as string
+      );   
+    }  
+  }
+  // vendorData.authId = authCheckExists?._id;  
+  vendorData.profile_image = userCheckExists?.profile_image;  
+  vendorData.cover_image = userCheckExists?.cover_image;  
+  // vendorData.phone_number = userCheckExists?.phone_number;  
+  vendorData.status = "active"; 
+ 
+  const userUpdate = await Vendor.findByIdAndUpdate(id, vendorData, { new: true });
+   
+  const authUpdate  = await Auth.findByIdAndUpdate(authCheckExists._id, { role: "VENDOR" }, { new: true }) as IAuth;
 
+  if(userUpdate){
+    sendResetEmail(
+      authUpdate.email,
+      `<!DOCTYPE html>
+        <html lang="en">
+        <head>
+            <meta charset="UTF-8">
+            <meta name="viewport" content="width=device-width, initial-scale=1.0">
+            <title>Activation Code</title>
+            <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    margin: 0;
+                    padding: 20px;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: auto;
+                    background: white;
+                    padding: 20px;
+                    border-radius: 5px;
+                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                }
+                h1 {
+                    color: #333;
+                }
+                p {
+                    color: #555;
+                    line-height: 1.5;
+                }
+                .footer {
+                    margin-top: 20px;
+                    font-size: 12px;
+                    color: #999;
+                }
+            </style>
+        </head>
+        <body>
+            <div class="container">
+                <h1>Hello, ${authUpdate.name}</h1>
+                 <p>Your vendor account request has been accepted successfully.</p>
+                <p>Thank you!</p>
+                <div class="footer">
+                    <p>&copy; ${new Date().getFullYear()} bdCalling</p>
+                </div>
+            </div>
+        </body>
+        </html>`
+    );
+  
+  }
+
+  return { userUpdate, authUpdate };  
 };
 
+const deleteVendorRequest  = async (req: RequestData) => {
+  const { id }: any = req.params   
+  if (!id) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Advertise from not fount.");
+  } 
+  const deleteVendor = await Vendor.findByIdAndDelete(id);
+ 
+  return deleteVendor;
+};
+
+const getAllPending = async () => {
+  const data = await Vendor.find({status: "pending"})
+  return data;
+} 
+
+// --- Vendor Profile ---------------
 const updateProfile = async (req: RequestData) => {
   const { files, body: data } = req;
   const { authId, userId } = req.user
@@ -286,28 +404,10 @@ const updateProfile = async (req: RequestData) => {
     if (files.profile_image && files.profile_image[0]) {
       fileUploads.profile_image = `/images/profile/${files.profile_image[0].filename}`;
     }
-    if (files.licensePlateImage && files.licensePlateImage[0]) {
-      fileUploads.licensePlateImage = `/images/vehicle-licenses/${files.licensePlateImage[0].filename}`;
-    }
-    if (files.drivingLicenseImage && files.drivingLicenseImage[0]) {
-      fileUploads.drivingLicenseImage = `/images/driving-licenses/${files.drivingLicenseImage[0].filename}`;
-    }
-    if (files.vehicleInsuranceImage && files.vehicleInsuranceImage[0]) {
-      fileUploads.vehicleInsuranceImage = `/images/insurance/${files.vehicleInsuranceImage[0].filename}`;
-    }
-    if (files.vehicleRegistrationCardImage && files.vehicleRegistrationCardImage[0]) {
-      fileUploads.vehicleRegistrationCardImage = `/images/vehicle-registration/${files.vehicleRegistrationCardImage[0].filename}`;
-    }
-    if (files.vehicleFrontImage && files.vehicleFrontImage[0]) {
-      fileUploads.vehicleFrontImage = `/images/vehicle-image/${files.vehicleFrontImage[0].filename}`;
-    }
-    if (files.vehicleBackImage && files.vehicleBackImage[0]) {
-      fileUploads.vehicleBackImage = `/images/vehicle-image/${files.vehicleBackImage[0].filename}`;
-    }
-    if (files.vehicleSideImage && files.vehicleSideImage[0]) {
-      fileUploads.vehicleSideImage = `/images/vehicle-image/${files.vehicleSideImage[0].filename}`;
-    }
-  }
+    if (files.banner && files.banner[0]) {
+      fileUploads.banner = `/images/profile/${files.banner[0].filename}`;
+    } 
+  };
 
   const updatedUserData = { ...data, ...fileUploads };
 
@@ -317,11 +417,12 @@ const updateProfile = async (req: RequestData) => {
       { name: updatedUserData.name },
       {
         new: true,
+        runValidators: true
       }
     ),
     Vendor.findByIdAndUpdate(userId, updatedUserData, {
       new: true,
-      runValidators: true,
+      runValidators: true
     }),
   ]);
 
@@ -368,9 +469,12 @@ export const VendorService = {
   declinedAdvertise,
   approveAdvertise,
   sendVendorRequest,
-  acceptRequest,
+  acceptVendorRequest,
   getProfile,
   deleteMyAccount,
   updateProfile,
+  deleteVendorRequest,
+  getPaddingRequest,
+  getAllPending
 };
 

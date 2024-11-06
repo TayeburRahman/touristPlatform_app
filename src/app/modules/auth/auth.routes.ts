@@ -66,24 +66,20 @@ router.delete(
 
 //------ Vendor Route -----------------
 router.post("/vendor/send-request",
-  // auth(ENUM_USER_ROLE.USER),
+  auth(ENUM_USER_ROLE.USER),
   uploadFile(),
   VendorController.sendVendorRequest);
 
-router.post("/vendor/accept-request/:id",
-  auth(ENUM_USER_ROLE.ADMIN),
-  VendorController.acceptRequest)
-
-router.get("/profile", auth(ENUM_USER_ROLE.VENDOR), VendorController.getProfile);
-
+router.get("/vendor/profile", auth(ENUM_USER_ROLE.VENDOR), VendorController.getProfile);
 router.patch(
-  "/edit-profile",
+  "/vendor/edit-profile",
   auth(ENUM_USER_ROLE.VENDOR),
   uploadFile(),
   VendorController.updateProfile
 );
+
 router.delete(
-  "/delete-account",
+  "/vendor/delete-account",
   auth(ENUM_USER_ROLE.VENDOR),
   VendorController.deleteMyAccount
 );

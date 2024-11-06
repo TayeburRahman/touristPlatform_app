@@ -22,6 +22,10 @@ const UserSchema = new Schema<IUser>(
       type: String,
       default: null,
     },
+    cover_image: {
+      type: String,
+      default: null,
+    },
     phone_number: {
       type: String,
       default: null,
@@ -59,7 +63,7 @@ const UserSchema = new Schema<IUser>(
     },
     status: {
       type: String,
-      enum: ["active", "deactivate"],
+      enum: ["active", "deactivate", "upgraded"],
       default: "active",
     },
   },

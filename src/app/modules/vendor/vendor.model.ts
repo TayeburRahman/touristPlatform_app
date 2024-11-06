@@ -28,6 +28,10 @@ const socialMedia = new Schema<ISocialMedia>({
 // Define the Vendor schema
 const VendorSchema = new Schema<IVendor>(
   { 
+    authId: {
+      type:  Schema.Types.ObjectId,
+      ref: 'Auth',
+    }, 
     userId: {
       type: Schema.Types.ObjectId, 
       ref: 'User',
@@ -35,12 +39,16 @@ const VendorSchema = new Schema<IVendor>(
     name: {
       type: String,
       required: true,
+    }, 
+    vendor_name: {
+      type: String,
+      required: true,
     },
     email: {
       type: String,
       required: true,
     },
-    vendor_name: {
+    vendor_email: {
       type: String,
       required: true,
     },
@@ -60,6 +68,10 @@ const VendorSchema = new Schema<IVendor>(
       type: String,
       default: null,
     },  
+    cover_image:{
+      type: String,
+      default: null,
+    },
     description: {
       type: String,
       default: null,
@@ -68,9 +80,16 @@ const VendorSchema = new Schema<IVendor>(
       type: [socialMedia],
       default: null,
     },
+    date_of_birth: {
+      type: Date,
+    },
+    amount: {
+      type: Number,
+      default: 0,
+    },
     status: {
       type: String,
-      enum: ['pending', 'approved', 'declined'],
+      enum: ['pending', 'approved', 'declined',"deactivate", "active"],
       default: 'pending',
     }, 
     location: {
@@ -87,7 +106,12 @@ const VendorSchema = new Schema<IVendor>(
 const AdvertiseSchema  = new Schema<IAdvertise>(
   {
     userId: {
-      type: String, 
+      type: Schema.Types.ObjectId,
+      ref: 'User',
+    }, 
+    authId: {
+      type:  Schema.Types.ObjectId,
+      ref: 'Auth',
     }, 
     name: {
       type: String,
@@ -120,7 +144,7 @@ const AdvertiseSchema  = new Schema<IAdvertise>(
     },
     status: {
        type: String,
-       enum: ['pending', 'approved', 'declined'],
+       enum: ['pending', 'active', 'declined', "deactivate"],
        default: 'pending',
     }, 
   },

@@ -56,7 +56,6 @@ const createAdminAccount = async (payload: IAuth) => {
   return result;
 };
 
-
 const updateProfile = async (req: IRequest): Promise<IAdmin | null> => {
   const { files } = req as any;
   const { userId, authId } = req.user; 
