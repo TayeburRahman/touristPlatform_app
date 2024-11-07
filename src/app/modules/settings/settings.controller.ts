@@ -58,8 +58,9 @@ const getTermsConditions = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+// --------------------
 const addFaq = catchAsync(async (req: Request, res: Response) => {
-  const result = await ManageService.addFaq(req);
+  const result = await ManageService.addFaq(req.body);
   sendResponse(res, {
     statusCode: 200,
     success: true,
@@ -69,7 +70,7 @@ const addFaq = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateFaq = catchAsync(async (req: Request, res: Response) => {
-  const result = await ManageService.updateFaq(req);
+  const result = await ManageService.updateFaq(req); 
   sendResponse(res, {
     statusCode: 200,
     success: true,

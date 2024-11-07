@@ -32,9 +32,8 @@ const VendorSchema = new Schema<IVendor>(
       type:  Schema.Types.ObjectId,
       ref: 'Auth',
     }, 
-    userId: {
-      type: Schema.Types.ObjectId, 
-      ref: 'User',
+    username: {
+      type: String,  
     }, 
     name: {
       type: String,
@@ -80,8 +79,8 @@ const VendorSchema = new Schema<IVendor>(
       type: [socialMedia],
       default: null,
     },
-    date_of_birth: {
-      type: Date,
+    sendMail: {
+      type: String,
     },
     amount: {
       type: Number,
@@ -89,7 +88,7 @@ const VendorSchema = new Schema<IVendor>(
     },
     status: {
       type: String,
-      enum: ['pending', 'approved', 'declined',"deactivate", "active"],
+      enum: ['pending', 'approved', 'declined',"deactivate"],
       default: 'pending',
     }, 
     location: {

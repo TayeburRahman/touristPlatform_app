@@ -73,6 +73,10 @@ const eventSchema = new Schema<IEvent>({
     type: [String], 
     default: null 
   },
+  favorites: { 
+    type: [String], 
+    default: null 
+  },
   status: { 
     type: String, 
     enum: ['pending', 'approved', 'declined'], 

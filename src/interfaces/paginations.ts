@@ -6,6 +6,7 @@ export type IPaginationOptions = {
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 };
+
 export type IGenericResponse<T> = {
   meta: {
     page: number;
@@ -14,10 +15,10 @@ export type IGenericResponse<T> = {
   };
   data: T;
 };
+
 export type IAcademicSemesterFilters = {
   searchTerm?: string;
 };
- 
 
 export type IOptions = {
   page?: number;
@@ -25,6 +26,7 @@ export type IOptions = {
   sortBy?: string;
   sortOrder?: SortOrder;
 };
+
 export type IOptionsResult = {
   page: number;
   limit: number;

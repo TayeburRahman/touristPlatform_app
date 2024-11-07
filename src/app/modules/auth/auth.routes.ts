@@ -21,28 +21,28 @@ router.post("/forgot-password", AuthController.forgotPass)
 router.post("/forgot-resend", AuthController.resendCodeForgotAccount)
 router.post("/verify-otp", AuthController.checkIsValidForgetActivationCode)
 router.post("/reset-password", AuthController.resetPassword)
-router.patch("/change-password",
-  auth(
+router.patch("/change-password", auth(
     ENUM_USER_ROLE.USER,
-    // ENUM_USER_ROLE.VENDOR,
-    ENUM_USER_ROLE.SUPER_ADMIN
+    ENUM_USER_ROLE.VENDOR,
+    ENUM_USER_ROLE.SUPER_ADMIN,
+    ENUM_USER_ROLE.ADMIN
   ), AuthController.changePassword
 );
 
 //------ User Router ---------------
-router.get("/user/profile", auth(ENUM_USER_ROLE.USER), UserController.getProfile)
-router.patch(
-  "/user/edit-profile",
-  auth(ENUM_USER_ROLE.USER),
-  uploadFile(),
-  UserController.updateProfile
-)
-router.delete(
-  "/user/delete-account",
-  auth(ENUM_USER_ROLE.USER),
-  UserController.deleteMyAccount
-);
-
+// router.get("/user/profile", auth(ENUM_USER_ROLE.USER), UserController.getProfile)
+// router.patch(
+//   "/user/edit-profile",
+//   auth(ENUM_USER_ROLE.USER),
+//   uploadFile(),
+//   UserController.updateProfile
+// )
+// router.delete(
+//   "/user/delete-account",
+//   auth(ENUM_USER_ROLE.USER),
+//   UserController.deleteMyAccount
+// );
+ 
 //------ Admin Router ---------------
 router.post("/create_admin",
   auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
@@ -62,26 +62,6 @@ router.delete(
   "/admin/delete_account",
   auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
   AdminController.deleteMyAccount
-);
-
-//------ Vendor Route -----------------
-router.post("/vendor/send-request",
-  auth(ENUM_USER_ROLE.USER),
-  uploadFile(),
-  VendorController.sendVendorRequest);
-
-router.get("/vendor/profile", auth(ENUM_USER_ROLE.VENDOR), VendorController.getProfile);
-router.patch(
-  "/vendor/edit-profile",
-  auth(ENUM_USER_ROLE.VENDOR),
-  uploadFile(),
-  VendorController.updateProfile
-);
-
-router.delete(
-  "/vendor/delete-account",
-  auth(ENUM_USER_ROLE.VENDOR),
-  VendorController.deleteMyAccount
 );
 
 

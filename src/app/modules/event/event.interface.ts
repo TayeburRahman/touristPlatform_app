@@ -14,5 +14,6 @@ export interface IEvent extends Document {
   event_image: string[] | null;  
   status: 'pending' | 'approved' | 'declined';
   category:  mongoose.Types.ObjectId | null;
+  favorites: string[] | null;  
   
 }

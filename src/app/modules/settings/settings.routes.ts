@@ -31,19 +31,19 @@ router.get(
   '/get-facts',
   ManageController.getFacts,
 );
-router.get(
+router.post(
   '/add-faqs',
   ManageController.addFaq,
 ); 
 router.patch(
-  '/update-faqs',
+  '/update-faqs/:id',
   ManageController.updateFaq,
 );
 router.patch(
   '/delete-faqs',
   ManageController.deleteFaq,
 );
-router.post(
+router.get(
   '/get-faqs',
   ManageController.getFaq,
 ); 

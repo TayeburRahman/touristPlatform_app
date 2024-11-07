@@ -36,7 +36,7 @@ interface ChangePasswordPayload {
 }
 
 const registrationAccount = async (payload: IAuth) => {
-  const { role, password, confirmPassword, email, ...other } = payload;
+  const { role, password, confirmPassword, email, longitude, latitude, ...other } = payload;
 
   if (!role || !Object.values(ENUM_USER_ROLE).includes(role as any)) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Valid Role is required!");
@@ -56,10 +56,21 @@ const registrationAccount = async (payload: IAuth) => {
   if (existingAuth && !existingAuth.isActive) {
     await Promise.all([
       existingAuth.role === "USER" && User.deleteOne({ authId: existingAuth._id }),
-      // existingAuth.role === "VENDOR" && Partner.deleteOne({ authId: existingAuth._id }),
+      existingAuth.role === "VENDOR" && Vendor.deleteOne({ authId: existingAuth._id }),
       existingAuth.role === "ADMIN" && Admin.deleteOne({ authId: existingAuth._id }),
       Auth.deleteOne({ email }),
     ]);
+  }
+
+  if(role === "VENDOR"){
+    if(!longitude || !latitude){
+      throw new ApiError(httpStatus.BAD_REQUEST, "Vendor location is required!");
+    }
+    const location = {
+      type: 'Point',
+      coordinates: [longitude, latitude],
+    }; 
+    other.location = location;
   }
 
   const { activationCode } = createActivationToken();
@@ -103,9 +114,9 @@ const registrationAccount = async (payload: IAuth) => {
     case ENUM_USER_ROLE.ADMIN:
       result = await Admin.create(other);
       break;
-    // case ENUM_USER_ROLE.VENDOR:
-    //   result = await Partner.create(other);
-    //   break;
+    case ENUM_USER_ROLE.VENDOR:  
+      result = await Vendor.create(other);
+      break;
     default:
       throw new ApiError(400, "Invalid role provided!");
   }
@@ -117,12 +128,15 @@ const activateAccount = async (payload: ActivationPayload) => {
   const { activation_code, userEmail } = payload;
 
   const existAuth = await Auth.findOne({ email: userEmail });
+  
   if (!existAuth) {
     throw new ApiError(400, "User not found");
   }
+  
   if (existAuth.activationCode !== activation_code) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Code didn't match!");
   }
+
   const user = await Auth.findOneAndUpdate(
     { email: userEmail },
     { isActive: true },
@@ -136,16 +150,14 @@ const activateAccount = async (payload: ActivationPayload) => {
 
   if (existAuth.role === ENUM_USER_ROLE.USER) {
     result = await User.findOne({ authId: existAuth._id });
+  } else if (existAuth.role === ENUM_USER_ROLE.VENDOR){
+    result = await Vendor.findOne({ authId: existAuth._id });
   } else if (
     existAuth.role === ENUM_USER_ROLE.ADMIN ||
     existAuth.role === ENUM_USER_ROLE.SUPER_ADMIN
   ) {
     result = await Admin.findOne({ authId: existAuth._id });
-  } 
-  // else if (existAuth.role === ENUM_USER_ROLE.VENDOR) {
-  //   result = await Partner.findOne({ authId: existAuth._id });
-  // }
-   else {
+  } else {
     throw new ApiError(400, "Invalid role provided!");
   }
 
@@ -174,9 +186,7 @@ const activateAccount = async (payload: ActivationPayload) => {
 const loginAccount = async (payload: LoginPayload) => {
   const { email, password } = payload;
 
-  const isAuth = await Auth.isAuthExist(email);
-
-  console.log("isAuth", email, isAuth)
+  const isAuth = await Auth.isAuthExist(email); 
 
   if (!isAuth) {
     throw new ApiError(404, "User does not exist");
@@ -197,8 +207,7 @@ const loginAccount = async (payload: LoginPayload) => {
   const { _id: authId } = isAuth;
   let userDetails : any;
   let role;
-  
-  console.log("role", userDetails)
+   
   switch (isAuth.role) {
     case ENUM_USER_ROLE.USER:
       userDetails = await User.findOne({ authId: isAuth._id }).populate("authId");
@@ -299,6 +308,7 @@ const checkIsValidForgetActivationCode = async (payload: {  email: string; code:
   await account.save();
   return update;
 };
+
 const resetPassword = async (req: { query: { email: string }; body: ResetPasswordPayload }) => {
   const { email } = req.query;
   const { newPassword, confirmPassword } = req.body;
@@ -482,7 +492,6 @@ const resendCodeForgotAccount = async (payload: ForgotPasswordPayload) => {
     </html>`
   );
 };
-
 // Scheduled task to unset activationCode field
 cron.schedule("* * * * *", async () => {
   try {

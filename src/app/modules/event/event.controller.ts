@@ -6,7 +6,6 @@ import Event from "./event.model";
 import ApiError from "../../../errors/ApiError";
 
 
-
 const createNewEvent : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
     const result = await EventService.createNewEvent(req)
     sendResponse(res, {
@@ -29,7 +28,6 @@ const updateEvents : RequestHandler = catchAsync( async (req: Request, res: Resp
 
 const deleteEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
     const result = await EventService.deleteEvents(req);
- 
     sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -68,12 +66,37 @@ const retrieveEvent: RequestHandler = catchAsync(async (req: Request, res: Respo
     });
 });
 
-  
+const favoritesAddEvent : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result = await EventService.favoritesAddEvent(req); 
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: `Event Approved Successfully!`,
+        data: result,
+    });
+}) 
+
+const getUserFavorites : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result = await EventService.getUserFavorites(req); 
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: `Event Approved Successfully!`,
+        data: result,
+    });
+}) 
+
+
+ 
+
+ 
 
 export const EventController = {
     createNewEvent,
     updateEvents,
     deleteEvents,
     retrieveEvent,
-    approveEvents
+    approveEvents,
+    favoritesAddEvent,
+    getUserFavorites
 }

@@ -6,35 +6,31 @@ import { VendorController } from './vendor.controller';
 
 const router = express.Router();
 
-router.post(
-  '/advertise-us-from',
-  VendorController.createAdvertiseUsFrom,
-);
-router.get(
-  '/advertise-request-get-all',
-  auth(ENUM_USER_ROLE.ADMIN),
-  VendorController.getPaddingRequest,
-);
+router.get("/profile", auth(ENUM_USER_ROLE.VENDOR), VendorController.getProfile);
 router.patch(
-  '/advertise-approve/:id',
-  auth(ENUM_USER_ROLE.ADMIN),
-  VendorController.approveAdvertise,
-);
-router.patch(
-  '/advertise-declined/:id',
-  auth(ENUM_USER_ROLE.ADMIN),
-  VendorController.declinedAdvertise,
+  "/edit-profile",
+  auth(ENUM_USER_ROLE.VENDOR),
+  uploadFile(),
+  VendorController.updateProfile
 );
 
-// ---------------
+router.delete(
+  "/delete-account",
+  auth(ENUM_USER_ROLE.VENDOR),
+  VendorController.deleteMyAccount
+);
+
+// -----Admin -------------
 router.patch("/accept-request/:id",
   // auth(ENUM_USER_ROLE.ADMIN),
   VendorController.acceptVendorRequest);
+
 router.patch(
-  '/vendor-delete/:id',
+  '/advertise-declined/:id',
   auth(ENUM_USER_ROLE.ADMIN),
-  VendorController.deleteVendorRequest,
+  VendorController.declinedVendor,
 );
+
 router.get(
   '/vendor-request-get-all',
   auth(ENUM_USER_ROLE.ADMIN),

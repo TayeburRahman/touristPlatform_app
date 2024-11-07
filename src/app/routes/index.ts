@@ -1,6 +1,5 @@
 import express from 'express';
-import { AuthRoutes } from '../modules/auth/auth.routes';
-import { MessageRoutes } from '../modules/messages/message.routes';
+import { AuthRoutes } from '../modules/auth/auth.routes'; 
 import { NotificationRoutes } from '../modules/notifications/notifications.routes';
 import { VendorRoutes } from '../modules/vendor/vendor.routes';
 import { ManageRoutes } from '../modules/settings/settings.routes';
@@ -20,30 +19,26 @@ const moduleRoutes = [
     path: '/vendor',
     route: VendorRoutes,
   },
-  // -- inprogress
+  // -- Inprogress
   {
     path: '/events',
     route: eventRoutes,
   },
-  // -- inprogress
+  // -- Inprogress
   {
     path: '/dashboard',
     route: DashboardRoutes,
   },
-  // -- padding
+  // -- Done
   {
-    path: '/message',
-    route: MessageRoutes,
-  },
-  // -- padding
+    path: '/rules',
+    route: ManageRoutes,
+  }, 
+  // -- Padding
   {
     path: '/notification',
     route: NotificationRoutes,
   },
-  {
-    path: '/rules',
-    route: ManageRoutes,
-  }
 ];
 moduleRoutes.forEach(route => router.use(route.path, route.route));
 

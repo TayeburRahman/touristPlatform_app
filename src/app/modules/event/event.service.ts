@@ -80,8 +80,7 @@ const createNewEvent = async (req: Request) => {
     }
 
     return newEvent;
-}; 
-
+} 
 const updateEvents = async (req: Request) => {
     const { userId } = req.user as IReqUser;
     const { eventId } = req.params;
@@ -128,8 +127,7 @@ const updateEvents = async (req: Request) => {
         console.error("Error updating event:", error);
         throw new ApiError(500, 'Failed to update event.');
     }
-}; 
-
+}
 const deleteEvents = async (req: Request) => {
     const { userId, authId } = req.user as IReqUser; 
     const id = req.params.id;
@@ -142,7 +140,6 @@ const deleteEvents = async (req: Request) => {
     const deleteEvent = await Event.findByIdAndDelete(id)  
     return deleteEvent;
 }
-
 const approveEvents = async (req: Request) => {
     const id = req.params.id;
     const result = await Event.findByIdAndUpdate(id, {status: 'approved'});
@@ -150,11 +147,65 @@ const approveEvents = async (req: Request) => {
         throw new ApiError(404, 'Event not found.');
     }  
     return result;
-} 
+}
+
+// -------------
+const favoritesAddEvent = async (req: Request) => {
+    const { userId, authId } = req.user as IReqUser;  // userId and authId are used to check and update
+    const eventId = req.params.id;  // eventId from params
+
+
+    console.log("authId", authId)
+ 
+    // Find the existing event by its ID
+    const existingEvent: any = await Event.findById(eventId);  
+
+    if (!existingEvent) {
+        throw new ApiError(404, 'Event not found or unauthorized.');
+    }
+
+     const isFavorite = existingEvent.favorites?.includes(authId);
+
+    let result;
+
+    if (isFavorite) { 
+        
+        result = await Event.findByIdAndUpdate(
+            eventId,
+            { $pull: { favorites: authId } },  
+            { new: true }   
+        );
+    } else {  
+        result = await Event.findByIdAndUpdate(
+            eventId,
+            { $addToSet: { favorites: authId } },  
+            { new: true }  
+        );
+    } 
+    return result;
+};
+
+
+const getUserFavorites = async (req: Request) => {
+    const { authId } = req.user as IReqUser; 
+ 
+    const favoriteEvents = await Event.find({ favorites: authId });
+ 
+    if (!favoriteEvents || favoriteEvents.length === 0) {
+        return { message: 'No favorite events found.' };
+    }
+
+    return favoriteEvents;  
+};
+
+
+ 
 
 export const EventService = {
     createNewEvent,
     updateEvents,
     deleteEvents,
-    approveEvents
+    approveEvents,
+    favoritesAddEvent,
+    getUserFavorites
 };

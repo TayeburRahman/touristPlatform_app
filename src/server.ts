@@ -4,8 +4,7 @@ import mongoose from 'mongoose';
 import { Server } from 'socket.io';
 import { app } from './app';
 import config from './config/index';
-import { errorLogger, logger } from './shared/logger';
-import socket from './socket/socket';
+import { errorLogger, logger } from './shared/logger'; 
 
 process.on('uncaughtException', error => {
   errorLogger.error(error);
@@ -23,18 +22,6 @@ async function main() {
     server = app.listen(port, config.base_url as string, () => {
       logger.info(`App listening on http://${config.base_url}:${config.port}`);
     });
-
-    const socketIO = new Server(server, {
-      pingTimeout: 60000,
-      cors: {
-        origin: '*',
-      },
-    });
-    
-    socket(socketIO);
-
-    //@ts-ignore
-    global.io = socketIO;
   } catch (error) {
     errorLogger.error(error);
     throw error;

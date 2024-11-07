@@ -36,5 +36,19 @@ router.patch(
     EventController.approveEvents,
 );
 
+router.patch(
+    '/favorites/:id',
+    auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN),
+    EventController.favoritesAddEvent,
+);
+
+router.get(
+    '/favorites',
+    auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR),
+    EventController.getUserFavorites,
+);
+
+ 
+
 
 export const eventRoutes = router;

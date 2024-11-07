@@ -33,6 +33,7 @@ const addAboutUs = async (payload: any) => {
 const getAboutUs = async () => {
   return await AboutUs.findOne();
 };
+
 //! Terms Conditions
 const addTermsConditions = async (payload: any) => {
   const checkIsExist = await TermsConditions.findOne();
@@ -53,19 +54,25 @@ const getTermsConditions = async () => {
 
 //! Faqs
 const addFaq = async (payload: any) => {
+  console.log(payload)
   if (!payload?.questions || !payload?.answer){
     throw new Error("Question and answer are required");
   }
+ 
    return await Faq.create(payload); 
 };
 
 const updateFaq = async (req: any) => {
   const id =  req.params.id
+ 
   const payload =  req.body
   if (!payload?.questions || !payload?.answer){
     throw new Error("Question and answer are required");
   }
-   return await Faq.findByIdAndUpdate(id, payload, { new: true });
+
+  const result = await Faq.findByIdAndUpdate(id, payload, { new: true });
+
+   return result
 };
 
 const deleteFaq = async (req: any) => {
@@ -74,7 +81,7 @@ const deleteFaq = async (req: any) => {
 };
 
 const getFaq = async () => {
-  return await Faq.findOne();
+  return await Faq.find();
 };
 
 export const ManageService = {

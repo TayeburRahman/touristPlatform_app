@@ -12,17 +12,18 @@ export interface ISocialMedia {
 
 export interface IVendor extends Document {
   authId: mongoose.Types.ObjectId;
-  userId: mongoose.Types.ObjectId;
+  username: string;
   name: string;
   email: string;
   vendor_email: string;
   address?: string | null;
   phone_number?: string | null; 
+  sendMail: string | null;
   banner: string | null;
   vendor_name: string | null;
   profile_image: string | null;
   description: string | null; 
-  status:'pending'| 'active'| 'declined' | 'deactivate';
+  status:'pending'| 'approved'| 'declined' | 'deactivate';
   current_trip_user?: mongoose.Types.ObjectId;
   location?: ILocation;
   social_media: [ISocialMedia] | null;
