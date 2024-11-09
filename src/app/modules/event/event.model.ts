@@ -75,18 +75,16 @@ const eventSchema = new Schema<IEvent>({
   },
   favorites: { 
     type: [String], 
-    default: null 
+    default: [] 
   },
   status: { 
     type: String, 
     enum: ['pending', 'approved', 'declined'], 
-    default: 'pending' 
+    default: 'pending'
   }
 }, {
   timestamps: true  
 });
-
-const Event = mongoose.model<IEvent>('Event', eventSchema);
-
-
+ 
+const Event = mongoose.model<IEvent>('Event', eventSchema); 
 export default Event;

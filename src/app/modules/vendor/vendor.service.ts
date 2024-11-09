@@ -6,18 +6,45 @@ import { RequestData } from '../../../interfaces/common';
 import Vendor, { Advertise } from './vendor.model';
 import { IAdvertise, IVendor } from './vendor.interface';
 import { sendResetEmail } from '../auth/sendResetMails';
-import User from '../user/user.model';
-import { jwtHelpers } from '../../../helpers/jwtHelpers';
-import config from '../../../config';
+import { logger } from '../../../shared/logger';
+import cron from "node-cron";
+import { Plan } from '../payment/payment.model';
 
 interface DeleteAccountPayload {
   email: string;
   password: string;
 }
- 
 
-// --- Vendor Request ---------------
+cron.schedule("* * * * *", async () => {   
+  try {
+    const now = new Date();
+    const result = await Vendor.updateMany(
+      { 
+        expiredDate: { $lte: now }, 
+      },
+      {
+        $unset: { package: null, plan: null }, 
+      }
+    );
 
+    await Plan.updateMany(
+      { 
+        end_date: { $lte: now }, 
+      },
+      {
+        $unset: { active: false }, 
+      }
+    );
+
+    if (result.modifiedCount > 0) {
+      logger.info(`Removed package from ${result.modifiedCount} expired.`);
+    }
+  } catch (error) {
+    logger.error("Error removing package from expired.:", error);
+  }
+});
+
+// --- Vendor Request --------------- 
 const acceptVendorRequest = async (req: RequestData) => { 
   const { id } = req.params as { id: string }; 
 
@@ -80,7 +107,6 @@ const acceptVendorRequest = async (req: RequestData) => {
         </body>
         </html>`
     );
-  
   }
 
   return { userUpdate, authUpdate };  

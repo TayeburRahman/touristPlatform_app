@@ -21,21 +21,19 @@ router.delete(
 );
 
 // -----Admin -------------
+router.get("/get-all-vendor-request",
+  auth(ENUM_USER_ROLE.ADMIN),
+  VendorController.getAllPending);
+
 router.patch("/accept-request/:id",
-  // auth(ENUM_USER_ROLE.ADMIN),
+  auth(ENUM_USER_ROLE.ADMIN),
   VendorController.acceptVendorRequest);
 
-router.patch(
-  '/advertise-declined/:id',
+router.delete(
+  '/declined/:id',
   auth(ENUM_USER_ROLE.ADMIN),
   VendorController.declinedVendor,
-);
-
-router.get(
-  '/vendor-request-get-all',
-  auth(ENUM_USER_ROLE.ADMIN),
-  VendorController.getAllPending,
-);
+); 
 
 
 export const VendorRoutes = router;

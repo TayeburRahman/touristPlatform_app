@@ -6,7 +6,7 @@ import { DashboardController } from './dashboard.controller';
 
 const router = express.Router();
 
-// -----Category--------------------------------
+// -----Category-------------------
 router.post(
     '/category',
     auth(ENUM_USER_ROLE.ADMIN),
@@ -22,15 +22,32 @@ router.delete(
     DashboardController.deleteCategory,
 )
 
-// ----------------------------- 
-// router.post(
-//     '/vendor',
-//     auth(ENUM_USER_ROLE.ADMIN),
-//     uploadFile,
-//     DashboardController.createAndUpdateVendor,
-// );
+// -----Packages------------------------ 
+router.post(
+    '/create_packages',
+    auth(ENUM_USER_ROLE.ADMIN), 
+    DashboardController.createPackages
+);
+router.patch(
+    '/update_packages/:id',
+    auth(ENUM_USER_ROLE.ADMIN), 
+    DashboardController.updatePackages
+);
+router.delete(
+    '/delete_packages/:id',
+    auth(ENUM_USER_ROLE.ADMIN), 
+    DashboardController.deletePackages
+);
+router.get(
+    '/get_packages', 
+    DashboardController.getPackages
+);
+router.get(
+    '/package/:id', 
+    DashboardController.getPackagesDetails
+);
 
-
+// --------------------------
 
 
 export const DashboardRoutes = router;

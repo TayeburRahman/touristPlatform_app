@@ -1,10 +1,11 @@
 import express from 'express';
-import { AuthRoutes } from '../modules/auth/auth.routes'; 
+import { AuthRoutes } from '../modules/auth/auth.routes';
 import { NotificationRoutes } from '../modules/notifications/notifications.routes';
 import { VendorRoutes } from '../modules/vendor/vendor.routes';
 import { ManageRoutes } from '../modules/settings/settings.routes';
 import { DashboardRoutes } from '../modules/dashboard/dashboard.route';
 import { eventRoutes } from '../modules/event/event.route';
+import { PaymentRoutes } from '../modules/payment/payment.routes';
 
 const router = express.Router();
 
@@ -29,11 +30,15 @@ const moduleRoutes = [
     path: '/dashboard',
     route: DashboardRoutes,
   },
+  {
+    path: '/payments',
+    route: PaymentRoutes,
+  },
   // -- Done
   {
     path: '/rules',
     route: ManageRoutes,
-  }, 
+  },
   // -- Padding
   {
     path: '/notification',

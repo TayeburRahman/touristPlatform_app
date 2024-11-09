@@ -30,18 +30,18 @@ router.patch("/change-password", auth(
 );
 
 //------ User Router ---------------
-// router.get("/user/profile", auth(ENUM_USER_ROLE.USER), UserController.getProfile)
-// router.patch(
-//   "/user/edit-profile",
-//   auth(ENUM_USER_ROLE.USER),
-//   uploadFile(),
-//   UserController.updateProfile
-// )
-// router.delete(
-//   "/user/delete-account",
-//   auth(ENUM_USER_ROLE.USER),
-//   UserController.deleteMyAccount
-// );
+router.get("/user/profile", auth(ENUM_USER_ROLE.USER), UserController.getProfile)
+router.patch(
+  "/user/edit-profile",
+  auth(ENUM_USER_ROLE.USER),
+  uploadFile(),
+  UserController.updateProfile
+)
+router.delete(
+  "/user/delete-account",
+  auth(ENUM_USER_ROLE.USER),
+  UserController.deleteMyAccount
+);
  
 //------ Admin Router ---------------
 router.post("/create_admin",

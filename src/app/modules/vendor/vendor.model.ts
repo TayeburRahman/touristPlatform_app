@@ -38,19 +38,11 @@ const VendorSchema = new Schema<IVendor>(
     name: {
       type: String,
       required: true,
-    }, 
-    vendor_name: {
-      type: String,
-      required: true,
-    },
+    },  
     email: {
       type: String,
       required: true,
-    },
-    vendor_email: {
-      type: String,
-      required: true,
-    },
+    }, 
     banner: {
       type: String,
       default: null,
@@ -90,10 +82,27 @@ const VendorSchema = new Schema<IVendor>(
       type: String,
       enum: ['pending', 'approved', 'declined',"deactivate"],
       default: 'pending',
-    }, 
+    },
     location: {
+      type: String, 
+    },
+    location_map: {
       type: locationSchema,
     },
+    expiredDate:{
+      type: Date,
+      default: null,
+    },
+    package: {
+      type:  Schema.Types.ObjectId,
+      ref: 'Packages',
+      default: null,
+    }, 
+    plan:{
+      type:  Schema.Types.ObjectId,
+      ref: 'Plans',
+      default: null,
+    }, 
   },
   {
     timestamps: true,
@@ -154,10 +163,6 @@ const AdvertiseSchema  = new Schema<IAdvertise>(
     },
   },
 );
-
-
-// Create the Vendor model
- 
 
 // Create the Vendor model
 const Vendor: Model<IVendor> = model<IVendor>('Vendor', VendorSchema); 

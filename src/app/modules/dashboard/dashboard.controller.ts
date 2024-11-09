@@ -3,6 +3,7 @@ import sendResponse from '../../../shared/sendResponse';
 import catchAsync from '../../../shared/catchasync'; 
 import { Category } from './dashboard.model';
 import ApiError from '../../../errors/ApiError';
+import { DashboardService } from './dashboard.services';
 
 const createAndUpdateCategory: RequestHandler = catchAsync(
   async (req: Request, res: Response) => {
@@ -58,9 +59,81 @@ const getCategory: RequestHandler = catchAsync(
   ); 
 // ----------------------------
 
+const createPackages: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {   
+    const result = await DashboardService.createPackages(req) 
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: `Create Packages Successfully!`,
+      data: result,
+    });
+  },
+); 
+
+const updatePackages: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {   
+    const result = await DashboardService.updatePackages(req) 
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: `Update Packages Successfully!`,
+      data: result,
+    });
+  },
+); 
+
+const deletePackages: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {   
+    const result = await DashboardService.deletePackages(req) 
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: `Delete Packages Successfully!`,
+      data: result,
+    });
+  },
+); 
+
+const getPackages: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {   
+    const result = await DashboardService.getPackages(req) 
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: `Get Packages Successfully!`,
+      data: result,
+    });
+  },
+);  
+
+const getPackagesDetails: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {   
+    const result = await DashboardService.getPackagesDetails(req) 
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: `Get Package Successfully!`,
+      data: result,
+    });
+  },
+);  
+
+
+ 
+ 
+
+ 
+ 
+
 export const DashboardController = {
     createAndUpdateCategory, 
     getCategory,
-    deleteCategory
+    deleteCategory,
+    createPackages,
+    updatePackages,
+    deletePackages,
+    getPackages,
+    getPackagesDetails
 
 };

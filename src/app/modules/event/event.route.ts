@@ -5,12 +5,18 @@ import { EventController } from './event.controller';
 import { uploadFile } from '../../middlewares/fileUploader';
 const router = express.Router();
 
+
+router.get(
+    '/',  
+    EventController.getEvents,
+);
+
 router.post(
     '/create',
     auth(ENUM_USER_ROLE.VENDOR),
     uploadFile(),
     EventController.createNewEvent,
-);
+); 
 
 router.patch(
     '/update/:eventId',

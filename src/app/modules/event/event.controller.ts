@@ -5,6 +5,17 @@ import { EventService } from "./event.service";
 import Event from "./event.model";
 import ApiError from "../../../errors/ApiError";
 
+ 
+
+const getEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result = await EventService.getEvents(req)
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: `Event retrieved successfully`,
+        data: result,
+    });
+}) 
 
 const createNewEvent : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
     const result = await EventService.createNewEvent(req)
@@ -85,13 +96,10 @@ const getUserFavorites : RequestHandler = catchAsync( async (req: Request, res: 
         data: result,
     });
 }) 
-
-
- 
-
  
 
 export const EventController = {
+    getEvents,
     createNewEvent,
     updateEvents,
     deleteEvents,

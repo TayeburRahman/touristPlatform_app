@@ -62,15 +62,15 @@ const registrationAccount = async (payload: IAuth) => {
     ]);
   }
 
-  if(role === "VENDOR"){
+  if(role === "VENDOR" && longitude && latitude){
     if(!longitude || !latitude){
       throw new ApiError(httpStatus.BAD_REQUEST, "Vendor location is required!");
     }
-    const location = {
+    const location_map = {
       type: 'Point',
       coordinates: [longitude, latitude],
     }; 
-    other.location = location;
+    other.location_map = location_map;
   }
 
   const { activationCode } = createActivationToken();

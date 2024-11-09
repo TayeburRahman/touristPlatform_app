@@ -25,11 +25,18 @@ export interface IVendor extends Document {
   description: string | null; 
   status:'pending'| 'approved'| 'declined' | 'deactivate';
   current_trip_user?: mongoose.Types.ObjectId;
-  location?: ILocation;
+  location?: string | null; 
+  location_map: ILocation;
   social_media: [ISocialMedia] | null;
   date_of_birth: string | null;
   amount: number | null;
   cover_image: string | null;
+  package: string | null;
+  expirationTime: Date | null;
+  available_events: number | null;
+  featured_events: number | null; 
+  plan: string | null;
+  expiredDate: Date;
 }
 
 
