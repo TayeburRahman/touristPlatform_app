@@ -5,10 +5,19 @@ import { EventService } from "./event.service";
 import Event from "./event.model";
 import ApiError from "../../../errors/ApiError";
 
- 
 
 const getEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
     const result = await EventService.getEvents(req)
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: `Event retrieved successfully`,
+        data: result,
+    });
+}) 
+
+const getPopularMostEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result = await EventService.getPopularMostEvents(req)
     sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -77,8 +86,8 @@ const retrieveEvent: RequestHandler = catchAsync(async (req: Request, res: Respo
     });
 });
 
-const favoritesAddEvent : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
-    const result = await EventService.favoritesAddEvent(req); 
+const saveUserClickEvent : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result = await EventService.saveUserClickEvent(req); 
     sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -96,6 +105,19 @@ const getUserFavorites : RequestHandler = catchAsync( async (req: Request, res: 
         data: result,
     });
 }) 
+
+
+const getFeaturedEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result = await EventService.getFeaturedEvents(req); 
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: `Event featured get Successfully!`,
+        data: result,
+    });
+}) 
+
+ 
  
 
 export const EventController = {
@@ -105,6 +127,8 @@ export const EventController = {
     deleteEvents,
     retrieveEvent,
     approveEvents,
-    favoritesAddEvent,
-    getUserFavorites
+    saveUserClickEvent,
+    getPopularMostEvents,
+    getUserFavorites,
+    getFeaturedEvents
 }

@@ -6,7 +6,6 @@ import ApiError from '../../../errors/ApiError';
 import User from '../auth/auth.model';
 import { Packages } from './dashboard.model';
  
- 
 
 const createPackages = async (req: Request) => { 
   const data = req.body; 
@@ -55,8 +54,8 @@ const getPackagesDetails = async (req: Request) => {
   } 
   return packages;
 };
-// --------------------------------
 
+// --------------------------------
 export const DashboardService = {
   updatePackages, 
   createPackages,

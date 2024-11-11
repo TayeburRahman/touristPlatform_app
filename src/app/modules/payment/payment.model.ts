@@ -45,7 +45,7 @@ const planSchema = new Schema<IPlan>(
       ref: 'Events',
     },
     featured_events: {
-      type: Number,
+      type: Number
     },
     available_events: {
       type: Number,

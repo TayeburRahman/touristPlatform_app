@@ -15,5 +15,5 @@ export interface IEvent extends Document {
   status: 'pending' | 'approved' | 'declined';
   category:  mongoose.Types.ObjectId | null;
   favorites: string[] | null;  
-  
+  featured: Date | null;
 }

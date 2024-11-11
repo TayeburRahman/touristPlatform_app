@@ -3,13 +3,10 @@ import auth from '../../middlewares/auth';
 import { ENUM_USER_ROLE } from '../../../enums/user';
 import { EventController } from './event.controller';
 import { uploadFile } from '../../middlewares/fileUploader';
-const router = express.Router();
+const router = express.Router(); 
 
-
-router.get(
-    '/',  
-    EventController.getEvents,
-);
+router.get( '/', EventController.getEvents);
+router.get('/popular-events', EventController.getPopularMostEvents); 
 
 router.post(
     '/create',
@@ -18,20 +15,31 @@ router.post(
     EventController.createNewEvent,
 ); 
 
+router.get(
+    '/user-favorites',
+    auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR),
+    EventController.getUserFavorites,
+);
+ 
 router.patch(
     '/update/:eventId',
     auth(ENUM_USER_ROLE.VENDOR),
     uploadFile(),
-    EventController.updateEvents,
+    EventController.updateEvents
 );
 
 router.get(
     '/get/:eventId',
-    EventController.retrieveEvent,
+    EventController.retrieveEvent
 );
 
+router.get(
+    '/featured_events',
+    EventController.getFeaturedEvents
+); 
+
 router.delete(
-    '/delete/:id',
+    '/delete/:eventId',
     auth(ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN),
     EventController.deleteEvents,
 );
@@ -43,9 +51,9 @@ router.patch(
 );
 
 router.patch(
-    '/favorites/:id',
+    '/save-click/:id',
     auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN),
-    EventController.favoritesAddEvent,
+    EventController.saveUserClickEvent,
 );
 
 router.get(
@@ -53,7 +61,6 @@ router.get(
     auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR),
     EventController.getUserFavorites,
 );
-
  
 
 

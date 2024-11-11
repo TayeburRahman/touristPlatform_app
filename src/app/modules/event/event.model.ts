@@ -73,6 +73,10 @@ const eventSchema = new Schema<IEvent>({
     type: [String], 
     default: null 
   },
+  featured: { 
+    type: Date, 
+    default: null 
+  },
   favorites: { 
     type: [String], 
     default: [] 

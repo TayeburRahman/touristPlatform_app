@@ -33,7 +33,6 @@ const paymentSuccessAndSave = async (payload: {
   transaction_id: string; 
   package_id: any;
 }) => {
-
   const {userId} = payload;
   const requiredFields = ["amount", "userId", "transaction_id", "package_id"] as const;
 
