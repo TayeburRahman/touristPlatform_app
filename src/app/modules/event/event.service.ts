@@ -32,7 +32,7 @@ const createNewEvent = async (req: Request) => {
         featured_events: { $gt: 0 }
     });
 
-    if (!featuredEvent) {
+    if (featured && !featuredEvent) {
         throw new ApiError(403, 'You do not have enough available to feature the date of this event.');
     }
 
@@ -255,7 +255,7 @@ const getPopularMostEvents = async (req: Request) => {
 } 
 
 const getFeaturedEvents = async (req: Request) => {
-    
+
     const events = await Event.find({ 
          status: 'approved', 
          featured: { $ne: null }
@@ -309,6 +309,24 @@ const getUserFavorites = async (req: Request) => {
     return favoriteEvents;
 };
 
+// ----------------------
+const getEventsByDate = async (req: Request) => {
+    const { date } = req.body; 
+
+    if (!date) {
+        throw new ApiError(400, 'Invalid date format.');
+    }
+
+    const eventDate = new Date(date); 
+
+    console.log("-------------",eventDate);
+
+    const events = await Event.find({ date: date });
+  
+
+    return events;
+}
+
 export const EventService = {
     getEvents,
     createNewEvent,
@@ -318,5 +336,6 @@ export const EventService = {
     saveUserClickEvent,
     getPopularMostEvents,
     getUserFavorites,
-    getFeaturedEvents
+    getFeaturedEvents,
+    getEventsByDate
 };

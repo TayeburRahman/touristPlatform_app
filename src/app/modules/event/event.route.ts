@@ -61,6 +61,13 @@ router.get(
     auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR),
     EventController.getUserFavorites,
 );
+
+router.get(
+    '/events_by_date', 
+    EventController.getEventsByDate,
+);
+
+ 
  
 
 

@@ -4,7 +4,7 @@ import { ILocation, ISocialMedia } from '../vendor/vendor.interface';
 export interface IEvent extends Document {
   vendor: mongoose.Types.ObjectId;
   name: string;   
-  date: string;  
+  date: Date;  
   time: string;  
   duration: string;
   option: string;

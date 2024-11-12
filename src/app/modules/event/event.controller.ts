@@ -117,6 +117,18 @@ const getFeaturedEvents : RequestHandler = catchAsync( async (req: Request, res:
     });
 }) 
 
+
+const getEventsByDate : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result = await EventService.getEventsByDate(req); 
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: `Event get Successfully!`,
+        data: result,
+    });
+}) 
+
+// getEventsByDate
  
  
 
@@ -130,5 +142,6 @@ export const EventController = {
     saveUserClickEvent,
     getPopularMostEvents,
     getUserFavorites,
-    getFeaturedEvents
+    getFeaturedEvents,
+    getEventsByDate
 }

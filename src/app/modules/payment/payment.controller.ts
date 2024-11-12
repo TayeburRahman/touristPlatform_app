@@ -23,7 +23,18 @@ const paymentSuccessAndSave = catchAsync(async (req: Request, res: Response) => 
   });
 });
 
+const userPlanHistory = catchAsync(async (req: Request, res: Response) => {
+  const result = await PaymentService.userPlanHistory(req.body);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: 'Save successfully',
+    data: result,
+  });
+});
+
 export const PaymentController = {
   makePaymentIntent,
-  paymentSuccessAndSave
+  paymentSuccessAndSave,
+  userPlanHistory
 };

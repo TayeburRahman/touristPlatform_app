@@ -47,6 +47,27 @@ router.get(
     DashboardController.getPackagesDetails
 );
 
+router.post(
+    '/banner_create', 
+    uploadFile(),
+    DashboardController.createBannerImage
+);
+
+router.patch(
+    '/banner_update/:id', 
+    uploadFile(),
+    DashboardController.updateBannerImage
+);
+
+router.delete(
+    '/banner_delete/:id',  
+    DashboardController.deleteBannerImage
+);
+
+router.get(
+    '/banners',  
+    DashboardController.getBannerImage
+);
 // --------------------------
 
 

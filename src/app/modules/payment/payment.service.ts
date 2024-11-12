@@ -26,7 +26,6 @@ const makePaymentIntent = async (payload: { amount: any }) => {
   return data;
 };
 
-
 const paymentSuccessAndSave = async (payload: {
   amount: number;
   userId: string;
@@ -79,4 +78,10 @@ const paymentSuccessAndSave = async (payload: {
 
   return {  vendor: vendorUpdate, plan: planCreate };
 };
-export const PaymentService = { makePaymentIntent, paymentSuccessAndSave };
+
+const userPlanHistory = async (req: Request) => { 
+}
+  
+
+ 
+export const PaymentService = { makePaymentIntent, paymentSuccessAndSave, userPlanHistory};

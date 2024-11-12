@@ -117,15 +117,56 @@ const getPackagesDetails: RequestHandler = catchAsync(
       data: result,
     });
   },
+);   
+// ---------------
+const createBannerImage: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {   
+    const result = await DashboardService.createBannerImage(req) 
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: `Banner Create Successfully!`,
+      data: result,
+    });
+  },
 );  
 
+const updateBannerImage: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {   
+    const result = await DashboardService.updateBannerImage(req) 
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: `Banner Update Successfully!`,
+      data: result,
+    });
+  },
+);  
 
- 
- 
+const getBannerImage: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {   
+    const result = await DashboardService.getBannerImage(req) 
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: `Banner Get Successfully!`,
+      data: result,
+    });
+  },
+);  
 
- 
- 
-
+const deleteBannerImage: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {   
+    const result = await DashboardService.deleteBannerImage(req) 
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: `Banner Delete Successfully!`,
+      data: result,
+    });
+  },
+); 
+  
 export const DashboardController = {
     createAndUpdateCategory, 
     getCategory,
@@ -134,6 +175,10 @@ export const DashboardController = {
     updatePackages,
     deletePackages,
     getPackages,
-    getPackagesDetails
+    getPackagesDetails,
+    createBannerImage,
+    updateBannerImage,
+    getBannerImage,
+    deleteBannerImage
 
 };

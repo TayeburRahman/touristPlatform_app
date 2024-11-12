@@ -1,5 +1,5 @@
 import mongoose, { Schema, Model, model } from 'mongoose';   
-import { ICategory, IPackages } from './dashboard.interface';
+import { IBanner, ICategory, IPackages } from './dashboard.interface';
  
 
 
@@ -51,5 +51,18 @@ const CategorySchema  = new Schema<ICategory>(
     }, 
   );
 
+
+  
+const BannerSchema  = new Schema<IBanner>(
+  {
+    banner_img: {
+      type: String, 
+      required: true, 
+    },
+  }, 
+);
+
+
+export const Banners = model<IBanner>('Banners', BannerSchema);
 export const Packages = model<IPackages>('Packages', PackagesSchema);
 export const Category = model<ICategory>('Category', CategorySchema);
