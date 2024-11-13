@@ -13,6 +13,7 @@ const createNewEvent = async (req: Request) => {
     const { event_image } = req.files as { event_image: Express.Multer.File[] };
     const { name, date, time, featured,
         //  social_media, 
+        end_date,
         duration, option, longitude, latitude, description, image, category } = req.body as any;
     const data = req.body;
 
@@ -48,7 +49,8 @@ const createNewEvent = async (req: Request) => {
         "option",
         "longitude",
         "latitude",
-        "category"
+        "category",
+        "end_date"
     ];
 
 
@@ -96,7 +98,8 @@ const createNewEvent = async (req: Request) => {
         description,
         category,
         event_image: images,
-        featured
+        featured,
+        end_date
     });
 
     if (!newEvent) {
@@ -189,10 +192,10 @@ const deleteEvents = async (req: Request) => {
     }
 
     const isFeatured = event.featured;
- 
-    const updatedAvailableEvents = Math.min(plan.available_events + 1);  
+
+    const updatedAvailableEvents = Math.min(plan.available_events + 1);
     const updatedFeaturedEvents = isFeatured
-        ? Math.min(plan.featured_events + 1)  
+        ? Math.min(plan.featured_events + 1)
         : plan.featured_events;
 
     try {
@@ -201,7 +204,7 @@ const deleteEvents = async (req: Request) => {
             featured_events: updatedFeaturedEvents,
             events: plan.events.filter((eid: any) => !eid.equals((eventId)))
         });
- 
+
         await Event.findByIdAndDelete(eventId);
 
         return { message: 'Event canceled successfully and plan updated.' };
@@ -252,16 +255,81 @@ const getPopularMostEvents = async (req: Request) => {
     ]);
 
     return data;
-} 
+}
+
+const getAllEvents = async (req: Request) => {
+    const query = req.query;
+    const categoryQuery = new QueryBuilder(
+        Event.find()
+            .populate('category')
+            .populate('vendor'),
+        query,
+    )
+        .search(['name'])
+        .filter()
+        .sort()
+        .paginate()
+        .fields();
+    const result = await categoryQuery.modelQuery;
+    const meta = await categoryQuery.countTotal();
+    return { result, meta }
+}
 
 const getFeaturedEvents = async (req: Request) => {
-
-    const events = await Event.find({ 
-         status: 'approved', 
-         featured: { $ne: null }
-         }) 
+    const events = await Event.find({
+        status: 'approved',
+        featured: { $ne: null }
+    })
 
     return events
+} 
+ 
+// - no need now
+const getUserFavorites = async (req: Request) => {
+    const { authId } = req.user as IReqUser;
+
+    const favoriteEvents = await Event.find({ favorites: authId });
+
+    if (!favoriteEvents || favoriteEvents.length === 0) {
+        return { message: 'No favorite events found.' };
+    }
+
+    return favoriteEvents;
+};
+
+// ----------------------
+const getEventsByDate = async (req: Request) => {
+    const { date } = req.body; 
+    if (!date) {
+        throw new ApiError(400, 'Invalid date format.');
+    }
+
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+        throw new ApiError(400, 'Invalid date format.');
+    } 
+    const customDate = parsedDate.toISOString().slice(0, 10);  
+    
+    const events = await Event.find({ status:"approved", date: customDate });
+    return events;
+}
+
+const getPastEvents = async (req: Request) => {
+    const { date } = req.body;
+    if (!date) {
+        throw new ApiError(400, 'Invalid date format.');
+    }
+
+    const parsedDate = new Date(date);
+    if (isNaN(parsedDate.getTime())) {
+        throw new ApiError(400, 'Invalid date format.');
+    }
+    const customDate = parsedDate.toISOString().slice(0, 10); 
+    const pastEvents = await Event.find({
+        status: 'approved',  
+        end_date: { $lt: customDate }
+    });
+    return pastEvents;
 }
 
 // -------------
@@ -296,37 +364,6 @@ const saveUserClickEvent = async (req: Request) => {
         updatedEvent
     }
 };
-
-const getUserFavorites = async (req: Request) => {
-    const { authId } = req.user as IReqUser;
-
-    const favoriteEvents = await Event.find({ favorites: authId });
-
-    if (!favoriteEvents || favoriteEvents.length === 0) {
-        return { message: 'No favorite events found.' };
-    }
-
-    return favoriteEvents;
-};
-
-// ----------------------
-const getEventsByDate = async (req: Request) => {
-    const { date } = req.body; 
-
-    if (!date) {
-        throw new ApiError(400, 'Invalid date format.');
-    }
-
-    const eventDate = new Date(date); 
-
-    console.log("-------------",eventDate);
-
-    const events = await Event.find({ date: date });
-  
-
-    return events;
-}
-
 export const EventService = {
     getEvents,
     createNewEvent,
@@ -337,5 +374,7 @@ export const EventService = {
     getPopularMostEvents,
     getUserFavorites,
     getFeaturedEvents,
-    getEventsByDate
+    getEventsByDate,
+    getPastEvents,
+    getAllEvents
 };

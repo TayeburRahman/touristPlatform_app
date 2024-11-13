@@ -24,7 +24,7 @@ const paymentSuccessAndSave = catchAsync(async (req: Request, res: Response) => 
 });
 
 const userPlanHistory = catchAsync(async (req: Request, res: Response) => {
-  const result = await PaymentService.userPlanHistory(req.body);
+  const result = await PaymentService.userPlanHistory(req);
   sendResponse(res, {
     statusCode: 200,
     success: true,

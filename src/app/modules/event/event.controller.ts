@@ -16,6 +16,16 @@ const getEvents : RequestHandler = catchAsync( async (req: Request, res: Respons
     });
 }) 
 
+const getAllEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result = await EventService.getAllEvents(req); 
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: `Event get Successfully!`,
+        data: result,
+    });
+}) 
+
 const getPopularMostEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
     const result = await EventService.getPopularMostEvents(req)
     sendResponse(res, {
@@ -128,12 +138,22 @@ const getEventsByDate : RequestHandler = catchAsync( async (req: Request, res: R
     });
 }) 
 
+
+const getPastEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result = await EventService.getPastEvents(req); 
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: `Event get Successfully!`,
+        data: result,
+    });
+}) 
+
 // getEventsByDate
- 
- 
 
 export const EventController = {
     getEvents,
+    getAllEvents,    
     createNewEvent,
     updateEvents,
     deleteEvents,
@@ -143,5 +163,7 @@ export const EventController = {
     getPopularMostEvents,
     getUserFavorites,
     getFeaturedEvents,
-    getEventsByDate
+    getEventsByDate,
+    getPastEvents
+    
 }

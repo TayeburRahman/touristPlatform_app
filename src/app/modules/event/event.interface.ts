@@ -16,4 +16,9 @@ export interface IEvent extends Document {
   category:  mongoose.Types.ObjectId | null;
   favorites: string[] | null;  
   featured: Date | null;
+  end_date: Date | null;
+}
+
+export interface IDate extends Document {
+  date: Date;
 }

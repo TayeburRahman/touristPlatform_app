@@ -42,7 +42,7 @@ const planSchema = new Schema<IPlan>(
     events: {
       type: [Schema.Types.ObjectId],
       default: [],
-      ref: 'Events',
+      ref: 'Event',
     },
     featured_events: {
       type: Number

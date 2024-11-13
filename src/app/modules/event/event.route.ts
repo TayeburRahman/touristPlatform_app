@@ -6,6 +6,7 @@ import { uploadFile } from '../../middlewares/fileUploader';
 const router = express.Router(); 
 
 router.get( '/', EventController.getEvents);
+router.get( '/admin', auth(ENUM_USER_ROLE.ADMIN), EventController.getAllEvents); 
 router.get('/popular-events', EventController.getPopularMostEvents); 
 
 router.post(
@@ -67,8 +68,11 @@ router.get(
     EventController.getEventsByDate,
 );
 
- 
- 
+router.get(
+    '/events_by_past', 
+    EventController.getPastEvents,
+);
+
 
 
 export const eventRoutes = router;

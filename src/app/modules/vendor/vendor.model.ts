@@ -163,8 +163,7 @@ const AdvertiseSchema  = new Schema<IAdvertise>(
     },
   },
 );
-
-// Create the Vendor model
+ 
 const Vendor: Model<IVendor> = model<IVendor>('Vendor', VendorSchema); 
 export default Vendor;
 export const Advertise = model<IAdvertise>('Advertise', AdvertiseSchema);

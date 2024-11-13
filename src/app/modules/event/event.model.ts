@@ -40,6 +40,10 @@ const eventSchema = new Schema<IEvent>({
     type: Date, 
     required: true 
   },
+  end_date:{ 
+    type: Date, 
+    required: true 
+  },
   time: { 
     type: String, 
     required: true 

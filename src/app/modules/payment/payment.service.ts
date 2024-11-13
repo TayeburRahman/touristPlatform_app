@@ -5,6 +5,10 @@ import { Payment, Plan } from './payment.model';
 import { Packages } from '../dashboard/dashboard.model';
 import { IPackages } from '../dashboard/dashboard.interface';
 import Vendor from '../vendor/vendor.model';
+import { IUser } from '../user/user.interface';
+import { IReqUser } from '../auth/auth.interface';
+import { RequestData } from '../../../interfaces/common';
+import { Request } from 'express';
 
 const stripe = new Stripe(config.stripe.stripe_secret_key as string);
 
@@ -80,7 +84,19 @@ const paymentSuccessAndSave = async (payload: {
 };
 
 const userPlanHistory = async (req: Request) => { 
-}
+  const { userId } = req.user as IReqUser;  
+  if (!userId) {
+    throw new Error('User not authenticated');
+  }
+ 
+  const plans = await Plan.find({ userId })
+    .populate('userId')  
+    .populate('payment_id')  
+    .populate('packages_id')  
+    .populate('events');  
+    
+  return plans;
+};
   
 
  

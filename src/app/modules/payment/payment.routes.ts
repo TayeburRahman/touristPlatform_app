@@ -16,9 +16,9 @@ router.post(
   PaymentController.paymentSuccessAndSave,
 );
 
-router.post(
-  '/plan_history/:userId',
-  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR),
+router.get(
+  '/plan_history',
+  auth(ENUM_USER_ROLE.VENDOR),
   PaymentController.userPlanHistory,
 );
 
