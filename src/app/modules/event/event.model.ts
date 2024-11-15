@@ -58,7 +58,7 @@ const eventSchema = new Schema<IEvent>({
      required: true,
   },
   option: { 
-    type: String, 
+    type: [String], 
     required: true 
   },
   social_media: { 

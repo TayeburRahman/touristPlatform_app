@@ -70,5 +70,10 @@ router.get(
 );
 // --------------------------
 
+router.get(
+    '/overview',   
+    DashboardController.getEventOverview
+);
+ 
 
 export const DashboardRoutes = router;

@@ -7,7 +7,7 @@ export interface IEvent extends Document {
   date: Date;  
   time: string;  
   duration: string;
-  option: string;
+  option: string[];
   social_media: [ISocialMedia] | null;
   location: ILocation; 
   description?: string;  

@@ -166,7 +166,19 @@ const deleteBannerImage: RequestHandler = catchAsync(
     });
   },
 ); 
-  
+
+const getEventOverview: RequestHandler = catchAsync(
+  async (req: Request, res: Response) => {   
+    const result = await DashboardService.getEventOverview(req) 
+    sendResponse(res, {
+      statusCode: 200,
+      success: true,
+      message: `Get Overview Successfully!`,
+      data: result,
+    });
+  },
+); 
+
 export const DashboardController = {
     createAndUpdateCategory, 
     getCategory,
@@ -179,6 +191,7 @@ export const DashboardController = {
     createBannerImage,
     updateBannerImage,
     getBannerImage,
-    deleteBannerImage
+    deleteBannerImage,
+    getEventOverview
 
 };

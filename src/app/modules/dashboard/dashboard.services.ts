@@ -6,6 +6,7 @@ import ApiError from '../../../errors/ApiError';
 import User from '../auth/auth.model';
 import { Banners, Packages } from './dashboard.model';
 import { IBanner } from './dashboard.interface';
+import Event from '../event/event.model';
  
 
 const createPackages = async (req: Request) => { 
@@ -113,6 +114,152 @@ const deleteBannerImage = async (req: Request) => {
   return banner;
 };
 
+// --Event------------------------- 
+// const getEventOverview = async (req: Request) => {
+//   try {
+//     const { year } = req.query as {
+//       year: string;
+//     }
+//     const selectedYear = year ? parseInt(year) : new Date().getFullYear();
+
+//     // Fetch all events for calculations
+//     const events = await Event.find();
+
+//     // Helper function to filter events by date range
+//     const filterEventsByDateRange = (startDate : any, endDate: any) => {
+//       return events.filter(event => {
+//         const eventDate = new Date(event.date);
+//         return eventDate >= startDate && eventDate < endDate;
+//       });
+//     };
+
+//     // Yearly growth
+//     const startOfThisYear = new Date(selectedYear, 0, 1);
+//     const startOfLastYear = new Date(selectedYear - 1, 0, 1);
+//     const endOfLastYear = new Date(selectedYear, 0, 1);
+//     const eventsThisYear = filterEventsByDateRange(startOfThisYear, new Date());
+//     const eventsLastYear = filterEventsByDateRange(startOfLastYear, endOfLastYear);
+//     const yearlyGrowth = eventsLastYear.length
+//       ? ((eventsThisYear.length - eventsLastYear.length) / eventsLastYear.length) * 100
+//       : 0;
+
+//     // Monthly growth (current month vs previous month in the selected year)
+//     const now = new Date();
+//     const startOfThisMonth = new Date(selectedYear, now.getMonth(), 1);
+//     const startOfLastMonth = new Date(selectedYear, now.getMonth() - 1, 1);
+//     const endOfLastMonth = new Date(selectedYear, now.getMonth(), 1);
+//     const eventsThisMonth = filterEventsByDateRange(startOfThisMonth, new Date());
+//     const eventsLastMonth = filterEventsByDateRange(startOfLastMonth, endOfLastMonth);
+//     const monthlyGrowth = eventsLastMonth.length
+//       ? ((eventsThisMonth.length - eventsLastMonth.length) / eventsLastMonth.length) * 100
+//       : 0;
+
+//     // Daily growth (today vs yesterday in the selected year)
+//     const startOfToday = new Date(selectedYear, now.getMonth(), now.getDate());
+//     const startOfYesterday = new Date(selectedYear, now.getMonth(), now.getDate() - 1);
+//     const endOfYesterday = startOfToday;
+//     const eventsToday = filterEventsByDateRange(startOfToday, new Date());
+//     const eventsYesterday = filterEventsByDateRange(startOfYesterday, endOfYesterday);
+//     const dailyGrowth = eventsYesterday.length
+//       ? ((eventsToday.length - eventsYesterday.length) / eventsYesterday.length) * 100
+//       : 0;
+
+//     // Monthly data for each month
+//     const monthlyData = Array.from({ length: 12 }, (_, month) => {
+//       const startOfMonth = new Date(selectedYear, month, 1);
+//       const endOfMonth = new Date(selectedYear, month + 1, 1);
+//       const eventsInMonth = filterEventsByDateRange(startOfMonth, endOfMonth);
+//       return eventsInMonth.length;
+//     });
+
+//     // Send response with growth overview and monthly data
+//     return {
+//       selectedYear,
+//       yearlyGrowth: yearlyGrowth.toFixed(2) + '%',
+//       monthlyGrowth: monthlyGrowth.toFixed(2) + '%',
+//       dailyGrowth: dailyGrowth.toFixed(2) + '%',
+//     };
+//   } catch (error : any) {
+//     console.error(error);
+//     throw new ApiError(404,'Server error:', error);
+//   }
+// };
+
+
+const getEventOverview = async (req: Request) => {
+  try {
+    const { year } = req.query as {
+      year: string;
+    }
+    const selectedYear = year ? parseInt(year) : new Date().getFullYear();
+
+    // Fetch all events for calculations
+    const events = await Event.find();
+
+    // Helper function to filter events by date range
+    const filterEventsByDateRange = (startDate: any, endDate : any) => {
+      return events.filter(event => {
+        const eventDate = new Date(event.date);
+        return eventDate >= startDate && eventDate < endDate;
+      });
+    };
+
+    // Yearly growth
+    const startOfThisYear = new Date(selectedYear, 0, 1);
+    const startOfLastYear = new Date(selectedYear - 1, 0, 1);
+    const endOfLastYear = new Date(selectedYear, 0, 1);
+    const eventsThisYear = filterEventsByDateRange(startOfThisYear, new Date());
+    const eventsLastYear = filterEventsByDateRange(startOfLastYear, endOfLastYear);
+    const yearlyGrowth = eventsLastYear.length
+      ? ((eventsThisYear.length - eventsLastYear.length) / eventsLastYear.length) * 100
+      : 0;
+
+    // Monthly growth (current month vs previous month in the selected year)
+    const now = new Date();
+    const startOfThisMonth = new Date(selectedYear, now.getMonth(), 1);
+    const startOfLastMonth = new Date(selectedYear, now.getMonth() - 1, 1);
+    const endOfLastMonth = new Date(selectedYear, now.getMonth(), 1);
+    const eventsThisMonth = filterEventsByDateRange(startOfThisMonth, new Date());
+    const eventsLastMonth = filterEventsByDateRange(startOfLastMonth, endOfLastMonth);
+    const monthlyGrowth = eventsLastMonth.length
+      ? ((eventsThisMonth.length - eventsLastMonth.length) / eventsLastMonth.length) * 100
+      : 0;
+
+    // Daily growth (today vs yesterday in the selected year)
+    const startOfToday = new Date(selectedYear, now.getMonth(), now.getDate());
+    const startOfYesterday = new Date(selectedYear, now.getMonth(), now.getDate() - 1);
+    const endOfYesterday = startOfToday;
+    const eventsToday = filterEventsByDateRange(startOfToday, new Date());
+    const eventsYesterday = filterEventsByDateRange(startOfYesterday, endOfYesterday);
+    const dailyGrowth = eventsYesterday.length
+      ? ((eventsToday.length - eventsYesterday.length) / eventsYesterday.length) * 100
+      : 0;
+
+    // Monthly data for each month
+    const monthlyData = Array.from({ length: 12 }, (_, month) => {
+      const startOfMonth = new Date(selectedYear, month, 1);
+      const endOfMonth = new Date(selectedYear, month + 1, 1);
+      const eventsInMonth = filterEventsByDateRange(startOfMonth, endOfMonth);
+      return eventsInMonth.length;
+    });
+
+    // Send response with growth overview and monthly data
+   return {
+      selectedYear,
+      yearlyGrowth: yearlyGrowth.toFixed(2) + '%',
+      monthlyGrowth: monthlyGrowth.toFixed(2) + '%',
+      dailyGrowth: dailyGrowth.toFixed(2) + '%',
+      monthlyData,
+    };
+  } catch (error: any) {
+    console.error(error);
+    throw new ApiError(404,'Server error:', error);
+  }
+};
+
+
+
+
 export const DashboardService = {
   updatePackages, 
   createPackages,
@@ -122,5 +269,6 @@ export const DashboardService = {
   createBannerImage,
   updateBannerImage,
   getBannerImage,
-  deleteBannerImage
+  deleteBannerImage,
+  getEventOverview
 };

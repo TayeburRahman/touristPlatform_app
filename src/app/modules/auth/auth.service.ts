@@ -13,12 +13,15 @@ import { sendResetEmail } from "./sendResetMails";
 import { createActivationToken } from "../../../utils/createActivationToken";
 import { registrationSuccessEmailBody } from "../../../mails/user.register";  
 import { resetEmailTemplate } from "../../../mails/reset.email";
-import { ActivationPayload, IAuth, LoginPayload } from "./auth.interface";
+import { ActivationPayload, IAuth, IReqUser, LoginPayload } from "./auth.interface";
 import config from "../../../config";
 import User from "../user/user.model";
 import Admin from "../admin/admin.model";
 import Vendor from "../vendor/vendor.model";
-
+import { RequestData } from "../../../interfaces/common";
+import { IUser } from "../user/user.interface";
+import { IVendor } from "../vendor/vendor.interface";
+import { IAdmin } from "../admin/admin.interface";
 
 interface ForgotPasswordPayload {
   email: string;
@@ -34,6 +37,39 @@ interface ChangePasswordPayload {
   newPassword: string;
   confirmPassword: string;
 }
+
+const profileDetails = async (req: any) => {
+  const { authId } = req.user as IReqUser;
+  
+  // Find the authenticated user
+  const authUser = await Auth.findById(authId);
+  if (!authUser) {
+    throw new ApiError(404, "Authenticated user not found");
+  }
+
+  let userDetails: IUser | IVendor | IAdmin | null = null;
+ 
+  switch (authUser.role) {
+    case ENUM_USER_ROLE.USER:
+      userDetails = await User.findOne({ authId: authUser._id }).populate("authId");
+      break;
+    case ENUM_USER_ROLE.VENDOR:
+      userDetails = await Vendor.findOne({ authId: authUser._id }).populate("authId");
+      break;
+    case ENUM_USER_ROLE.ADMIN:
+      userDetails = await Admin.findOne({ authId: authUser._id }).populate("authId");
+      break;
+    default:
+      throw new ApiError(400, "Invalid role provided!");
+  }
+
+  if (!userDetails) {
+    throw new ApiError(404, "User details not found");
+  }
+
+  return  userDetails ;
+};
+
 
 const registrationAccount = async (payload: IAuth) => {
   const { role, password, confirmPassword, email, longitude, latitude, ...other } = payload;
@@ -537,6 +573,8 @@ cron.schedule("* * * * *", async () => {
   }
 });
 
+
+
 export const AuthService = {
   registrationAccount,
   loginAccount,
@@ -547,5 +585,6 @@ export const AuthService = {
   checkIsValidForgetActivationCode,
   resendCodeActivationAccount,
   resendCodeForgotAccount,
+  profileDetails,
 };
  

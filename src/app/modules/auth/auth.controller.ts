@@ -67,6 +67,19 @@ const changePassword = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const profileDetails = catchAsync(async (req: Request, res: Response) => {  
+  const data = await AuthService.profileDetails(req);
+
+  // Send the response
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Profile details retrieved successfully!",
+    data,
+  });
+});
+
+
 const forgotPass = catchAsync(async (req: Request, res: Response) => {
   await AuthService.forgotPass(req.body);
   sendResponse(res, {
@@ -139,5 +152,6 @@ export const AuthController = {
   checkIsValidForgetActivationCode,
   resendCodeActivationAccount,
   resendCodeForgotAccount,
+  profileDetails
 };
  
