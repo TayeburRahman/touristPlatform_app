@@ -33,8 +33,6 @@ router.get("/profile",
 auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN), 
 AuthController.profileDetails)
 
- 
-
 //------ User Router ---------------
 router.get("/user/profile", auth(ENUM_USER_ROLE.USER), UserController.getProfile)
 router.patch(
