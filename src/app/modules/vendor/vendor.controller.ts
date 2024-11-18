@@ -4,34 +4,24 @@ import { IReqUser } from "../auth/auth.interface";
 import { Request, RequestHandler, Response } from 'express'; 
 import { VendorService } from "./vendor.service"; 
  
-// ------------------------------
-const updateProfile = catchAsync(async (req: Request, res: Response) => {
-  const result = await VendorService.updateProfile(req as any);
+
+const vendorRegister = catchAsync(async (req: Request, res: Response) => {
+  const result =  await VendorService.vendorRegister(req as any);
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Profile updated successfully",
+    message:"Your account is awaiting admin approval!",
     data: result,
   });
 });
 
-const getProfile = catchAsync(async (req: Request, res: Response) => {
- const user =  req.user as IReqUser;
-  const result = await VendorService.getProfile(user);
+const vendorRequest = catchAsync(async (req: Request, res: Response) => {
+  const result =  await VendorService.vendorRequest(req as any);
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "User retrieved successfully",
+    message:"Request send successfully",
     data: result,
-  });
-});
-
-const deleteMyAccount = catchAsync(async (req: Request, res: Response) => {
-  await VendorService.deleteMyAccount(req.body);
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: "Account deleted!",
   });
 });
 
@@ -68,16 +58,10 @@ const getAllPending = catchAsync(async (req: Request, res: Response) => {
 
 
 export const VendorController = {
-  // sendAdvertiseUsFrom, 
-  // approveAdvertise,
-  // sendVendorRequest, 
-  // deleteVendorRequest,
-  // getPaddingRequest,
+  vendorRegister,
   declinedVendor,
   acceptVendorRequest, 
   getAllPending,
-  deleteMyAccount,
-  getProfile,
-  updateProfile,
+  vendorRequest, 
 };
  

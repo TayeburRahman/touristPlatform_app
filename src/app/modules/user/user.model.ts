@@ -22,23 +22,15 @@ const UserSchema = new Schema<IUser>(
       type: String,
       default: null,
     },
-    cover_image: {
+    banner: {
       type: String,
       default: null,
     },
     phone_number: {
       type: String,
       default: null,
-    },
-    isPhoneNumberVerified: {
-      type: Boolean,
-      default: false,
-    },
-    street: {
-      type: String,
-      default: null,
-    },
-    neighborhood: {
+    },   
+    address: {
       type: String,
       default: null,
     },

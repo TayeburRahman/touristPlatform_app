@@ -9,30 +9,32 @@ import { sendResetEmail } from '../auth/sendResetMails';
 import { logger } from '../../../shared/logger';
 import cron from "node-cron";
 import { Plan } from '../payment/payment.model';
+import { ENUM_USER_ROLE } from '../../../enums/user';
+import mongoose from 'mongoose';
 
 interface DeleteAccountPayload {
   email: string;
   password: string;
 }
 
-cron.schedule("* * * * *", async () => {   
+cron.schedule("* * * * *", async () => {
   try {
     const now = new Date();
     const result = await Vendor.updateMany(
-      { 
-        expiredDate: { $lte: now }, 
+      {
+        expiredDate: { $lte: now },
       },
       {
-        $unset: { package: null, plan: null }, 
+        $unset: { package: null, plan: null },
       }
     );
 
     await Plan.updateMany(
-      { 
-        end_date: { $lte: now }, 
+      {
+        end_date: { $lte: now },
       },
       {
-        $unset: { active: false }, 
+        $unset: { active: false },
       }
     );
 
@@ -44,72 +46,214 @@ cron.schedule("* * * * *", async () => {
   }
 });
 
-// --- Vendor Request --------------- 
-const acceptVendorRequest = async (req: RequestData) => { 
-  const { id } = req.params as { id: string }; 
+const vendorRegister = async (req: any) => {
+  const { files, body: data } = req;
+  const { password, confirmPassword, email, longitude, latitude, ...other } = data;
 
-  const vendorDb = await Vendor.findById(id) as IVendor; 
-  const authDb: any = await Auth.findById(vendorDb?.authId);
-  if (!vendorDb || !authDb) {
-    throw new ApiError(httpStatus.NOT_FOUND, 'Vendor not found');
-  } 
-  const userUpdate = await Vendor.findByIdAndUpdate(id, { status: "approved" }, { new: true });
-   
-  const authUpdate  = await Auth.findByIdAndUpdate(authDb._id, { isActive: true }, { new: true }) as IAuth;
+  const role = "VENDOR"
+ 
+  if (!password || !confirmPassword || !email) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Email, Password, and Confirm Password are required!");
+  }
+ 
+  if (password !== confirmPassword) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Password and Confirm Password didn't match");
+  }
+ 
+  const existingAuth: any = await Auth.findOne({ email });
+  if (existingAuth) {
+    if (existingAuth.isActive) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Email already exists");
+    } else {
+      // Delete inactive existing user
+      await Auth.deleteOne({ _id: existingAuth._id });
+    }
+  }
+ 
+  const existingVendor: any = await Vendor.findOne({ email });
+  if (existingVendor) {
+    if (existingVendor.status === "active") {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Vendor Profile Already Exists");
+    } else {
+      // Delete inactive existing vendor
+      await Vendor.deleteOne({ email });
+    }
+  }
+ 
+  if (role === "VENDOR" && (longitude && latitude)) {
+    const location_map = {
+      type: 'Point',
+      coordinates: [longitude, latitude],
+    };
+    other.location_map = location_map;
+  } else if (role === "VENDOR" && (!longitude || !latitude)) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Vendor location is required!");
+  }
+ 
+  if (files) {
+    if (files.profile_image?.[0]) {
+      other.profile_image = `/images/profile/${files.profile_image[0].filename}`;
+    }
+    if (files.banner?.[0]) {
+      other.banner = `/images/profile/${files.banner[0].filename}`;
+    }
+  }
+ 
+  const auth = {
+    role,
+    name: other.name,
+    email,
+    password,
+    expirationTime: Date.now() + 3 * 60 * 1000, 
+  };
 
-  if(userUpdate){
-    sendResetEmail(
-      authUpdate.email,
-      `<!DOCTYPE html>
-        <html lang="en">
-        <head>
-            <meta charset="UTF-8">
-            <meta name="viewport" content="width=device-width, initial-scale=1.0">
-            <title>Activation Code</title>
-            <style>
-                body {
-                    font-family: Arial, sans-serif;
-                    background-color: #f4f4f4;
-                    margin: 0;
-                    padding: 20px;
-                }
-                .container {
-                    max-width: 600px;
-                    margin: auto;
-                    background: white;
-                    padding: 20px;
-                    border-radius: 5px;
-                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                }
-                h1 {
-                    color: #333;
-                }
-                p {
-                    color: #555;
-                    line-height: 1.5;
-                }
-                .footer {
-                    margin-top: 20px;
-                    font-size: 12px;
-                    color: #999;
-                }
-            </style>
-        </head>
-        <body>
-            <div class="container">
-                <h1>Hello, ${authUpdate.name}</h1>
-                 <p>Your vendor account request has been accepted successfully.</p>
-                <p>Thank you!</p>
-                <div class="footer">
-                    <p>&copy; ${new Date().getFullYear()} bdCalling</p>
-                </div>
-            </div>
-        </body>
-        </html>`
-    );
+  let createAuth = await Auth.create(auth); 
+ 
+  other.authId = createAuth?._id
+  other.email = email; 
+  // Create vendor record if role is VENDOR
+  let result;
+  if (role === ENUM_USER_ROLE.VENDOR) {
+    result = await Vendor.create(other);
+  } else {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Invalid role provided!");
+  }
+  // Return success message
+  return { result, message: "Your account is awaiting admin approval!" };
+}; 
+
+const vendorRequest = async (req: RequestData) => {
+  const { files, body: data } = req;
+  const { longitude, latitude, ...other } = req.body as any;
+  const { authId, userId } = req.user
+
+  if (!authId) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "User ID is required!");
   }
 
-  return { userUpdate, authUpdate };  
+  const existingAuth = await Auth.findById(authId);
+
+  if (!existingAuth?.isActive) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Please log out and log back in to request.");
+  }
+
+  if (longitude && latitude) {
+    const location_map = {
+      type: 'Point',
+      coordinates: [longitude, latitude],
+    };
+    other.location_map = location_map;
+
+  } else if (longitude || latitude) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Location are required if one is provided.");
+  }
+
+  if (files) {
+    if (files.profile_image?.[0]) {
+      other.profile_image = `/images/profile/${files.profile_image[0].filename}`;
+    }
+    if (files.banner?.[0]) {
+      other.banner = `/images/profile/${files.banner[0].filename}`;
+    }
+  }
+
+  other.authId = existingAuth._id;
+  other.email = existingAuth?.email;
+  other.name = existingAuth?.name;
+  other.userId = userId;
+
+
+  const result = await Vendor.create(other);
+
+  return { result, message: "Request sent successfully!" };
+};
+
+const acceptVendorRequest = async (req: RequestData) => {
+  const { id } = req.params as { id: string };
+  const vendorDb = await Vendor.findById(id) as IVendor;
+  const authDb: any = await Auth.findById(vendorDb?.authId);
+
+  if (!vendorDb || !authDb) {
+    throw new ApiError(httpStatus.NOT_FOUND, 'Vendor or Auth not found');
+  }
+
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try {
+
+    if (authDb.role === "USER") {
+      authDb.role = "VENDOR";
+      await authDb.save();
+    }
+
+    const userUpdate = await Vendor.findByIdAndUpdate(id, { status: "approved" }, { new: true, session });
+
+    const authUpdate = await Auth.findByIdAndUpdate(authDb._id, { isActive: true }, { new: true, session }) as IAuth;
+
+    await session.commitTransaction();
+    session.endSession();
+
+    if (userUpdate) {
+      sendResetEmail(
+        authUpdate.email,
+        `<!DOCTYPE html>
+          <html lang="en">
+          <head>
+              <meta charset="UTF-8">
+              <meta name="viewport" content="width=device-width, initial-scale=1.0">
+              <title>Activation Code</title>
+              <style>
+                  body {
+                      font-family: Arial, sans-serif;
+                      background-color: #f4f4f4;
+                      margin: 0;
+                      padding: 20px;
+                  }
+                  .container {
+                      max-width: 600px;
+                      margin: auto;
+                      background: white;
+                      padding: 20px;
+                      border-radius: 5px;
+                      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                  }
+                  h1 {
+                      color: #333;
+                  }
+                  p {
+                      color: #555;
+                      line-height: 1.5;
+                  }
+                  .footer {
+                      margin-top: 20px;
+                      font-size: 12px;
+                      color: #999;
+                  }
+              </style>
+          </head>
+          <body>
+              <div class="container">
+                  <h1>Hello, ${authUpdate.name}</h1>
+                   <p>Your vendor account request has been accepted successfully.</p>
+                  <p>Thank you!</p>
+                  <div class="footer">
+                      <p>&copy; ${new Date().getFullYear()} bdCalling</p>
+                  </div>
+              </div>
+          </body>
+          </html>`
+      );
+    }
+
+    return { userUpdate, authUpdate };
+
+  } catch (error) {
+    // Abort transaction if any error occurs
+    await session.abortTransaction();
+    session.endSession();
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to accept vendor request');
+  }
 };
 
 const declinedVendor = async (req: RequestData) => {
@@ -189,10 +333,9 @@ const declinedVendor = async (req: RequestData) => {
 };
 
 const getAllPending = async () => {
-  const data = await Vendor.find({status: "pending"})
+  const data = await Vendor.find({ status: "pending" })
   return data;
-} 
-
+}
 // --- Vendor Profile ---------------
 const updateProfile = async (req: RequestData) => {
   const { files, body: data } = req;
@@ -210,7 +353,7 @@ const updateProfile = async (req: RequestData) => {
     }
     if (files.banner && files.banner[0]) {
       fileUploads.banner = `/images/profile/${files.banner[0].filename}`;
-    } 
+    }
   };
 
   const updatedUserData = { ...data, ...fileUploads };
@@ -273,9 +416,10 @@ export const VendorService = {
   // approveAdvertise,
   // sendVendorRequest, 
   // deleteVendorRequest,
-  // getPaddingRequest,
+  vendorRegister,
+  vendorRequest,
   declinedVendor,
-  acceptVendorRequest, 
+  acceptVendorRequest,
   getAllPending,
   getProfile,
   deleteMyAccount,

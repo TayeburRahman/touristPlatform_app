@@ -42,11 +42,7 @@ const AuthSchema: Schema<IAuth> = new Schema(
     },
     verifyExpire: {
       type: Date,
-    },
-    expirationTime: {
-      type: Date,
-      default: () => Date.now() + 2 * 60 * 1000,
-    },
+    }, 
     is_block: {
       type: Boolean,
       default: false,

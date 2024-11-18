@@ -22,51 +22,28 @@ router.post("/forgot-resend", AuthController.resendCodeForgotAccount)
 router.post("/verify-otp", AuthController.checkIsValidForgetActivationCode)
 router.post("/reset-password", AuthController.resetPassword)
 router.patch("/change-password", auth(
-    ENUM_USER_ROLE.USER,
-    ENUM_USER_ROLE.VENDOR,
-    ENUM_USER_ROLE.SUPER_ADMIN,
-    ENUM_USER_ROLE.ADMIN
-  ), AuthController.changePassword
+  ENUM_USER_ROLE.USER,
+  ENUM_USER_ROLE.VENDOR,
+  ENUM_USER_ROLE.SUPER_ADMIN,
+  ENUM_USER_ROLE.ADMIN
+), AuthController.changePassword
 );
-
-router.get("/profile", 
-auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN), 
-AuthController.profileDetails)
-
-//------ User Router ---------------
-router.get("/user/profile", auth(ENUM_USER_ROLE.USER), UserController.getProfile)
-router.patch(
-  "/user/edit-profile",
-  auth(ENUM_USER_ROLE.USER),
+router.get("/profile",
+  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN),
+  AuthController.profileDetails)
+router.patch("/edit-profile",
+  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN),
   uploadFile(),
-  UserController.updateProfile
-)
-router.delete(
-  "/user/delete-account",
-  auth(ENUM_USER_ROLE.USER),
-  UserController.deleteMyAccount
-);
- 
+  AuthController.updateProfile)
+router.delete("/delete-account",
+  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN),
+  AuthController.deleteMyProfile)
+  
 //------ Admin Router ---------------
 router.post("/create_admin",
   auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
   AdminController.createAdminAccount);
-router.get(
-  "/admin/profile",
-  auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  AdminController.myProfile
-);
-router.patch(
-  "/admin/edit-profile",
-  auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  uploadFile(),
-  AdminController.updateProfile
-);
-router.delete(
-  "/admin/delete_account",
-  auth(ENUM_USER_ROLE.ADMIN, ENUM_USER_ROLE.SUPER_ADMIN),
-  AdminController.deleteMyAccount
-);
+ 
 
 
 

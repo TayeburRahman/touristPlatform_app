@@ -22,6 +22,7 @@ import { RequestData } from "../../../interfaces/common";
 import { IUser } from "../user/user.interface";
 import { IVendor } from "../vendor/vendor.interface";
 import { IAdmin } from "../admin/admin.interface";
+import mongoose from 'mongoose';
 
 interface ForgotPasswordPayload {
   email: string;
@@ -68,8 +69,7 @@ const profileDetails = async (req: any) => {
   }
 
   return  userDetails ;
-};
-
+}; 
 
 const registrationAccount = async (payload: IAuth) => {
   const { role, password, confirmPassword, email, longitude, latitude, ...other } = payload;
@@ -80,6 +80,7 @@ const registrationAccount = async (payload: IAuth) => {
   if (!password || !confirmPassword || !email) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Email, Password, and Confirm Password are required!");
   }
+
   if (password !== confirmPassword) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Password and Confirm Password didn't match");
   }
@@ -288,12 +289,10 @@ const loginAccount = async (payload: LoginPayload) => {
 };
 
 const forgotPass = async (payload: { email: string}) => {
-  const user = await Auth.findOne(
-    { email: payload.email },
-    { _id: 1, role: 1, email: 1, name: 1 }
-  ) as IAuth;
-
-  if (!user.email) {
+ 
+  const user = await Auth.findOne({ email: payload.email }) as IAuth; 
+  if (!user?.email) {
+    console.log("hello", payload.email);
     throw new ApiError(httpStatus.BAD_REQUEST, "User does not found!");
   }
 
@@ -527,7 +526,122 @@ const resendCodeForgotAccount = async (payload: ForgotPasswordPayload) => {
     </body>
     </html>`
   );
+}; 
+
+const updateProfile = async (req: RequestData) => {
+  const { files, body: data } = req;
+  const { authId, userId, role } = req.user;
+ 
+ 
+  let checkValidDriver;
+  if (role === "USER") {
+    checkValidDriver = await User.findById(userId);
+  } else if (role === "VENDOR") {
+    checkValidDriver = await Vendor.findById(userId);
+  } else if (role === "ADMIN") {
+    checkValidDriver = await Admin.findById(userId);
+  } else {
+    throw new ApiError(400, "Invalid role provided");
+  }
+ 
+  if (!checkValidDriver) {
+    throw new ApiError(404, "You are not authorized");
+  }
+
+  // Process file uploads
+  const fileUploads: Record<string, string> = {};
+  if (files) {
+    if (files.profile_image?.[0]) {
+      fileUploads.profile_image = `/images/profile/${files.profile_image[0].filename}`;
+    }
+    if (files.banner?.[0]) {
+      fileUploads.banner = `/images/profile/${files.banner[0].filename}`;
+    }
+  }
+ 
+  const updatedUserData = { ...data, ...fileUploads };
+ 
+  await Auth.findByIdAndUpdate(
+    authId,
+    { name: updatedUserData.name },
+    { new: true, runValidators: true }
+  );
+ 
+  let profile;
+  if (role === "USER") {
+    profile = await User.findByIdAndUpdate(userId, updatedUserData, {
+      new: true,
+      runValidators: true,
+    });
+  } else if (role === "VENDOR") {
+    profile = await Vendor.findByIdAndUpdate(userId, updatedUserData, {
+      new: true,
+      runValidators: true,
+    });
+  } else {
+    profile = await Admin.findByIdAndUpdate(userId, updatedUserData, {
+      new: true,
+      runValidators: true,
+    });
+  }
+ 
+  return profile;
+}; 
+
+const deleteMyProfile = async (req: RequestData) => {
+  const { email, password } = req.body as {
+    email: string;
+    password: string;
+  };
+  const { role } = req.user;
+ 
+  if (!email || !password) {
+    throw new ApiError(400, "Email and password are required");
+  }
+ 
+  const session = await mongoose.startSession();
+  session.startTransaction();
+
+  try { 
+    const isUserExist = await Auth.isAuthExist(email);
+    if (!isUserExist) {
+      throw new ApiError(404, "User does not exist");
+    }
+ 
+    if (
+      isUserExist.password &&
+      !(await Auth.isPasswordMatched(password, isUserExist.password))
+    ) {
+      throw new ApiError(401, "Password is incorrect");
+    }
+ 
+    if (role === "VENDOR") {
+      await Vendor.deleteOne({ authId: isUserExist._id }).session(session);
+    } else if (role === "USER") {
+      await User.deleteOne({ authId: isUserExist._id }).session(session);
+    } else if (role === "ADMIN") {
+      await Admin.deleteOne({ authId: isUserExist._id }).session(session);
+    } else {
+      throw new ApiError(400, "Invalid role");
+    }
+ 
+    const authDeletionResult = await Auth.deleteOne({ email }).session(session);
+ 
+    await session.commitTransaction();
+    session.endSession();
+ 
+    return {
+      message: `Profile for ${email} deleted successfully`,
+      authDeletionResult,
+    };
+  } catch (error) {
+    // If any error occurs, abort the transaction
+    await session.abortTransaction();
+    session.endSession();
+    throw new ApiError(500, "Failed to delete user profile. Please try again.");
+  }
 };
+
 // Scheduled task to unset activationCode field
 cron.schedule("* * * * *", async () => {
   try {
@@ -586,5 +700,7 @@ export const AuthService = {
   resendCodeActivationAccount,
   resendCodeForgotAccount,
   profileDetails,
+  updateProfile,
+  deleteMyProfile
 };
  

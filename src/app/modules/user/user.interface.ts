@@ -5,7 +5,7 @@ export type IUser = Document & {
     name: string;
     email: string;
     profile_image?: string | null;
-    cover_image?: string | null;
+    banner?: string | null;
     phone_number?: string | null;
     isPhoneNumberVerified: boolean;
     street?: string | null;
@@ -18,4 +18,5 @@ export type IUser = Document & {
     status: "active" | "deactivate" | "upgraded";
     createdAt?: Date;
     updatedAt?: Date;
+    address: string
   }

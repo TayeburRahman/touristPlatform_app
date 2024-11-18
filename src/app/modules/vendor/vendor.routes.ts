@@ -6,19 +6,14 @@ import { VendorController } from './vendor.controller';
 
 const router = express.Router();
 
-router.get("/profile", auth(ENUM_USER_ROLE.VENDOR), VendorController.getProfile);
-router.patch(
-  "/edit-profile",
-  auth(ENUM_USER_ROLE.VENDOR),
+router.post("/register", 
   uploadFile(),
-  VendorController.updateProfile
-);
+  VendorController.vendorRegister);
 
-router.delete(
-  "/delete-account",
-  auth(ENUM_USER_ROLE.VENDOR),
-  VendorController.deleteMyAccount
-);
+router.patch("/send-vendor-request",
+  auth(ENUM_USER_ROLE.USER),
+  uploadFile(),
+  VendorController.vendorRequest);
 
 // -----Admin -------------
 router.get("/get-all-vendor-request",

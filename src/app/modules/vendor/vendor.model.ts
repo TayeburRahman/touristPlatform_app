@@ -1,6 +1,6 @@
 import mongoose, { Schema, Model, model } from 'mongoose'; 
-import { ILocation,  IVendor, ISocialMedia, IAdvertise } from './vendor.interface';
-import { boolean, string } from 'zod';
+import { ILocation,  IVendor, ISocialMedia, IAdvertise, IQuestion } from './vendor.interface'; 
+import { any } from 'zod';
 // Define the Location schema
 const locationSchema = new Schema<ILocation>({
   type: {
@@ -25,6 +25,19 @@ const socialMedia = new Schema<ISocialMedia>({
   },
 });
 
+const Question = new Schema<IQuestion>({
+  question: {
+    type: String,  
+    required: true,
+  },
+  answer: {
+    type: Schema.Types.Mixed,
+    required: true,
+  },
+});
+
+ 
+
 // Define the Vendor schema
 const VendorSchema = new Schema<IVendor>(
   { 
@@ -32,7 +45,14 @@ const VendorSchema = new Schema<IVendor>(
       type:  Schema.Types.ObjectId,
       ref: 'Auth',
     }, 
+    userId:{
+      type:  Schema.Types.ObjectId,
+      ref: 'User',
+    }, 
     username: {
+      type: String,  
+    }, 
+    business_name: {
       type: String,  
     }, 
     name: {
@@ -58,11 +78,7 @@ const VendorSchema = new Schema<IVendor>(
     profile_image: {
       type: String,
       default: null,
-    },  
-    cover_image:{
-      type: String,
-      default: null,
-    },
+    },   
     description: {
       type: String,
       default: null,
@@ -82,22 +98,19 @@ const VendorSchema = new Schema<IVendor>(
       type: String,
       enum: ['pending', 'approved', 'declined',"deactivate"],
       default: 'pending',
-    },
-    location: {
-      type: String, 
-    },
+    }, 
     location_map: {
       type: locationSchema,
-    },
-    expiredDate:{
-      type: Date,
-      default: null,
-    },
+    }, 
     package: {
       type:  Schema.Types.ObjectId,
       ref: 'Packages',
       default: null,
     }, 
+    questions: {
+      type:  [Question], 
+      default: [],
+    },
     plan:{
       type:  Schema.Types.ObjectId,
       ref: 'Plans',

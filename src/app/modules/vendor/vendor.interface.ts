@@ -9,6 +9,11 @@ export interface ISocialMedia {
   link: string;
 }
 
+export interface IQuestion {
+  question: string;
+  answer: any;
+}
+
 
 export interface IVendor extends Document {
   authId: mongoose.Types.ObjectId;
@@ -37,6 +42,9 @@ export interface IVendor extends Document {
   featured_events: number | null; 
   plan: string | null;
   expiredDate: Date;
+  questions: [IQuestion] | null;
+  business_name: string | null
+  userId: string | null;
 }
 
 

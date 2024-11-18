@@ -53,17 +53,16 @@ const createNewEvent = async (req: Request) => {
         "end_date"
     ];
 
-
     for (const field of requiredFields) {
         if (!data[field]) {
             throw new ApiError(400, `${field} is required.`);
         }
-    }
+    };
 
     const eventDate = new Date(date);
     if (isNaN(eventDate.getTime())) {
         throw new ApiError(400, 'Invalid date format.');
-    }
+    };
 
     const location = {
         type: 'Point',
@@ -104,7 +103,7 @@ const createNewEvent = async (req: Request) => {
 
     if (!newEvent) {
         throw new ApiError(500, 'Failed to create event.');
-    }
+    };
 
     const available_events = Math.max(0, plan.available_events - 1);
     let featured_events
@@ -112,7 +111,7 @@ const createNewEvent = async (req: Request) => {
         featured_events = Math.max(0, plan.featured_events - 1);
     } else {
         featured_events = plan.featured_events;
-    }
+    };
 
     await Plan.findByIdAndUpdate(plan._id, {
         available_events,
@@ -227,9 +226,9 @@ const approveEvents = async (req: Request) => {
 const getEvents = async (req: Request) => {
     const query = req.query;
     const categoryQuery = new QueryBuilder(
-        Event.find({ status: 'approved' })
-            .populate('category')
-            .populate('vendor'),
+        Event.find({ status: 'approved' }) 
+        .select('name event_image location category')
+        .populate('category', 'name'),
         query,
     )
         .search(['name'])
@@ -260,9 +259,9 @@ const getPopularMostEvents = async (req: Request) => {
 const getAllEvents = async (req: Request) => {
     const query = req.query;
     const categoryQuery = new QueryBuilder(
-        Event.find()
-            .populate('category')
-            .populate('vendor'),
+        Event.find() 
+        .select('name event_image location category')
+        .populate('category', 'name'),
         query,
     )
         .search(['name'])
