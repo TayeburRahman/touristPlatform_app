@@ -7,6 +7,7 @@ export type IPayment = {
   transaction_id: string;
   note: string;
   vendor: Schema.Types.ObjectId;
+  currency: string;
 };
 
 export type IPlan = {

@@ -19,7 +19,7 @@
   "lint-staged": {
     "src/**/*.ts": "yarn lint-prettier"
   },
-  "author": "",
+  "author": "tayebrayhan101@gmail.com",
   "license": "ISC",
   "devDependencies": {
     "@types/cookie-parser": "^1.4.6",

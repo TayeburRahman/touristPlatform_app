@@ -8,15 +8,18 @@ import { IEvent } from "./event.interface";
 import { Types } from "mongoose";
 
 const createNewEvent = async (req: Request) => {
-    const { userId, authId } = req.user as IReqUser;
+    const { userId, authId, role } = req.user as IReqUser;
 
     const { event_image } = req.files as { event_image: Express.Multer.File[] };
     const { name, date, time, featured,
-        //  social_media, 
+        social_media, 
         end_date,
+        address,
         duration, option, longitude, latitude, description, image, category } = req.body as any;
-    const data = req.body;
 
+        console.log("social_media", social_media)
+    
+    const data = req.body; 
     const plan: any = await Plan.findOne({
         userId: userId,
         active: true,
@@ -50,7 +53,8 @@ const createNewEvent = async (req: Request) => {
         "longitude",
         "latitude",
         "category",
-        "end_date"
+        "end_date",
+        "address"
     ];
 
     for (const field of requiredFields) {
@@ -60,6 +64,7 @@ const createNewEvent = async (req: Request) => {
     };
 
     const eventDate = new Date(date);
+
     if (isNaN(eventDate.getTime())) {
         throw new ApiError(400, 'Invalid date format.');
     };
@@ -72,18 +77,8 @@ const createNewEvent = async (req: Request) => {
     let images: any = [];
     if (event_image && Array.isArray(event_image)) {
         images = event_image.map(file => `/images/events/${file.filename}`);
-    }
-
-    const social_media = [
-        {
-            "name": "Facebook",
-            "link": "https://facebook.com/annual-charity-event"
-        },
-        {
-            "name": "Instagram",
-            "link": "https://instagram.com/annual-charity-event"
-        }
-    ]
+    }  
+    const parsMedia = JSON.parse(social_media)
 
     const newEvent = await Event.create({
         vendor: userId,
@@ -92,13 +87,14 @@ const createNewEvent = async (req: Request) => {
         time,
         duration,
         option,
-        social_media,
+        social_media: parsMedia,
         location,
         description,
         category,
         event_image: images,
         featured,
-        end_date
+        end_date,
+        address
     });
 
     if (!newEvent) {
@@ -221,28 +217,54 @@ const approveEvents = async (req: Request) => {
     }
     return result;
 }
-
 // -------------
 const getEvents = async (req: Request) => {
-    const query = req.query;
-    const categoryQuery = new QueryBuilder(
-        Event.find({ status: 'approved' }) 
-        .select('name event_image location category')
-        .populate('category', 'name'),
-        query,
-    )
-        .search(['name'])
-        .filter()
-        .sort()
-        .paginate()
-        .fields();
+    const query = Object.fromEntries(
+        Object.entries(req.query).filter(([_, value]) => value)
+    ) as any;
+
+    let categoryQuery;
+    if (query?.date) {
+        const parsedDate = new Date(query?.date);
+
+        if (isNaN(parsedDate.getTime())) {
+            throw new ApiError(400, 'Invalid date format.');
+        }
+        const customDate = parsedDate.toISOString().slice(0, 10);
+        categoryQuery = new QueryBuilder(
+            Event.find({ status: 'approved', date: customDate })
+                .select('name event_image location category address')
+                .populate('category', 'name'),
+            query,
+        )
+            .search(['name'])
+            .filter()
+            .sort()
+            .paginate()
+            .fields();
+
+    } else {
+        categoryQuery = new QueryBuilder(
+            Event.find({ status: 'approved' })
+                .select('name event_image location category address')
+                .populate('category', 'name')
+            ,
+            query,
+        )
+            .search(['name'])
+            .filter()
+            .sort()
+            .paginate()
+            .fields();
+    }
+
     const result = await categoryQuery.modelQuery;
     const meta = await categoryQuery.countTotal();
     return { result, meta }
 }
 
 const getPopularMostEvents = async (req: Request) => {
-    const data = await Event.aggregate([
+    const result = await Event.aggregate([
         { $match: { status: 'approved' } },
         {
             $addFields: {
@@ -250,18 +272,40 @@ const getPopularMostEvents = async (req: Request) => {
             }
         },
         { $sort: { favoritesCount: -1 } },
-        { $project: { favoritesCount: 0 } }
+        {
+            $project: {
+                name: 1,
+                event_image: 1,
+                location: 1,
+                category: 1,
+                favoritesCount: 1,
+                address: 1,
+            }
+        },
+        {
+            $lookup: {
+                from: 'categories',
+                localField: 'category',
+                foreignField: '_id',
+                as: 'category'
+            }
+        },
+        {
+            $unwind: '$category'
+        },
+
+        { $limit: 10 }
     ]);
 
-    return data;
-}
+    return { result };
+};
 
 const getAllEvents = async (req: Request) => {
     const query = req.query;
     const categoryQuery = new QueryBuilder(
-        Event.find() 
-        .select('name event_image location category')
-        .populate('category', 'name'),
+        Event.find()
+            .select('name event_image location category address')
+            .populate('category', 'name'),
         query,
     )
         .search(['name'])
@@ -275,14 +319,13 @@ const getAllEvents = async (req: Request) => {
 }
 
 const getFeaturedEvents = async (req: Request) => {
-    const events = await Event.find({
+    const result = await Event.find({
         status: 'approved',
         featured: { $ne: null }
     })
 
-    return events
-} 
- 
+    return { result }
+}
 // - no need now
 const getUserFavorites = async (req: Request) => {
     const { authId } = req.user as IReqUser;
@@ -295,10 +338,9 @@ const getUserFavorites = async (req: Request) => {
 
     return favoriteEvents;
 };
-
 // ----------------------
 const getEventsByDate = async (req: Request) => {
-    const { date } = req.body; 
+    const { date } = req.body;
     if (!date) {
         throw new ApiError(400, 'Invalid date format.');
     }
@@ -306,11 +348,14 @@ const getEventsByDate = async (req: Request) => {
     const parsedDate = new Date(date);
     if (isNaN(parsedDate.getTime())) {
         throw new ApiError(400, 'Invalid date format.');
-    } 
-    const customDate = parsedDate.toISOString().slice(0, 10);  
-    
-    const events = await Event.find({ status:"approved", date: customDate });
-    return events;
+    }
+    const customDate = parsedDate.toISOString().slice(0, 10);
+
+    const result = await Event.find({ status: "approved", date: customDate })
+        .select('name event_image location category address')
+        .populate('category', 'name')
+
+    return { result };
 }
 
 const getPastEvents = async (req: Request) => {
@@ -323,14 +368,44 @@ const getPastEvents = async (req: Request) => {
     if (isNaN(parsedDate.getTime())) {
         throw new ApiError(400, 'Invalid date format.');
     }
-    const customDate = parsedDate.toISOString().slice(0, 10); 
-    const pastEvents = await Event.find({
-        status: 'approved',  
+    const customDate = parsedDate.toISOString().slice(0, 10);
+    const result = await Event.find({
+        status: 'approved',
         end_date: { $lt: customDate }
-    });
-    return pastEvents;
+    })
+        .select('name event_image location category address')
+        .populate('category', 'name')
+
+    return { result };
 }
 
+const getVendorEvents = async (req: Request) => {
+    const { vendorId } = req.params;
+    if (!vendorId) {
+        throw new ApiError(400, 'Vendor Id is required.');
+    }
+    const result = await Event.find({
+        status: 'approved', vendor: vendorId })
+        .select('name event_image location category address')
+        .populate('category', 'name')
+    return { result };
+}
+
+const getVendorFeatured= async (req: Request) => {
+    const { vendorId } = req.params;
+    if (!vendorId) {
+        throw new ApiError(400, 'Vendor Id is required.');
+    }
+    
+    const result = await Event.find({
+        status: 'approved', vendor: vendorId,  featured: { $ne: null }})
+        .select('name event_image location category address')
+        .populate('category', 'name')
+
+    return { result };
+}
+
+ 
 // -------------
 const saveUserClickEvent = async (req: Request) => {
 
@@ -375,5 +450,7 @@ export const EventService = {
     getFeaturedEvents,
     getEventsByDate,
     getPastEvents,
-    getAllEvents
+    getAllEvents,
+    getVendorEvents,
+    getVendorFeatured
 };

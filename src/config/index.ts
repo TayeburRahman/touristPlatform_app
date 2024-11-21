@@ -15,6 +15,7 @@ export default {
   database_password: process.env.DB_PASSWORD,
   activation_secret: process.env.ACTIVATION_SECRET,
   bcrypt_salt_rounds: process.env.BCRYPT_SALT_ROUNDS,
+  client_domain_url: process.env.CLIENT_DOMAIN_URL,
   jwt: {
     secret: process.env.JWT_SECRET,
     refresh_secret: process.env.JWT_REFRESH_SECRET,
@@ -42,5 +43,6 @@ export default {
   },
   stripe: {
     stripe_secret_key: process.env.STRIPE_SECRET_KEY,
+    stripe_webhook_secret: process.env.STRIPE_WEBHOOK_SECRET,
   },
 };

@@ -11,6 +11,7 @@ import cron from "node-cron";
 import { Plan } from '../payment/payment.model';
 import { ENUM_USER_ROLE } from '../../../enums/user';
 import mongoose from 'mongoose';
+import Event from '../event/event.model';
 
 interface DeleteAccountPayload {
   email: string;
@@ -48,18 +49,19 @@ cron.schedule("* * * * *", async () => {
 
 const vendorRegister = async (req: any) => {
   const { files, body: data } = req;
-  const { password, confirmPassword, email, longitude, latitude, ...other } = data;
+  const { password, confirmPassword, email, longitude, latitude , social_media, questions, ...other } = data;
+
+  console.log("====", other.address)
 
   const role = "VENDOR"
- 
   if (!password || !confirmPassword || !email) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Email, Password, and Confirm Password are required!");
   }
- 
+
   if (password !== confirmPassword) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Password and Confirm Password didn't match");
   }
- 
+
   const existingAuth: any = await Auth.findOne({ email });
   if (existingAuth) {
     if (existingAuth.isActive) {
@@ -69,7 +71,7 @@ const vendorRegister = async (req: any) => {
       await Auth.deleteOne({ _id: existingAuth._id });
     }
   }
- 
+
   const existingVendor: any = await Vendor.findOne({ email });
   if (existingVendor) {
     if (existingVendor.status === "active") {
@@ -79,7 +81,7 @@ const vendorRegister = async (req: any) => {
       await Vendor.deleteOne({ email });
     }
   }
- 
+
   if (role === "VENDOR" && (longitude && latitude)) {
     const location_map = {
       type: 'Point',
@@ -89,28 +91,38 @@ const vendorRegister = async (req: any) => {
   } else if (role === "VENDOR" && (!longitude || !latitude)) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Vendor location is required!");
   }
- 
+
   if (files) {
     if (files.profile_image?.[0]) {
       other.profile_image = `/images/profile/${files.profile_image[0].filename}`;
     }
     if (files.banner?.[0]) {
-      other.banner = `/images/profile/${files.banner[0].filename}`;
+      other.banner = `/vendor/${files.banner[0].filename}`;
     }
-  }
- 
+    if (files.business_profile?.[0]) {
+      other.business_profile = `/vendor/${files.business_profile[0].filename}`;
+    }
+     
+  } 
+
   const auth = {
     role,
     name: other.name,
     email,
     password,
-    expirationTime: Date.now() + 3 * 60 * 1000, 
+    expirationTime: Date.now() + 3 * 60 * 1000,
   };
+  
+  console.log(social_media, questions)
 
-  let createAuth = await Auth.create(auth); 
- 
+  let createAuth = await Auth.create(auth);
+  const parsMedia = JSON.parse(social_media)
+  const parsQuestions = JSON.parse(questions)
+
+  other.questions = parsQuestions
+  other.social_media = parsMedia
   other.authId = createAuth?._id
-  other.email = email; 
+  other.email = email;
   // Create vendor record if role is VENDOR
   let result;
   if (role === ENUM_USER_ROLE.VENDOR) {
@@ -120,11 +132,11 @@ const vendorRegister = async (req: any) => {
   }
   // Return success message
   return { result, message: "Your account is awaiting admin approval!" };
-}; 
+};
 
 const vendorRequest = async (req: RequestData) => {
   const { files, body: data } = req;
-  const { longitude, latitude, ...other } = req.body as any;
+  const { longitude, latitude, social_media, questions, ...other } = req.body as any;
   const { authId, userId } = req.user
 
   if (!authId) {
@@ -153,9 +165,17 @@ const vendorRequest = async (req: RequestData) => {
       other.profile_image = `/images/profile/${files.profile_image[0].filename}`;
     }
     if (files.banner?.[0]) {
-      other.banner = `/images/profile/${files.banner[0].filename}`;
+      other.banner = `/vendor/${files.banner[0].filename}`;
+    }
+    if (files.business_profile?.[0]) {
+      other.business_profile = `/vendor/${files.business_profile[0].filename}`;
     }
   }
+
+  const parsMedia = JSON.parse(social_media)
+  const parsQuestions = JSON.parse(questions) 
+  other.questions = parsQuestions
+  other.social_media = parsMedia
 
   other.authId = existingAuth._id;
   other.email = existingAuth?.email;
@@ -351,8 +371,11 @@ const updateProfile = async (req: RequestData) => {
     if (files.profile_image && files.profile_image[0]) {
       fileUploads.profile_image = `/images/profile/${files.profile_image[0].filename}`;
     }
-    if (files.banner && files.banner[0]) {
-      fileUploads.banner = `/images/profile/${files.banner[0].filename}`;
+    if (files.banner?.[0]) {
+      fileUploads.banner = `/vendor/${files.banner[0].filename}`;
+    }
+    if (files.business_profile?.[0]) {
+      fileUploads.business_profile = `/vendor/${files.business_profile[0].filename}`;
     }
   };
 
@@ -379,6 +402,7 @@ const updateProfile = async (req: RequestData) => {
 const getProfile = async (user: { userId: string }) => {
   const userId = user.userId;
   const result = await Vendor.findById(userId).populate("authId");
+
   if (!result) {
     throw new ApiError(httpStatus.NOT_FOUND, "User not found");
   }
@@ -388,7 +412,20 @@ const getProfile = async (user: { userId: string }) => {
     throw new ApiError(httpStatus.FORBIDDEN, "You are blocked. Contact support");
   }
 
-  return result;
+  const featured = await Event.find({
+    status: 'approved', vendor: userId, featured: { $ne: null }
+  })
+    .select('name event_image location category address')
+    .populate('category', 'name')
+
+  const events = await Event.find({
+    status: 'approved', vendor: userId
+  })
+    .select('name event_image location category address')
+    .populate('category', 'name')
+
+
+  return { result, events, featured };
 };
 
 const deleteMyAccount = async (payload: DeleteAccountPayload) => {
@@ -411,6 +448,33 @@ const deleteMyAccount = async (payload: DeleteAccountPayload) => {
   return await Auth.deleteOne({ email });
 };
 
+const getVendorProfileDetails = async (params: { id: string }) => {
+  const { id } = params;
+  if (!id) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Missing vendor Id");
+  }
+  const result = await Vendor.findById(id)
+    .select('address banner business_name description location_map profile_image social_media business_profile')
+
+  if (!result) {
+    throw new ApiError(httpStatus.NOT_FOUND, "Vendor not found");
+  }
+
+  const featured = await Event.find({
+    status: 'approved', vendor: id, featured: { $ne: null }
+  })
+    .select('name event_image location category address')
+    .populate('category', 'name')
+
+  const events = await Event.find({
+    status: 'approved', vendor: id
+  })
+    .select('name event_image location category address')
+    .populate('category', 'name')
+
+  return { result, events, featured }; 
+};
+
 export const VendorService = {
   // sendAdvertiseUsFrom, 
   // approveAdvertise,
@@ -424,5 +488,6 @@ export const VendorService = {
   getProfile,
   deleteMyAccount,
   updateProfile,
+  getVendorProfileDetails
 };
 

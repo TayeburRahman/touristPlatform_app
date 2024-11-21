@@ -45,6 +45,7 @@ export interface IVendor extends Document {
   questions: [IQuestion] | null;
   business_name: string | null
   userId: string | null;
+  business_profile: string | null;
 }
 
 

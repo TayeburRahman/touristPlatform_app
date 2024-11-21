@@ -4,24 +4,34 @@ import { PaymentService } from './payment.service';
 import sendResponse from '../../../shared/sendResponse';
 
 const makePaymentIntent = catchAsync(async (req: Request, res: Response) => {
-  const result = await PaymentService.makePaymentIntent(req.body);
+  // const result = await PaymentService.makePaymentIntent(req.body);
+  // sendResponse(res, {
+  //   statusCode: 200,
+  //   success: true,
+  //   message: 'Payment intent create successfully',
+  //   data: result,
+  // });
+}); 
+
+const createCheckoutSession = catchAsync(async (req: Request, res: Response) => {
+  const result = await PaymentService.createCheckoutSession(req);
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Payment intent create successfully',
+    message: 'Payment checkout session create successfully',
     data: result,
   });
 });
 
-const paymentSuccessAndSave = catchAsync(async (req: Request, res: Response) => {
-  const result = await PaymentService.paymentSuccessAndSave(req.body);
+const checkAndUpdateStatusByWebhook = catchAsync(async (req: any, res: Response) => {
+  const result = await PaymentService.checkAndUpdateStatusByWebhook(req);
   sendResponse(res, {
     statusCode: 200,
     success: true,
     message: 'Save successfully',
     data: result,
   });
-});
+}); 
 
 const userPlanHistory = catchAsync(async (req: Request, res: Response) => {
   const result = await PaymentService.userPlanHistory(req);
@@ -35,6 +45,7 @@ const userPlanHistory = catchAsync(async (req: Request, res: Response) => {
 
 export const PaymentController = {
   makePaymentIntent,
-  paymentSuccessAndSave,
-  userPlanHistory
+  checkAndUpdateStatusByWebhook, 
+  userPlanHistory,
+  createCheckoutSession
 };

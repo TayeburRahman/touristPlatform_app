@@ -85,6 +85,9 @@ const eventSchema = new Schema<IEvent>({
     type: [String], 
     default: [] 
   },
+  address: { 
+    type:String, 
+  },
   status: { 
     type: String, 
     enum: ['pending', 'approved', 'declined'], 

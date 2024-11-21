@@ -73,6 +73,15 @@ router.get(
     EventController.getPastEvents,
 );
 
+router.get(
+    '/vendor-events/:vendorId', 
+    EventController.getVendorEvents,
+);
+router.get(
+    '/vendor-featured/:vendorId', 
+    EventController.getVendorFeatured,
+);
+
 
 
 export const eventRoutes = router;

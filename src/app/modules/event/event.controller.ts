@@ -5,7 +5,6 @@ import { EventService } from "./event.service";
 import Event from "./event.model";
 import ApiError from "../../../errors/ApiError";
 
-
 const getEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
     const result = await EventService.getEvents(req)
     sendResponse(res, {
@@ -83,7 +82,10 @@ const retrieveEvent: RequestHandler = catchAsync(async (req: Request, res: Respo
     } 
     const event = await Event.findById(eventId)
     .populate('category')
-    .populate('vendor'); 
+    .populate({
+        path: 'vendor',
+        select: 'name profile_image email _id', 
+    });
 
     if (!event) {
         throw new ApiError(404, 'Event not found.');
@@ -149,6 +151,29 @@ const getPastEvents : RequestHandler = catchAsync( async (req: Request, res: Res
     });
 }) 
 
+const getVendorEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result = await EventService.getVendorEvents(req); 
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: `Event get Successfully!`,
+        data: result,
+    });
+}) 
+
+const getVendorFeatured : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result = await EventService.getVendorFeatured(req); 
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: `Event get Successfully!`,
+        data: result,
+    });
+}) 
+
+
+ 
+
 // getEventsByDate
 
 export const EventController = {
@@ -164,6 +189,8 @@ export const EventController = {
     getUserFavorites,
     getFeaturedEvents,
     getEventsByDate,
-    getPastEvents
+    getPastEvents,
+    getVendorEvents,
+    getVendorFeatured
     
 }

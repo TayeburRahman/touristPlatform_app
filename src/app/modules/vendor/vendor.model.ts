@@ -36,7 +36,6 @@ const Question = new Schema<IQuestion>({
   },
 });
 
- 
 
 // Define the Vendor schema
 const VendorSchema = new Schema<IVendor>(
@@ -76,6 +75,10 @@ const VendorSchema = new Schema<IVendor>(
       default: null,
     }, 
     profile_image: {
+      type: String,
+      default: null,
+    },   
+    business_profile: {
       type: String,
       default: null,
     },   

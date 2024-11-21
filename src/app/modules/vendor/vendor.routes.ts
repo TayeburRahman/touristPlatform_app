@@ -30,5 +30,12 @@ router.delete(
   VendorController.declinedVendor,
 ); 
 
+router.get(
+  '/get-details/:id', 
+  VendorController.getVendorProfileDetails,
+);
+
+ 
+
 
 export const VendorRoutes = router;

@@ -17,6 +17,7 @@ export interface IEvent extends Document {
   favorites: string[] | null;  
   featured: Date | null;
   end_date: Date | null;
+  address: string | null;
 }
 
 export interface IDate extends Document {

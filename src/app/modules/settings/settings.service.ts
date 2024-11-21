@@ -6,7 +6,6 @@ const addFacts = async (payload: any) => {
   if (checkIsExist) {
     return await Facts.findOneAndUpdate({}, payload, {
       new: true,
-
       runValidators: true,
     });
   } else {

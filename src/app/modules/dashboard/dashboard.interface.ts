@@ -11,6 +11,7 @@ export interface ICategory extends Document {
 
 
   export interface IPackages extends Document {
+    _id: mongoose.Types.ObjectId;
     name: string;
     businessNameAndImage: boolean;  
     price: number;

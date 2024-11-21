@@ -5,6 +5,9 @@ import routes from './app/routes';
 import { NotFoundHandler } from './errors/NotFoundHandler';
 import cookieParser from 'cookie-parser';
 import bodyParser from 'body-parser';
+import Stripe from 'stripe';
+import config from './config'; 
+import { PaymentController } from './app/modules/payment/payment.controller';
 
 export const app: Application = express();
 
@@ -27,14 +30,20 @@ app.use(
     credentials: true,
   }),
 );
-
-app.use(express.json());
-app.use(express.urlencoded({ extended: true }));
+ 
+app.post(
+  '/payments/webhook',
+  express.raw({ type: 'application/json' }), 
+  PaymentController.checkAndUpdateStatusByWebhook
+);
 
 app.use(cookieParser());
 app.use(bodyParser.urlencoded({ extended: true }));
-app.use(bodyParser.json());
+app.use(bodyParser.json()); 
+app.use(express.json());
+app.use(express.urlencoded({ extended: true }));
 app.use(express.static('uploads'));
+
 
 app.use('/', routes);
 

@@ -13,9 +13,20 @@ const paymentSchema = new Schema<IPayment>(
       type: Schema.Types.ObjectId,
       ref: 'Packages',
     },
-    amount: Number,
-    transaction_id: String,
-    note: String,
+    currency: {
+      type: String,
+      default: 'usd',
+    },
+    amount: {
+      type: Number, 
+    },
+    transaction_id: {
+      type: String, 
+    },
+    note: {
+     type: String,
+     default:"Payment for purchase package in web transaction"
+    },
   },
   {
     timestamps: true,

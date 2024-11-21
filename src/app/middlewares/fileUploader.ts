@@ -20,13 +20,17 @@ export const uploadFile = () => {
         uploadPath = 'uploads/images/message';
       } else if (file.fieldname === 'video') {
         uploadPath = 'uploads/video';
-      } else if (file.fieldname === 'banner') {
-        uploadPath = 'uploads/vendor';
       } else if (file.fieldname === 'event_image') {
-        uploadPath = 'uploads/events';
+        uploadPath = 'uploads/images/events';
       }else if (file.fieldname === 'banner_img') {
         uploadPath = 'uploads/banner';
-      } else {
+      }else if (file.fieldname === 'banner') {
+        uploadPath = 'uploads/vendor';
+      }
+      else if (file.fieldname === 'business_profile') {
+        uploadPath = 'uploads/vendor';
+      } 
+      else {
         uploadPath = 'uploads';
       }
       if (!fs.existsSync(uploadPath)) {
@@ -63,7 +67,8 @@ export const uploadFile = () => {
       'message_img',
       "banner",
       'event_image',
-      'banner_img'
+      'banner_img',
+      "business_profile"
     ];
 
     if (file.fieldname === undefined) {
@@ -100,6 +105,9 @@ export const uploadFile = () => {
     { name: 'message_img', maxCount: 10 },
     { name: 'event_image', maxCount: 10 },
     { name: 'banner_img', maxCount: 10 },
+    { name: 'business_profile', maxCount: 1 },
+
+     
  
      
   ]);

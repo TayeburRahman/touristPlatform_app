@@ -56,6 +56,16 @@ const getAllPending = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getVendorProfileDetails = catchAsync(async (req: Request, res: Response) => {
+  const result = await VendorService.getVendorProfileDetails(req.params as any);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Get successfully",
+    data: result,
+  });
+});
+ 
 
 export const VendorController = {
   vendorRegister,
@@ -63,5 +73,6 @@ export const VendorController = {
   acceptVendorRequest, 
   getAllPending,
   vendorRequest, 
+  getVendorProfileDetails
 };
  
