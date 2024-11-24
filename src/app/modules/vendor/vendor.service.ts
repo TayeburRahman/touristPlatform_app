@@ -157,7 +157,7 @@ const vendorRequest = async (req: RequestData) => {
     "phone_number",
     "profile_image",
     "business_profile",
-    "location_map",
+    // "location_map",
     "description"
   ];
 
@@ -418,6 +418,8 @@ const updateProfile = async (req: RequestData) => {
 
   if (data?.social_media) data.social_media = JSON.parse(data.social_media as any);
   if (data?.questions) data.questions = JSON.parse(data.questions as any);
+
+  data.status = existingVendor.status
 
   const updatedUserData = { ...data };
 
