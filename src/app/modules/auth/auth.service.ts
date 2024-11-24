@@ -229,7 +229,7 @@ const loginAccount = async (payload: LoginPayload) => {
     throw new ApiError(404, "User does not exist");
   }
   if (!isAuth.isActive) {
-    throw new ApiError(401, "Please activate your account then try to login");
+    throw new ApiError(401, "Your account is awaiting admin approval.");
   }
   if (isAuth.is_block) {
     throw new ApiError(403, "You are blocked. Contact support");
@@ -375,23 +375,32 @@ const resetPassword = async (req: { query: { email: string }; body: ResetPasswor
 
 const changePassword = async (user: { authId: string }, payload: ChangePasswordPayload) => {
   const { authId } = user;
-
   const { oldPassword, newPassword, confirmPassword } = payload;
+
   if (newPassword !== confirmPassword) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Password and confirm password do not match");
+    throw new ApiError(httpStatus.BAD_REQUEST, "Password and confirm password do not match.");
   }
+ 
   const isUserExist = await Auth.findById(authId).select("+password");
   if (!isUserExist) {
-    throw new ApiError(404, "Account does not exist!");
+    throw new ApiError(httpStatus.NOT_FOUND, "Account does not exist!");
   }
+ 
   if (
     isUserExist.password &&
     !(await Auth.isPasswordMatched(oldPassword, isUserExist.password))
   ) {
-    throw new ApiError(402, "Old password is incorrect");
-  }
-  isUserExist.password = await bcrypt.hash(newPassword, Number(config.bcrypt_salt_rounds));
-  await isUserExist.save();
+    throw new ApiError(httpStatus.UNAUTHORIZED, "Old password is incorrect.");
+  } 
+ 
+  const hashedPassword = await bcrypt.hash(
+    newPassword,
+    Number(config.bcrypt_salt_rounds)
+  );
+  
+  await Auth.findByIdAndUpdate(authId,{password: hashedPassword}); 
+
+  return { message: "Password updated successfully." };  
 };
 
 const resendCodeActivationAccount = async (payload: { email: string }) => {

@@ -20,6 +20,7 @@ export type IPlan = {
   start_date: Date;
   end_date: Date;
   active: boolean;
+  amount: number;
 }; 
 
  

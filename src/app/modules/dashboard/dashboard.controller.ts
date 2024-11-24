@@ -11,20 +11,23 @@ const createAndUpdateCategory: RequestHandler = catchAsync(
     const id = req.query.id 
 
     let result;
+    let message;
 
      if(!data.name){
         throw new ApiError(200, 'Name is required');
      }
      if(!id){
         result = await Category.create(data); 
+        message = "Category Created Successfully!";
      }else{
         result = await Category.findByIdAndUpdate(id, data, { new: true });   
-     }
+        message = "Category Update Successfully!";
+      }
   
     sendResponse(res, {
       statusCode: 200,
       success: true,
-      message: "Category Post Successfully!",
+      message: message,
       data: result,
     });
   },

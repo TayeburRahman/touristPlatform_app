@@ -12,11 +12,12 @@ import { Plan } from '../payment/payment.model';
 import { ENUM_USER_ROLE } from '../../../enums/user';
 import mongoose from 'mongoose';
 import Event from '../event/event.model';
+import { Request } from 'express';
 
 interface DeleteAccountPayload {
   email: string;
   password: string;
-}
+};
 
 cron.schedule("* * * * *", async () => {
   try {
@@ -46,12 +47,10 @@ cron.schedule("* * * * *", async () => {
     logger.error("Error removing package from expired.:", error);
   }
 });
-
 const vendorRegister = async (req: any) => {
   const { files, body: data } = req;
-  const { password, confirmPassword, email, longitude, latitude , social_media, questions, ...other } = data;
+  const { password, confirmPassword, email, longitude, latitude, social_media, questions, ...other } = data;
 
-  console.log("====", other.address)
 
   const role = "VENDOR"
   if (!password || !confirmPassword || !email) {
@@ -61,6 +60,22 @@ const vendorRegister = async (req: any) => {
   if (password !== confirmPassword) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Password and Confirm Password didn't match");
   }
+
+
+  if (!questions) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Questions are required!");
+  } else {
+    const parsedQuestions = JSON.parse(questions);
+    if (!Array.isArray(parsedQuestions)) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Questions must be an array!");
+    }
+    parsedQuestions.map((q: any) => {
+      if (!q?.question || q?.answer === undefined) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Each question must include a question and an answer!");
+      }
+    });
+  }
+
 
   const existingAuth: any = await Auth.findOne({ email });
   if (existingAuth) {
@@ -102,8 +117,7 @@ const vendorRegister = async (req: any) => {
     if (files.business_profile?.[0]) {
       other.business_profile = `/vendor/${files.business_profile[0].filename}`;
     }
-     
-  } 
+  }
 
   const auth = {
     role,
@@ -112,15 +126,11 @@ const vendorRegister = async (req: any) => {
     password,
     expirationTime: Date.now() + 3 * 60 * 1000,
   };
-  
-  console.log(social_media, questions)
 
   let createAuth = await Auth.create(auth);
-  const parsMedia = JSON.parse(social_media)
-  const parsQuestions = JSON.parse(questions)
 
-  other.questions = parsQuestions
-  other.social_media = parsMedia
+  if (social_media) other.social_media = JSON.parse(social_media)
+  if (questions) other.questions = JSON.parse(questions)
   other.authId = createAuth?._id
   other.email = email;
   // Create vendor record if role is VENDOR
@@ -133,17 +143,49 @@ const vendorRegister = async (req: any) => {
   // Return success message
   return { result, message: "Your account is awaiting admin approval!" };
 };
-
 const vendorRequest = async (req: RequestData) => {
   const { files, body: data } = req;
   const { longitude, latitude, social_media, questions, ...other } = req.body as any;
   const { authId, userId } = req.user
+
+  const requiredFields = [
+    "business_name",
+    "name",
+    "email",
+    "banner",
+    "address",
+    "phone_number",
+    "profile_image",
+    "business_profile",
+    "location_map",
+    "description"
+  ];
+
+  for (const field of requiredFields) {
+    if (!other[field]) {
+      throw new ApiError(400, `${field} is required.`);
+    }
+  };
 
   if (!authId) {
     throw new ApiError(httpStatus.BAD_REQUEST, "User ID is required!");
   }
 
   const existingAuth = await Auth.findById(authId);
+
+  if (!questions) {
+    throw new ApiError(httpStatus.BAD_REQUEST, "Questions are required!");
+  } else {
+    const parsedQuestions = JSON.parse(questions);
+    if (!Array.isArray(parsedQuestions)) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Questions must be an array!");
+    }
+    parsedQuestions.map((q: any) => {
+      if (!q?.question || q?.answer === undefined) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Each question must include a question and an answer!");
+      }
+    });
+  }
 
   if (!existingAuth?.isActive) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Please log out and log back in to request.");
@@ -172,11 +214,8 @@ const vendorRequest = async (req: RequestData) => {
     }
   }
 
-  const parsMedia = JSON.parse(social_media)
-  const parsQuestions = JSON.parse(questions) 
-  other.questions = parsQuestions
-  other.social_media = parsMedia
-
+  if (social_media) other.social_media = JSON.parse(social_media)
+  if (questions) other.questions = JSON.parse(questions)
   other.authId = existingAuth._id;
   other.email = existingAuth?.email;
   other.name = existingAuth?.name;
@@ -187,7 +226,6 @@ const vendorRequest = async (req: RequestData) => {
 
   return { result, message: "Request sent successfully!" };
 };
-
 const acceptVendorRequest = async (req: RequestData) => {
   const { id } = req.params as { id: string };
   const vendorDb = await Vendor.findById(id) as IVendor;
@@ -275,7 +313,6 @@ const acceptVendorRequest = async (req: RequestData) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to accept vendor request');
   }
 };
-
 const declinedVendor = async (req: RequestData) => {
   const { id }: any = req.params
   const data = req.body as {
@@ -351,54 +388,60 @@ const declinedVendor = async (req: RequestData) => {
 
   return update;
 };
-
 const getAllPending = async () => {
   const data = await Vendor.find({ status: "pending" })
   return data;
-}
+};
 // --- Vendor Profile ---------------
 const updateProfile = async (req: RequestData) => {
-  const { files, body: data } = req;
-  const { authId, userId } = req.user
+  const { files } = req;
+  const data = req.body as IVendor;
+  const { authId, userId } = req.user;
 
-  const checkValidDriver = await Vendor.findById(userId);
-  if (!checkValidDriver) {
-    throw new ApiError(404, "You are not authorized");
+  const existingVendor = await Vendor.findById(userId);
+  if (!existingVendor) {
+    throw new ApiError(404, "Vendor not found or unauthorized.");
   }
 
-  const fileUploads: Record<string, string> = {};
   if (files) {
-    if (files.profile_image && files.profile_image[0]) {
-      fileUploads.profile_image = `/images/profile/${files.profile_image[0].filename}`;
+    if (files.profile_image?.[0]) {
+      data.profile_image = `/images/profile/${files.profile_image[0].filename}`;
     }
     if (files.banner?.[0]) {
-      fileUploads.banner = `/vendor/${files.banner[0].filename}`;
+      data.banner = `/vendor/${files.banner[0].filename}`;
     }
     if (files.business_profile?.[0]) {
-      fileUploads.business_profile = `/vendor/${files.business_profile[0].filename}`;
+      data.business_profile = `/vendor/${files.business_profile[0].filename}`;
     }
-  };
+  }
 
-  const updatedUserData = { ...data, ...fileUploads };
 
-  const [, result] = await Promise.all([
+  if (data?.social_media) data.social_media = JSON.parse(data.social_media as any);
+  if (data?.questions) data.questions = JSON.parse(data.questions as any);
+
+  const updatedUserData = { ...data };
+
+  const [authUpdate, vendorUpdate] = await Promise.all([
     Auth.findByIdAndUpdate(
       authId,
       { name: updatedUserData.name },
       {
         new: true,
-        runValidators: true
+        runValidators: true,
       }
     ),
     Vendor.findByIdAndUpdate(userId, updatedUserData, {
       new: true,
-      runValidators: true
+      runValidators: true,
     }),
   ]);
 
-  return result;
-};
+  if (!authUpdate || !vendorUpdate) {
+    throw new ApiError(500, "Failed to update profile.");
+  }
 
+  return vendorUpdate;
+};
 const getProfile = async (user: { userId: string }) => {
   const userId = user.userId;
   const result = await Vendor.findById(userId).populate("authId");
@@ -427,7 +470,6 @@ const getProfile = async (user: { userId: string }) => {
 
   return { result, events, featured };
 };
-
 const deleteMyAccount = async (payload: DeleteAccountPayload) => {
   const { email, password } = payload;
 
@@ -447,7 +489,6 @@ const deleteMyAccount = async (payload: DeleteAccountPayload) => {
   await Vendor.deleteOne({ authId: isUserExist._id });
   return await Auth.deleteOne({ email });
 };
-
 const getVendorProfileDetails = async (params: { id: string }) => {
   const { id } = params;
   if (!id) {
@@ -472,7 +513,7 @@ const getVendorProfileDetails = async (params: { id: string }) => {
     .select('name event_image location category address')
     .populate('category', 'name')
 
-  return { result, events, featured }; 
+  return { result, events, featured };
 };
 
 export const VendorService = {

@@ -14,6 +14,12 @@ router.patch("/send-vendor-request",
   auth(ENUM_USER_ROLE.USER),
   uploadFile(),
   VendorController.vendorRequest);
+  router.patch(
+    '/update', 
+    uploadFile(),
+    auth(ENUM_USER_ROLE.VENDOR),
+    VendorController.updateProfile,
+  );
 
 // -----Admin -------------
 router.get("/get-all-vendor-request",
@@ -34,6 +40,8 @@ router.get(
   '/get-details/:id', 
   VendorController.getVendorProfileDetails,
 );
+
+ 
 
  
 

@@ -65,6 +65,9 @@ const planSchema = new Schema<IPlan>(
       type: Boolean,
       default: false,
     },
+    amount:{
+      type: Number
+    },
     start_date: Date,
     end_date: Date,
   },

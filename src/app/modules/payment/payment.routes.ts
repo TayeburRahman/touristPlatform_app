@@ -8,9 +8,9 @@ import bodyParser from 'body-parser';
 const router = Router();
 
 router.post(
-  '/create_intent',
+  '/success_intent',
   auth(ENUM_USER_ROLE.USER,ENUM_USER_ROLE.VENDOR),
-  PaymentController.makePaymentIntent,
+  PaymentController.paymentSuccessAndSave,
 );
 router.post(
   '/checkout-session',

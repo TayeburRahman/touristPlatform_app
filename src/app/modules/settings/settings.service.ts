@@ -15,7 +15,6 @@ const addFacts = async (payload: any) => {
 const getFacts = async () => {
   return await Facts.findOne();
 };
-
 //! About us
 const addAboutUs = async (payload: any) => {
   const checkIsExist = await AboutUs.findOne();
@@ -32,7 +31,6 @@ const addAboutUs = async (payload: any) => {
 const getAboutUs = async () => {
   return await AboutUs.findOne();
 };
-
 //! Terms Conditions
 const addTermsConditions = async (payload: any) => {
   const checkIsExist = await TermsConditions.findOne();
@@ -49,8 +47,6 @@ const addTermsConditions = async (payload: any) => {
 const getTermsConditions = async () => {
   return await TermsConditions.findOne();
 };
-
-
 //! Faqs
 const addFaq = async (payload: any) => {
   console.log(payload)
@@ -60,7 +56,6 @@ const addFaq = async (payload: any) => {
  
    return await Faq.create(payload); 
 };
-
 const updateFaq = async (req: any) => {
   const id =  req.params.id
  
@@ -73,12 +68,10 @@ const updateFaq = async (req: any) => {
 
    return result
 };
-
 const deleteFaq = async (req: any) => {
   const id = req.params.id
    return await Faq.findByIdAndDelete(id);
 };
-
 const getFaq = async () => {
   return await Faq.find();
 };

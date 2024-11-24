@@ -2,6 +2,7 @@
 import { Request } from 'express';
 import multer from 'multer';
 import fs from 'fs';
+import ApiError from '../../errors/ApiError';
 
 export const uploadFile = () => {
   const storage = multer.diskStorage({
@@ -46,7 +47,8 @@ export const uploadFile = () => {
         cb(null, uploadPath);
       } else {
         //@ts-ignore
-        cb(new Error('Invalid file type'));
+        // cb(new Error('Invalid file type'));
+        throw new ApiError(400, 'Invalid file type');
       }
     },
     filename: function (req, file, cb) {
@@ -68,7 +70,8 @@ export const uploadFile = () => {
       "banner",
       'event_image',
       'banner_img',
-      "business_profile"
+      "business_profile",
+
     ];
 
     if (file.fieldname === undefined) {
@@ -86,7 +89,8 @@ export const uploadFile = () => {
         cb(new Error('Invalid file type'));
       }
     } else {
-      cb(new Error('Invalid fieldname'));
+      // cb(new Error('Invalid fieldname'));
+      throw new ApiError(400, 'Invalid fieldname');
     }
   };
 
@@ -106,10 +110,6 @@ export const uploadFile = () => {
     { name: 'event_image', maxCount: 10 },
     { name: 'banner_img', maxCount: 10 },
     { name: 'business_profile', maxCount: 1 },
-
-     
- 
-     
   ]);
 
   return upload;

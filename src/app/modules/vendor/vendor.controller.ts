@@ -3,6 +3,7 @@ import sendResponse from "../../../shared/sendResponse";
 import { IReqUser } from "../auth/auth.interface"; 
 import { Request, RequestHandler, Response } from 'express'; 
 import { VendorService } from "./vendor.service"; 
+import { RequestData } from "../../../interfaces/common";
  
 
 const vendorRegister = catchAsync(async (req: Request, res: Response) => {
@@ -65,6 +66,20 @@ const getVendorProfileDetails = catchAsync(async (req: Request, res: Response) =
     data: result,
   });
 });
+
+const updateProfile = catchAsync(async (req: Request, res: Response) => {
+  console.log("Update profile", req.body)
+  const result = await VendorService.updateProfile(req as any);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Update successfully",
+    data: result,
+  });
+});
+
+
+ 
  
 
 export const VendorController = {
@@ -73,6 +88,7 @@ export const VendorController = {
   acceptVendorRequest, 
   getAllPending,
   vendorRequest, 
-  getVendorProfileDetails
+  getVendorProfileDetails,
+  updateProfile
 };
  

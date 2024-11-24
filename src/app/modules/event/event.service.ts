@@ -5,7 +5,6 @@ import { IReqUser } from "../auth/auth.interface";
 import { Plan } from "../payment/payment.model";
 import QueryBuilder from "../../../builder/QueryBuilder";
 import { IEvent } from "./event.interface";
-import { Types } from "mongoose";
 
 const createNewEvent = async (req: Request) => {
     const { userId, authId, role } = req.user as IReqUser;
@@ -16,8 +15,7 @@ const createNewEvent = async (req: Request) => {
         end_date,
         address,
         duration, option, longitude, latitude, description, image, category } = req.body as any;
-
-        console.log("social_media", social_media)
+ 
     
     const data = req.body; 
     const plan: any = await Plan.findOne({
@@ -43,7 +41,7 @@ const createNewEvent = async (req: Request) => {
     if (!Array.isArray(plan.events)) {
         plan.events = [];
     }
-
+ 
     const requiredFields = [
         "name",
         "date",
@@ -54,7 +52,8 @@ const createNewEvent = async (req: Request) => {
         "latitude",
         "category",
         "end_date",
-        "address"
+        "address",
+        // "question"
     ];
 
     for (const field of requiredFields) {
@@ -62,6 +61,7 @@ const createNewEvent = async (req: Request) => {
             throw new ApiError(400, `${field} is required.`);
         }
     };
+    
 
     const eventDate = new Date(date);
 
@@ -77,7 +77,12 @@ const createNewEvent = async (req: Request) => {
     let images: any = [];
     if (event_image && Array.isArray(event_image)) {
         images = event_image.map(file => `/images/events/${file.filename}`);
-    }  
+    } 
+    
+    if(!images?.length) {
+        throw new ApiError(400, 'Event image is required.'); 
+    }
+ 
     const parsMedia = JSON.parse(social_media)
 
     const newEvent = await Event.create({
@@ -117,7 +122,6 @@ const createNewEvent = async (req: Request) => {
 
     return newEvent;
 };
-
 const updateEvents = async (req: Request) => {
     const { userId } = req.user as IReqUser;
     const { eventId } = req.params;
@@ -164,8 +168,7 @@ const updateEvents = async (req: Request) => {
         console.error("Error updating event:", error);
         throw new ApiError(500, 'Failed to update event.');
     }
-}
-
+};
 const deleteEvents = async (req: Request) => {
     const { eventId } = req.params;
 
@@ -208,7 +211,6 @@ const deleteEvents = async (req: Request) => {
         throw new ApiError(500, 'Error while deleting the event or updating the plan.');
     }
 };
-
 const approveEvents = async (req: Request) => {
     const id = req.params.id;
     const result = await Event.findByIdAndUpdate(id, { status: 'approved' }, { new: true });
@@ -216,7 +218,7 @@ const approveEvents = async (req: Request) => {
         throw new ApiError(404, 'Event not found.');
     }
     return result;
-}
+};
 // -------------
 const getEvents = async (req: Request) => {
     const query = Object.fromEntries(
@@ -262,7 +264,6 @@ const getEvents = async (req: Request) => {
     const meta = await categoryQuery.countTotal();
     return { result, meta }
 }
-
 const getPopularMostEvents = async (req: Request) => {
     const result = await Event.aggregate([
         { $match: { status: 'approved' } },
@@ -299,7 +300,6 @@ const getPopularMostEvents = async (req: Request) => {
 
     return { result };
 };
-
 const getAllEvents = async (req: Request) => {
     const query = req.query;
     const categoryQuery = new QueryBuilder(
@@ -316,16 +316,17 @@ const getAllEvents = async (req: Request) => {
     const result = await categoryQuery.modelQuery;
     const meta = await categoryQuery.countTotal();
     return { result, meta }
-}
-
+};
 const getFeaturedEvents = async (req: Request) => {
     const result = await Event.find({
         status: 'approved',
         featured: { $ne: null }
     })
+    .select('name event_image location category address')
+    .populate('category', 'name')
 
     return { result }
-}
+};
 // - no need now
 const getUserFavorites = async (req: Request) => {
     const { authId } = req.user as IReqUser;
@@ -356,8 +357,7 @@ const getEventsByDate = async (req: Request) => {
         .populate('category', 'name')
 
     return { result };
-}
-
+};
 const getPastEvents = async (req: Request) => {
     const { date } = req.body;
     if (!date) {
@@ -377,8 +377,7 @@ const getPastEvents = async (req: Request) => {
         .populate('category', 'name')
 
     return { result };
-}
-
+};
 const getVendorEvents = async (req: Request) => {
     const { vendorId } = req.params;
     if (!vendorId) {
@@ -389,8 +388,7 @@ const getVendorEvents = async (req: Request) => {
         .select('name event_image location category address')
         .populate('category', 'name')
     return { result };
-}
-
+};
 const getVendorFeatured= async (req: Request) => {
     const { vendorId } = req.params;
     if (!vendorId) {
@@ -403,12 +401,9 @@ const getVendorFeatured= async (req: Request) => {
         .populate('category', 'name')
 
     return { result };
-}
-
- 
+};
 // -------------
 const saveUserClickEvent = async (req: Request) => {
-
     const { userId, authId } = req.user as IReqUser;
     const eventId = req.params.id;
 
@@ -438,6 +433,7 @@ const saveUserClickEvent = async (req: Request) => {
         updatedEvent
     }
 };
+
 export const EventService = {
     getEvents,
     createNewEvent,

@@ -36,7 +36,6 @@ const Question = new Schema<IQuestion>({
   },
 });
 
-
 // Define the Vendor schema
 const VendorSchema = new Schema<IVendor>(
   { 

@@ -7,6 +7,8 @@ import User from '../auth/auth.model';
 import { Banners, Packages } from './dashboard.model';
 import { IBanner } from './dashboard.interface';
 import Event from '../event/event.model';
+import { IReqUser } from '../auth/auth.interface';
+import { Plan } from '../payment/payment.model';
  
 
 const createPackages = async (req: Request) => { 
@@ -39,12 +41,15 @@ const deletePackages = async (req: Request) => {
 };
 
 const getPackages = async (req: Request) => { 
+  const {userId} = req.user as IReqUser;  
+  
   const packages = await Packages.find();
- 
+  const userPlan = await Plan.findOne({ userId, active: true }).sort({ createdAt: -1 });
   if (!packages) {
     throw new ApiError(404, 'Package not found.');
-  } 
-  return packages;
+  }  
+
+  return {packages, userplan: userPlan? userPlan?.packages_id: null};
 };
 
 const getPackagesDetails = async (req: Request) => { 
@@ -59,18 +64,18 @@ const getPackagesDetails = async (req: Request) => {
 
 // --------------------------------
 const createBannerImage = async (req: Request) => { 
-
   const { banner_img } = req.files as {
     banner_img: Express.Multer.File[]
-};
+   };
 
- let images: string = ''
-if (banner_img && Array.isArray(banner_img)) {
+  let images: string = ''
+  if (banner_img && Array.isArray(banner_img)) {
   banner_img.map(file => 
    images = `/banner/${file.filename}`
-  );
-} 
- const banner = await Banners.create({banner_img: images});
+   );
+  } 
+
+  const banner = await Banners.create({banner_img: images});
   return banner;
 };
 

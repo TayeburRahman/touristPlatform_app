@@ -40,6 +40,7 @@ router.delete(
 );
 router.get(
     '/get_packages', 
+    auth(ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.USER), 
     DashboardController.getPackages
 );
 router.get(
