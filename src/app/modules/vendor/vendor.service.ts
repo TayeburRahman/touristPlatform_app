@@ -11,8 +11,7 @@ import cron from "node-cron";
 import { Plan } from '../payment/payment.model';
 import { ENUM_USER_ROLE } from '../../../enums/user';
 import mongoose from 'mongoose';
-import Event from '../event/event.model';
-import { Request } from 'express';
+import Event from '../event/event.model'; 
 
 interface DeleteAccountPayload {
   email: string;
