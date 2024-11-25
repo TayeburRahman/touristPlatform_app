@@ -39,9 +39,15 @@ router.delete(
 router.get(
   '/get-details/:id', 
   VendorController.getVendorProfileDetails,
-);
+); 
+router.get("/get-all-vendor",
+  auth(ENUM_USER_ROLE.ADMIN),
+  VendorController.getAllVendor);
 
- 
+  router.patch("/status",
+    auth(ENUM_USER_ROLE.ADMIN),
+    VendorController.updateVendorStatus);
+   
 
  
 

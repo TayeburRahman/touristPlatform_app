@@ -78,7 +78,27 @@ const updateProfile = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
+const getAllVendor = catchAsync(async (req: Request, res: Response) => {
+  console.log("Update profile", req.body)
+  const result = await VendorService.getAllVendor(req as any);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Get all successfully",
+    data: result,
+  });
+});
 
+const updateVendorStatus = catchAsync(async (req: Request, res: Response) => {
+ 
+  const result = await VendorService.updateVendorStatus(req as any);
+  sendResponse(res, {
+    statusCode: 200,
+    success: true,
+    message: "Status Update successfully",
+    data: result,
+  });
+});
  
  
 
@@ -89,6 +109,9 @@ export const VendorController = {
   getAllPending,
   vendorRequest, 
   getVendorProfileDetails,
-  updateProfile
+  updateProfile,
+  getAllVendor,
+  updateVendorStatus
+   
 };
  

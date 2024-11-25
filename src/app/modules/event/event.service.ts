@@ -18,29 +18,29 @@ const createNewEvent = async (req: Request) => {
  
     
     const data = req.body; 
-    const plan: any = await Plan.findOne({
-        userId: userId,
-        active: true,
-        available_events: { $gt: 0 }
-    });
+    // const plan: any = await Plan.findOne({
+    //     userId: userId,
+    //     active: true,
+    //     available_events: { $gt: 0 }
+    // });
 
-    if (!plan) {
-        throw new ApiError(403, 'You do not have enough available events for this plan.');
-    }
+    // if (!plan) {
+    //     throw new ApiError(403, 'You do not have enough available events for this plan.');
+    // }
 
-    const featuredEvent: any = await Plan.findOne({
-        userId: userId,
-        active: true,
-        featured_events: { $gt: 0 }
-    });
+    // const featuredEvent: any = await Plan.findOne({
+    //     userId: userId,
+    //     active: true,
+    //     featured_events: { $gt: 0 }
+    // });
 
-    if (featured && !featuredEvent) {
-        throw new ApiError(403, 'You do not have enough available to feature the date of this event.');
-    }
+    // if (featured && !featuredEvent) {
+    //     throw new ApiError(403, 'You do not have enough available to feature the date of this event.');
+    // }
 
-    if (!Array.isArray(plan.events)) {
-        plan.events = [];
-    }
+    // if (!Array.isArray(plan.events)) {
+    //     plan.events = [];
+    // }
  
     const requiredFields = [
         "name",
@@ -106,19 +106,19 @@ const createNewEvent = async (req: Request) => {
         throw new ApiError(500, 'Failed to create event.');
     };
 
-    const available_events = Math.max(0, plan.available_events - 1);
-    let featured_events
-    if (featured) {
-        featured_events = Math.max(0, plan.featured_events - 1);
-    } else {
-        featured_events = plan.featured_events;
-    };
+    // const available_events = Math.max(0, plan.available_events - 1);
+    // let featured_events
+    // if (featured) {
+    //     featured_events = Math.max(0, plan.featured_events - 1);
+    // } else {
+    //     featured_events = plan.featured_events;
+    // };
 
-    await Plan.findByIdAndUpdate(plan._id, {
-        available_events,
-        featured_events,
-        events: [...plan.events, newEvent._id],
-    });
+    // await Plan.findByIdAndUpdate(plan._id, {
+    //     available_events,
+    //     featured_events,
+    //     events: [...plan.events, newEvent._id],
+    // });
 
     return newEvent;
 };
@@ -162,6 +162,7 @@ const updateEvents = async (req: Request) => {
     if (images?.length) existingEvent.event_image = images;
 
     try {
+        existingEvent.status = "updated"
         const updatedEvent = await existingEvent.save();
         return updatedEvent;
     } catch (error) {
@@ -169,6 +170,7 @@ const updateEvents = async (req: Request) => {
         throw new ApiError(500, 'Failed to update event.');
     }
 };
+
 const deleteEvents = async (req: Request) => {
     const { eventId } = req.params;
 

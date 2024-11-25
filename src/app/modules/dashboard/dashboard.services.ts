@@ -120,147 +120,108 @@ const deleteBannerImage = async (req: Request) => {
 };
 
 // --Event------------------------- 
-// const getEventOverview = async (req: Request) => {
-//   try {
-//     const { year } = req.query as {
-//       year: string;
-//     }
-//     const selectedYear = year ? parseInt(year) : new Date().getFullYear();
 
-//     // Fetch all events for calculations
-//     const events = await Event.find();
-
-//     // Helper function to filter events by date range
-//     const filterEventsByDateRange = (startDate : any, endDate: any) => {
-//       return events.filter(event => {
-//         const eventDate = new Date(event.date);
-//         return eventDate >= startDate && eventDate < endDate;
-//       });
-//     };
-
-//     // Yearly growth
-//     const startOfThisYear = new Date(selectedYear, 0, 1);
-//     const startOfLastYear = new Date(selectedYear - 1, 0, 1);
-//     const endOfLastYear = new Date(selectedYear, 0, 1);
-//     const eventsThisYear = filterEventsByDateRange(startOfThisYear, new Date());
-//     const eventsLastYear = filterEventsByDateRange(startOfLastYear, endOfLastYear);
-//     const yearlyGrowth = eventsLastYear.length
-//       ? ((eventsThisYear.length - eventsLastYear.length) / eventsLastYear.length) * 100
-//       : 0;
-
-//     // Monthly growth (current month vs previous month in the selected year)
-//     const now = new Date();
-//     const startOfThisMonth = new Date(selectedYear, now.getMonth(), 1);
-//     const startOfLastMonth = new Date(selectedYear, now.getMonth() - 1, 1);
-//     const endOfLastMonth = new Date(selectedYear, now.getMonth(), 1);
-//     const eventsThisMonth = filterEventsByDateRange(startOfThisMonth, new Date());
-//     const eventsLastMonth = filterEventsByDateRange(startOfLastMonth, endOfLastMonth);
-//     const monthlyGrowth = eventsLastMonth.length
-//       ? ((eventsThisMonth.length - eventsLastMonth.length) / eventsLastMonth.length) * 100
-//       : 0;
-
-//     // Daily growth (today vs yesterday in the selected year)
-//     const startOfToday = new Date(selectedYear, now.getMonth(), now.getDate());
-//     const startOfYesterday = new Date(selectedYear, now.getMonth(), now.getDate() - 1);
-//     const endOfYesterday = startOfToday;
-//     const eventsToday = filterEventsByDateRange(startOfToday, new Date());
-//     const eventsYesterday = filterEventsByDateRange(startOfYesterday, endOfYesterday);
-//     const dailyGrowth = eventsYesterday.length
-//       ? ((eventsToday.length - eventsYesterday.length) / eventsYesterday.length) * 100
-//       : 0;
-
-//     // Monthly data for each month
-//     const monthlyData = Array.from({ length: 12 }, (_, month) => {
-//       const startOfMonth = new Date(selectedYear, month, 1);
-//       const endOfMonth = new Date(selectedYear, month + 1, 1);
-//       const eventsInMonth = filterEventsByDateRange(startOfMonth, endOfMonth);
-//       return eventsInMonth.length;
-//     });
-
-//     // Send response with growth overview and monthly data
-//     return {
-//       selectedYear,
-//       yearlyGrowth: yearlyGrowth.toFixed(2) + '%',
-//       monthlyGrowth: monthlyGrowth.toFixed(2) + '%',
-//       dailyGrowth: dailyGrowth.toFixed(2) + '%',
-//     };
-//   } catch (error : any) {
-//     console.error(error);
-//     throw new ApiError(404,'Server error:', error);
-//   }
-// };
-
-
+const countTotal = async (req: Request) => {}
+ 
 const getEventOverview = async (req: Request) => {
   try {
-    const { year } = req.query as {
-      year: string;
-    }
+    const { year } = req.query as { year: string };
     const selectedYear = year ? parseInt(year) : new Date().getFullYear();
 
-    // Fetch all events for calculations
-    const events = await Event.find();
+    const now = new Date();
+    const startOfYear = new Date(Date.UTC(selectedYear, 0, 1));
+    const startOfLastYear = new Date(Date.UTC(selectedYear - 1, 0, 1));
+    const endOfLastYear = new Date(Date.UTC(selectedYear, 0, 1));
+    const startOfMonth = new Date(Date.UTC(selectedYear, now.getUTCMonth(), 1));
+    const startOfLastMonth = new Date(Date.UTC(selectedYear, now.getUTCMonth() - 1, 1));
+    const startOfToday = new Date(Date.UTC(selectedYear, now.getUTCMonth(), now.getUTCDate()));
+    const startOfYesterday = new Date(Date.UTC(selectedYear, now.getUTCMonth(), now.getUTCDate() - 1));
 
-    // Helper function to filter events by date range
-    const filterEventsByDateRange = (startDate: any, endDate : any) => {
-      return events.filter(event => {
-        const eventDate = new Date(event.date);
-        return eventDate >= startDate && eventDate < endDate;
-      });
+    // Helper function to fetch event count
+    const countEventsInRange = async (start: Date, end: Date) => {
+      return Event.countDocuments({ date: { $gte: start, $lt: end } });
+    };
+
+    // Calculate growth percentages
+    const calculateGrowth = (current: number, previous: number) => {
+      return previous > 0 ? ((current - previous) / previous) * 100 : 0;
     };
 
     // Yearly growth
-    const startOfThisYear = new Date(selectedYear, 0, 1);
-    const startOfLastYear = new Date(selectedYear - 1, 0, 1);
-    const endOfLastYear = new Date(selectedYear, 0, 1);
-    const eventsThisYear = filterEventsByDateRange(startOfThisYear, new Date());
-    const eventsLastYear = filterEventsByDateRange(startOfLastYear, endOfLastYear);
-    const yearlyGrowth = eventsLastYear.length
-      ? ((eventsThisYear.length - eventsLastYear.length) / eventsLastYear.length) * 100
-      : 0;
+    const [eventsThisYear, eventsLastYear] = await Promise.all([
+      countEventsInRange(startOfYear, now),
+      countEventsInRange(startOfLastYear, endOfLastYear),
+    ]);
+    const yearlyGrowth = calculateGrowth(eventsThisYear, eventsLastYear);
 
-    // Monthly growth (current month vs previous month in the selected year)
-    const now = new Date();
-    const startOfThisMonth = new Date(selectedYear, now.getMonth(), 1);
-    const startOfLastMonth = new Date(selectedYear, now.getMonth() - 1, 1);
-    const endOfLastMonth = new Date(selectedYear, now.getMonth(), 1);
-    const eventsThisMonth = filterEventsByDateRange(startOfThisMonth, new Date());
-    const eventsLastMonth = filterEventsByDateRange(startOfLastMonth, endOfLastMonth);
-    const monthlyGrowth = eventsLastMonth.length
-      ? ((eventsThisMonth.length - eventsLastMonth.length) / eventsLastMonth.length) * 100
-      : 0;
+    // Monthly growth
+    const [eventsThisMonth, eventsLastMonth] = await Promise.all([
+      countEventsInRange(startOfMonth, now),
+      countEventsInRange(startOfLastMonth, startOfMonth),
+    ]);
+    const monthlyGrowth = calculateGrowth(eventsThisMonth, eventsLastMonth);
 
-    // Daily growth (today vs yesterday in the selected year)
-    const startOfToday = new Date(selectedYear, now.getMonth(), now.getDate());
-    const startOfYesterday = new Date(selectedYear, now.getMonth(), now.getDate() - 1);
-    const endOfYesterday = startOfToday;
-    const eventsToday = filterEventsByDateRange(startOfToday, new Date());
-    const eventsYesterday = filterEventsByDateRange(startOfYesterday, endOfYesterday);
-    const dailyGrowth = eventsYesterday.length
-      ? ((eventsToday.length - eventsYesterday.length) / eventsYesterday.length) * 100
-      : 0;
+    // Daily growth
+    const [eventsToday, eventsYesterday] = await Promise.all([
+      countEventsInRange(startOfToday, now),
+      countEventsInRange(startOfYesterday, startOfToday),
+    ]);
+    const dailyGrowth = calculateGrowth(eventsToday, eventsYesterday);
 
-    // Monthly data for each month
-    const monthlyData = Array.from({ length: 12 }, (_, month) => {
-      const startOfMonth = new Date(selectedYear, month, 1);
-      const endOfMonth = new Date(selectedYear, month + 1, 1);
-      const eventsInMonth = filterEventsByDateRange(startOfMonth, endOfMonth);
-      return eventsInMonth.length;
+    // Monthly event aggregation
+    const monthlyData = await Event.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfYear, $lt: new Date(Date.UTC(selectedYear + 1, 0, 1)) },
+        },
+      },
+      {
+        $group: {
+          _id: { month: { $month: "$createdAt" } },
+          totalEvents: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          month: "$_id.month",
+          totalEvents: 1,
+        },
+      },
+      { $sort: { month: 1 } },
+    ]);
+
+    // Prepare monthly data result
+    const months = [
+      "Jan", "Feb", "Mar", "Apr", "May", "Jun",
+      "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
+    ];
+    const eventOverview = Array.from({ length: 12 }, (_, i) => {
+      const monthData = monthlyData.find((data: any) => data.month === i + 1) || {
+        month: i + 1,
+        totalEvents: 0,
+      };
+      return {
+        month: months[i],
+        totalEvents: monthData.totalEvents,
+      };
     });
 
-    // Send response with growth overview and monthly data
-   return {
+    // Return overview
+    return {
       selectedYear,
       yearlyGrowth: yearlyGrowth.toFixed(2) + '%',
       monthlyGrowth: monthlyGrowth.toFixed(2) + '%',
       dailyGrowth: dailyGrowth.toFixed(2) + '%',
-      monthlyData,
+      eventOverview,
     };
   } catch (error: any) {
-    console.error(error);
-    throw new ApiError(404,'Server error:', error);
+    console.error("Error fetching event overview:", error);
+    throw new ApiError(500, "Internal Server Error");
   }
 };
+
+
 
 
 

@@ -12,6 +12,7 @@ import { Plan } from '../payment/payment.model';
 import { ENUM_USER_ROLE } from '../../../enums/user';
 import mongoose from 'mongoose';
 import Event from '../event/event.model'; 
+import QueryBuilder from '../../../builder/QueryBuilder';
 
 interface DeleteAccountPayload {
   email: string;
@@ -156,7 +157,7 @@ const vendorRequest = async (req: RequestData) => {
     "phone_number",
     "profile_image",
     "business_profile",
-    "location_map",
+    // "location_map",
     "description"
   ];
 
@@ -418,6 +419,8 @@ const updateProfile = async (req: RequestData) => {
   if (data?.social_media) data.social_media = JSON.parse(data.social_media as any);
   if (data?.questions) data.questions = JSON.parse(data.questions as any);
 
+  data.status = existingVendor.status
+
   const updatedUserData = { ...data };
 
   const [authUpdate, vendorUpdate] = await Promise.all([
@@ -514,6 +517,55 @@ const getVendorProfileDetails = async (params: { id: string }) => {
 
   return { result, events, featured };
 };
+const getAllVendor = async (req: any) => {
+  const query =  req.query as any; 
+  const categoryQuery = new QueryBuilder(
+          Vendor.find()
+              // .select('name event_image location category address')
+              .populate('userId')
+          ,
+          query,
+      )
+          .search(['name'])
+          .filter()
+          .sort()
+          .paginate()
+          .fields();
+ 
+
+  const result = await categoryQuery.modelQuery;
+  const meta = await categoryQuery.countTotal();
+  return { result, meta }
+}
+const updateVendorStatus = async (req: any) => {
+  const { id, status } = req.query as any;
+
+  if (!id || !status) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Missing vendor Id or status");
+  }
+
+  const validStatuses = ['pending', 'approved', 'declined', 'deactivate'];
+  if (!validStatuses.includes(status)) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Invalid status");
+  }
+
+  const vendor = await Vendor.findById(id);
+  if (!vendor) {
+      throw new ApiError(httpStatus.NOT_FOUND, "Vendor not found");
+  }
+
+  let authData;
+  if (status === 'deactivate') {
+    authData= await Auth.findByIdAndUpdate(vendor?.authId, { isActive: false, is_block: true });
+  }
+  if (status === 'approved') {
+    authData= await Auth.findByIdAndUpdate(vendor?.authId, { isActive: true, is_block: false });
+} 
+
+  const updatedVendor = await Vendor.findByIdAndUpdate(id, { status }, { new: true });
+  return updatedVendor  
+};
+
 
 export const VendorService = {
   // sendAdvertiseUsFrom, 
@@ -528,6 +580,8 @@ export const VendorService = {
   getProfile,
   deleteMyAccount,
   updateProfile,
-  getVendorProfileDetails
+  getVendorProfileDetails,
+  getAllVendor,
+  updateVendorStatus
 };
 

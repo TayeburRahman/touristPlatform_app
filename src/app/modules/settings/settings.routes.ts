@@ -39,10 +39,14 @@ router.patch(
   '/update-faqs/:id',
   ManageController.updateFaq,
 );
-router.patch(
-  '/delete-faqs',
+router.delete(
+  '/delete-faqs/:id',
   ManageController.deleteFaq,
 );
+router.get(
+  '/get-faqs',
+  ManageController.getFaq,
+); 
 router.get(
   '/get-faqs',
   ManageController.getFaq,

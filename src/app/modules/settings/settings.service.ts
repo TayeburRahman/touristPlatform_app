@@ -3,14 +3,19 @@ import { AboutUs, Facts, Faq, TermsConditions } from './settings.model';
 //! Facts
 const addFacts = async (payload: any) => {
   const checkIsExist = await Facts.findOne();
+  let message;
+  let result
   if (checkIsExist) {
-    return await Facts.findOneAndUpdate({}, payload, {
+    result=await Facts.findOneAndUpdate({}, payload, {
       new: true,
       runValidators: true,
     });
+    message = 'Facts updated successfully!';
   } else {
-    return await Facts.create(payload);
+    result= await Facts.create(payload);
+    message = 'Facts added successfully!';
   }
+  return
 };
 const getFacts = async () => {
   return await Facts.findOne();
@@ -18,15 +23,20 @@ const getFacts = async () => {
 //! About us
 const addAboutUs = async (payload: any) => {
   const checkIsExist = await AboutUs.findOne();
+  let message;
+  let result
   if (checkIsExist) {
-    return await AboutUs.findOneAndUpdate({}, payload, {
+    result=await AboutUs.findOneAndUpdate({}, payload, {
       new: true,
 
       runValidators: true,
     });
+    message= 'About us updated successfully!'  
   } else {
-    return await AboutUs.create(payload);
+   result= await AboutUs.create(payload);
+   message = 'About us added successfully!'
   }
+  return  {result ,  message };
 };
 const getAboutUs = async () => {
   return await AboutUs.findOne();
@@ -34,15 +44,21 @@ const getAboutUs = async () => {
 //! Terms Conditions
 const addTermsConditions = async (payload: any) => {
   const checkIsExist = await TermsConditions.findOne();
+  let message;
+  let result
   if (checkIsExist) {
-    return await TermsConditions.findOneAndUpdate({}, payload, {
+    const result= await TermsConditions.findOneAndUpdate({}, payload, {
       new: true,
 
       runValidators: true,
-    });
-  } else {
-    return await TermsConditions.create(payload);
+    }) 
+    message= ' Terms conditions updated successfully!' 
+  } else { 
+    result =  await TermsConditions.create(payload);
+    message= 'Terms conditions added successfully!'
   }
+
+  return  {result ,  message };
 };
 const getTermsConditions = async () => {
   return await TermsConditions.findOne();
