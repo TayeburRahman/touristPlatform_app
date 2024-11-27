@@ -14,10 +14,13 @@ export interface IEvent extends Document {
   event_image: string[] | null;  
   status: 'pending' | 'approved' | 'declined';
   category:  mongoose.Types.ObjectId | null;
-  favorites: string[] | null;  
+  favorites: number | null;  
   featured: Date | null;
   end_date: Date | null;
   address: string | null;
+  recurrence: 'none' | 'weekly' | 'monthly' | 'yearly';
+  recurrence_end: Date | null | string;
+  active: boolean;
 }
 
 export interface IDate extends Document {

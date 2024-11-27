@@ -182,6 +182,10 @@ const getEventOverview: RequestHandler = catchAsync(
   },
 ); 
 
+ 
+
+ 
+
 export const DashboardController = {
     createAndUpdateCategory, 
     getCategory,
@@ -195,6 +199,6 @@ export const DashboardController = {
     updateBannerImage,
     getBannerImage,
     deleteBannerImage,
-    getEventOverview
+    getEventOverview, 
 
 };

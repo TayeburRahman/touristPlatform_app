@@ -30,11 +30,11 @@ router.patch("/accept-request/:id",
   auth(ENUM_USER_ROLE.ADMIN),
   VendorController.acceptVendorRequest);
 
-router.delete(
-  '/declined/:id',
-  auth(ENUM_USER_ROLE.ADMIN),
-  VendorController.declinedVendor,
-); 
+// router.delete(
+//   '/declined/:id',
+//   auth(ENUM_USER_ROLE.ADMIN),
+//   VendorController.declinedVendor,
+// ); 
 
 router.get(
   '/get-details/:id', 

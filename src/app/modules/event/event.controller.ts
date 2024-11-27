@@ -108,16 +108,7 @@ const saveUserClickEvent : RequestHandler = catchAsync( async (req: Request, res
     });
 }) 
 
-const getUserFavorites : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
-    const result = await EventService.getUserFavorites(req); 
-    sendResponse(res, {
-        statusCode: 200,
-        success: true,
-        message: `Event Approved Successfully!`,
-        data: result,
-    });
-}) 
-
+ 
 
 const getFeaturedEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
     const result = await EventService.getFeaturedEvents(req); 
@@ -171,10 +162,38 @@ const getVendorFeatured : RequestHandler = catchAsync( async (req: Request, res:
     });
 }) 
 
+const declinedEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result = await EventService.declinedEvents(req); 
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: `Cancel request successfully!`,
+        data: result,
+    });
+}) 
+
+const duplicateEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result = await EventService.duplicateEvents(req); 
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: `Event duplicate successfully!`,
+        data: result,
+    });
+})
+
+const getMyEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result = await EventService.getMyEvents(req); 
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: `Get my event successfully!`,
+        data: result,
+    });
+})
 
  
-
-// getEventsByDate
+ 
 
 export const EventController = {
     getEvents,
@@ -185,12 +204,14 @@ export const EventController = {
     retrieveEvent,
     approveEvents,
     saveUserClickEvent,
-    getPopularMostEvents,
-    getUserFavorites,
+    getPopularMostEvents, 
     getFeaturedEvents,
     getEventsByDate,
     getPastEvents,
     getVendorEvents,
-    getVendorFeatured
+    getVendorFeatured,
+    declinedEvents,
+    duplicateEvents,
+    getMyEvents
     
 }

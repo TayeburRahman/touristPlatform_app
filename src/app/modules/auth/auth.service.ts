@@ -27,12 +27,10 @@ import mongoose from 'mongoose';
 interface ForgotPasswordPayload {
   email: string;
 }
-
 interface ResetPasswordPayload {
   newPassword: string;
   confirmPassword: string;
 }
-
 interface ChangePasswordPayload {
   oldPassword: string;
   newPassword: string;
@@ -70,7 +68,6 @@ const profileDetails = async (req: any) => {
 
   return  userDetails ;
 }; 
-
 const registrationAccount = async (payload: IAuth) => {
   const { role, password, confirmPassword, email, longitude, latitude, ...other } = payload;
 
@@ -160,7 +157,6 @@ const registrationAccount = async (payload: IAuth) => {
 
   return { result, role, message: "Account created successfully!" };
 };
-
 const activateAccount = async (payload: ActivationPayload) => {
   const { activation_code, userEmail } = payload;
 
@@ -219,7 +215,6 @@ const activateAccount = async (payload: ActivationPayload) => {
     user,
   };
 };
-
 const loginAccount = async (payload: LoginPayload) => {
   const { email, password } = payload;
 
@@ -287,7 +282,6 @@ const loginAccount = async (payload: LoginPayload) => {
     user: userDetails,
   };
 };
-
 const forgotPass = async (payload: { email: string}) => {
  
   const user = await Auth.findOne({ email: payload.email }) as IAuth; 
@@ -319,7 +313,6 @@ const forgotPass = async (payload: { email: string}) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, error.message );
   }
 };
-
 const checkIsValidForgetActivationCode = async (payload: {  email: string; code: string }) => {
 
   const account : any = await Auth.findOne({ email: payload.email }) as IAuth;
@@ -343,7 +336,6 @@ const checkIsValidForgetActivationCode = async (payload: {  email: string; code:
   await account.save();
   return update;
 };
-
 const resetPassword = async (req: { query: { email: string }; body: ResetPasswordPayload }) => {
   const { email } = req.query;
   const { newPassword, confirmPassword } = req.body;
@@ -372,7 +364,6 @@ const resetPassword = async (req: { query: { email: string }; body: ResetPasswor
   );
   return result;
 };
-
 const changePassword = async (user: { authId: string }, payload: ChangePasswordPayload) => {
   const { authId } = user;
   const { oldPassword, newPassword, confirmPassword } = payload;
@@ -402,7 +393,6 @@ const changePassword = async (user: { authId: string }, payload: ChangePasswordP
 
   return { message: "Password updated successfully." };  
 };
-
 const resendCodeActivationAccount = async (payload: { email: string }) => {
   const email = payload.email;
   const user = await Auth.findOne({ email }) as IAuth;
@@ -468,7 +458,6 @@ const resendCodeActivationAccount = async (payload: { email: string }) => {
     </html>`
   );
 };
-
 const resendCodeForgotAccount = async (payload: ForgotPasswordPayload) => {
   const email = payload.email;
 
@@ -536,7 +525,6 @@ const resendCodeForgotAccount = async (payload: ForgotPasswordPayload) => {
     </html>`
   );
 }; 
-
 const updateProfile = async (req: RequestData) => {
   const { files, body: data } = req;
   const { authId, userId, role } = req.user;
@@ -596,7 +584,6 @@ const updateProfile = async (req: RequestData) => {
  
   return profile;
 }; 
-
 const deleteMyProfile = async (req: RequestData) => {
   const { email, password } = req.body as {
     email: string;
@@ -650,7 +637,6 @@ const deleteMyProfile = async (req: RequestData) => {
     throw new ApiError(500, "Failed to delete user profile. Please try again.");
   }
 };
-
 // Scheduled task to unset activationCode field
 cron.schedule("* * * * *", async () => {
   try {
@@ -673,7 +659,6 @@ cron.schedule("* * * * *", async () => {
     logger.error("Error removing activation codes from expired users:", error);
   }
 });
-
 // Scheduled task to unset codeVerify field
 cron.schedule("* * * * *", async () => {
   try {

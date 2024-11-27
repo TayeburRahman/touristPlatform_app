@@ -14,17 +14,10 @@ router.post(
     auth(ENUM_USER_ROLE.VENDOR),
     uploadFile(),
     EventController.createNewEvent,
-); 
-
-router.get(
-    '/user-favorites',
-    auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR),
-    EventController.getUserFavorites,
-);
- 
+);  
 router.patch(
     '/update/:eventId',
-    auth(ENUM_USER_ROLE.VENDOR),
+    auth(ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN ),
     uploadFile(),
     EventController.updateEvents
 );
@@ -32,6 +25,17 @@ router.patch(
 router.get(
     '/get/:eventId',
     EventController.retrieveEvent
+);
+router.get(
+    '/my-event',
+    auth(ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN ),
+    EventController.getMyEvents
+);
+ 
+
+router.patch(
+    '/duplicate-events/:eventId', 
+    EventController.duplicateEvents,
 );
 
 router.get(
@@ -50,18 +54,17 @@ router.patch(
     auth(ENUM_USER_ROLE.ADMIN),
     EventController.approveEvents,
 );
+router.patch(
+    '/cancel/:id',
+    auth(ENUM_USER_ROLE.ADMIN),
+    EventController.declinedEvents,
+); 
 
 router.patch(
     '/save-click/:id',
-    auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN),
+    // auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN),
     EventController.saveUserClickEvent,
-);
-
-router.get(
-    '/favorites',
-    auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR),
-    EventController.getUserFavorites,
-);
+); 
 
 router.get(
     '/events_by_date', 
@@ -80,7 +83,7 @@ router.get(
 router.get(
     '/vendor-featured/:vendorId', 
     EventController.getVendorFeatured,
-);
+); 
 
 
 

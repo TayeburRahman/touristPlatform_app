@@ -8,7 +8,9 @@ import { Banners, Packages } from './dashboard.model';
 import { IBanner } from './dashboard.interface';
 import Event from '../event/event.model';
 import { IReqUser } from '../auth/auth.interface';
-import { Plan } from '../payment/payment.model';
+import { Payment, Plan } from '../payment/payment.model';
+import Auth from '../auth/auth.model';
+import Vendor from '../vendor/vendor.model';
  
 
 const createPackages = async (req: Request) => { 
@@ -196,16 +198,18 @@ const getEventOverview = async (req: Request) => {
       "Jan", "Feb", "Mar", "Apr", "May", "Jun",
       "Jul", "Aug", "Sep", "Oct", "Nov", "Dec",
     ];
+ 
+
     const eventOverview = Array.from({ length: 12 }, (_, i) => {
-      const monthData = monthlyData.find((data: any) => data.month === i + 1) || {
+      const monthData = monthlyData.find((data) => data.month === i + 1) || {
         month: i + 1,
         totalEvents: 0,
       };
-      return {
-        month: months[i],
-        totalEvents: monthData.totalEvents,
-      };
+      return monthData.totalEvents;  
     });
+
+    const totalEvent = await Event.find()
+    const totalUser = await Auth.find()
 
     // Return overview
     return {
@@ -214,13 +218,17 @@ const getEventOverview = async (req: Request) => {
       monthlyGrowth: monthlyGrowth.toFixed(2) + '%',
       dailyGrowth: dailyGrowth.toFixed(2) + '%',
       eventOverview,
+      totalUser: totalUser?.length,
+      totalEvent: totalEvent?.length,
     };
   } catch (error: any) {
     console.error("Error fetching event overview:", error);
     throw new ApiError(500, "Internal Server Error");
   }
 };
+ 
 
+ 
 
 
 
@@ -236,5 +244,5 @@ export const DashboardService = {
   updateBannerImage,
   getBannerImage,
   deleteBannerImage,
-  getEventOverview
+  getEventOverview, 
 };

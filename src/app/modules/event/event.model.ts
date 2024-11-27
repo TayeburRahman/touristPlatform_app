@@ -49,8 +49,7 @@ const eventSchema = new Schema<IEvent>({
     required: true 
   },
   duration: { 
-    type: String, 
-    required: true 
+    type: String,  
   },
   category: { 
     type:  Schema.Types.ObjectId,
@@ -62,7 +61,7 @@ const eventSchema = new Schema<IEvent>({
     required: true 
   },
   social_media: { 
-    type: [socialMedia], 
+    type: String, 
     default: null 
   },
   location: { 
@@ -82,8 +81,8 @@ const eventSchema = new Schema<IEvent>({
     default: null 
   },
   favorites: { 
-    type: [String], 
-    default: [] 
+    type: Number, 
+    default: 0
   },
   address: { 
     type:String, 
@@ -92,7 +91,20 @@ const eventSchema = new Schema<IEvent>({
     type: String, 
     enum: ['pending','updated' ,'approved', 'declined'], 
     default: 'pending'
-  }
+  },
+  recurrence: {
+    type: String,
+    enum: ['none', 'weekly', 'monthly', 'yearly'],
+    default: 'none',
+  },
+  recurrence_end: { 
+    type: Date, 
+    default: null 
+  },
+  active: { 
+    type: Boolean,   
+    default: true
+  },
 }, {
   timestamps: true  
 });

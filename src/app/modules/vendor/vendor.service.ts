@@ -313,81 +313,81 @@ const acceptVendorRequest = async (req: RequestData) => {
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to accept vendor request');
   }
 };
-const declinedVendor = async (req: RequestData) => {
-  const { id }: any = req.params
-  const data = req.body as {
-    text: string;
-  };
+// const declinedVendor = async (req: RequestData) => {
+//   const { id }: any = req.params
+//   const data = req.body as {
+//     text: string;
+//   };
 
-  const dbData = await Vendor.findById(id) as IVendor;
-  if (!dbData) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Profile not fount.");
-  }
+//   const dbData = await Vendor.findById(id) as IVendor;
+//   if (!dbData) {
+//     throw new ApiError(httpStatus.BAD_REQUEST, "Profile not fount.");
+//   }
 
-  const update = await Vendor.findByIdAndUpdate(
-    id,
-    {
-      status: 'declined',
-      declined_text: data.text
-    },
-    { new: true }
-  );
+//   const update = await Vendor.findByIdAndUpdate(
+//     id,
+//     {
+//       status: 'declined',
+//       declined_text: data.text
+//     },
+//     { new: true }
+//   );
 
 
-  sendResetEmail(
-    dbData.email,
-    `<!DOCTYPE html>
-      <html lang="en">
-     <head>
-     <meta charset="UTF-8">
-     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <title>Advertisement Declined</title>
-     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #333;
-        }
-        p {
-            color: #555;
-            line-height: 1.5;
-        }
-        .footer {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #999;
-        }
-     </style>
-     </head>
-     <body>
-         <div class="container">
-              <h1>Hello, ${dbData.name}</h1>
-              <p>Thank you for submitting your advertisement with us. Unfortunately, we must inform you that your advertisement has been declined. Here is the reason provided:</p>
-               <p><strong>${data.text}</strong></p> 
-                  <p>If you have any questions or would like to discuss this further, please feel free to reach out.</p>
-                 <p>Thank you for your understanding.</p>
-              <div class="footer">
-                  <p>&copy; ${new Date().getFullYear()} bdCalling</p>
-              </div>
-         </div>
-      </body>
-      </html>`
-  );
+//   sendResetEmail(
+//     dbData.email,
+//     `<!DOCTYPE html>
+//       <html lang="en">
+//      <head>
+//      <meta charset="UTF-8">
+//      <meta name="viewport" content="width=device-width, initial-scale=1.0">
+//      <title>Advertisement Declined</title>
+//      <style>
+//         body {
+//             font-family: Arial, sans-serif;
+//             background-color: #f4f4f4;
+//             margin: 0;
+//             padding: 20px;
+//         }
+//         .container {
+//             max-width: 600px;
+//             margin: auto;
+//             background: white;
+//             padding: 20px;
+//             border-radius: 5px;
+//             box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+//         }
+//         h1 {
+//             color: #333;
+//         }
+//         p {
+//             color: #555;
+//             line-height: 1.5;
+//         }
+//         .footer {
+//             margin-top: 20px;
+//             font-size: 12px;
+//             color: #999;
+//         }
+//      </style>
+//      </head>
+//      <body>
+//          <div class="container">
+//               <h1>Hello, ${dbData.name}</h1>
+//               <p>Thank you for submitting your advertisement with us. Unfortunately, we must inform you that your advertisement has been declined. Here is the reason provided:</p>
+//                <p><strong>${data.text}</strong></p> 
+//                   <p>If you have any questions or would like to discuss this further, please feel free to reach out.</p>
+//                  <p>Thank you for your understanding.</p>
+//               <div class="footer">
+//                   <p>&copy; ${new Date().getFullYear()} bdCalling</p>
+//               </div>
+//          </div>
+//       </body>
+//       </html>`
+//   );
 
-  return update;
-};
+//   return update;
+// };
 const getAllPending = async () => {
   const data = await Vendor.find({ status: "pending" })
   return data;
@@ -539,6 +539,7 @@ const getAllVendor = async (req: any) => {
 }
 const updateVendorStatus = async (req: any) => {
   const { id, status } = req.query as any;
+  const { reasons } = req.body as any;
 
   if (!id || !status) {
       throw new ApiError(httpStatus.BAD_REQUEST, "Missing vendor Id or status");
@@ -547,6 +548,10 @@ const updateVendorStatus = async (req: any) => {
   const validStatuses = ['pending', 'approved', 'declined', 'deactivate'];
   if (!validStatuses.includes(status)) {
       throw new ApiError(httpStatus.BAD_REQUEST, "Invalid status");
+  }
+
+  if(status === 'declined' && !reasons){
+    throw new ApiError(httpStatus.BAD_REQUEST, "Reasons are required for declining vendor");
   }
 
   const vendor = await Vendor.findById(id);
@@ -562,7 +567,64 @@ const updateVendorStatus = async (req: any) => {
     authData= await Auth.findByIdAndUpdate(vendor?.authId, { isActive: true, is_block: false });
 } 
 
+// console.log("=============", vendor.email, "---",vendor.name)
+
   const updatedVendor = await Vendor.findByIdAndUpdate(id, { status }, { new: true });
+  
+  if(status === 'declined'){
+    sendResetEmail(
+      vendor.email,
+      `<!DOCTYPE html>
+        <html lang="en">
+       <head>
+       <meta charset="UTF-8">
+       <meta name="viewport" content="width=device-width, initial-scale=1.0">
+       <title>Advertisement Declined</title>
+       <style>
+          body {
+              font-family: Arial, sans-serif;
+              background-color: #f4f4f4;
+              margin: 0;
+              padding: 20px;
+          }
+          .container {
+              max-width: 600px;
+              margin: auto;
+              background: white;
+              padding: 20px;
+              border-radius: 5px;
+              box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          }
+          h1 {
+              color: #333;
+          }
+          p {
+              color: #555;
+              line-height: 1.5;
+          }
+          .footer {
+              margin-top: 20px;
+              font-size: 12px;
+              color: #999;
+          }
+       </style>
+       </head>
+       <body>
+           <div class="container">
+                <h1>Hello, ${vendor.name}</h1>
+                <p>Thank you for submitting your advertisement with us. Unfortunately, we must inform you that your advertisement has been declined. Here is the reason provided:</p>
+                 <p><strong>${reasons}</strong></p> 
+                    <p>If you have any questions or would like to discuss this further, please feel free to reach out.</p>
+                   <p>Thank you for your understanding.</p>
+                <div class="footer">
+                    <p>&copy; ${new Date().getFullYear()} bdCalling</p>
+                </div>
+           </div>
+        </body>
+        </html>`
+    );
+  }
+  
   return updatedVendor  
 };
 
@@ -574,7 +636,7 @@ export const VendorService = {
   // deleteVendorRequest,
   vendorRegister,
   vendorRequest,
-  declinedVendor,
+  // declinedVendor,
   acceptVendorRequest,
   getAllPending,
   getProfile,

@@ -27,15 +27,15 @@ const vendorRequest = catchAsync(async (req: Request, res: Response) => {
 });
 
 // ---------------------
-const declinedVendor = catchAsync(async (req: Request, res: Response) => {
-  const result = await VendorService.declinedVendor(req as any);
-  sendResponse(res, {
-    statusCode: 200,
-    success: true,
-    message: "Request declined successfully",
-    data: result,
-  });
-});
+// const declinedVendor = catchAsync(async (req: Request, res: Response) => {
+//   const result = await VendorService.declinedVendor(req as any);
+//   sendResponse(res, {
+//     statusCode: 200,
+//     success: true,
+//     message: "Request declined successfully",
+//     data: result,
+//   });
+// });
 
 const acceptVendorRequest = catchAsync(async (req: Request, res: Response) => {
   const result = await VendorService.acceptVendorRequest(req as any);
@@ -104,7 +104,7 @@ const updateVendorStatus = catchAsync(async (req: Request, res: Response) => {
 
 export const VendorController = {
   vendorRegister,
-  declinedVendor,
+  // declinedVendor,
   acceptVendorRequest, 
   getAllPending,
   vendorRequest, 

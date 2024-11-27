@@ -5,17 +5,75 @@ import { IReqUser } from "../auth/auth.interface";
 import { Plan } from "../payment/payment.model";
 import QueryBuilder from "../../../builder/QueryBuilder";
 import { IEvent } from "./event.interface";
+import { sendResetEmail } from "../auth/sendResetMails";
+import { logger } from "../../../shared/logger";
+import cron from "node-cron";
+import { EventDate } from "./event.helper";
 
+// set inactive evnets
+  cron.schedule("* * * * *", async () => {
+    try {
+      const now = new Date();
+      const result = await Event.updateMany(
+        {
+          active: true,
+          date: { $lte: now },
+        },
+        {
+          $set: { active: false },
+        }
+      );
+    // console.log(`Eventsresult:`, result);
+      if (result.modifiedCount > 0) {
+        logger.info(`Set ${result.modifiedCount} inactive events.`);
+      }
+    } catch (error) {
+      logger.error("Error set event active:", error);
+    }
+  });
+  cron.schedule("* * * * *", async () => {
+    try { 
+      const now = new Date();
+      const events = await Event.find({
+        active: false,
+        recurrence_end: { $gt: now }, 
+      }).exec(); 
+  
+      if (events.length > 0) {  
+        for (const event of events) {
+          let newEvent = event.toObject(); 
+          const currentDate = event.date;
+        //   console.log("currentDate",currentDate)
+          switch (event.recurrence) {
+            case "weekly":
+              newEvent.date = EventDate.getNextWeek(currentDate);
+              break;
+            case "monthly":
+              newEvent.date = EventDate.getNextMonth(currentDate);
+              break;
+            case "yearly":
+              newEvent.date = EventDate.getNextYear(currentDate);
+              break;
+            default:
+              continue;
+          } 
+            newEvent.active = true; // Reactivate event
+            await Event.findByIdAndUpdate(event._id, newEvent, { new: true }); 
+        }
+        logger.info(`Set ${events.length} active events from recurring events.`);
+      }
+    } catch (error) {
+      logger.error("Error setting event active:", error);
+    }
+  });
 const createNewEvent = async (req: Request) => {
-    const { userId, authId, role } = req.user as IReqUser;
-
+    const { userId, authId, role } = req.user as IReqUser; 
     const { event_image } = req.files as { event_image: Express.Multer.File[] };
     const { name, date, time, featured,
         social_media, 
         end_date,
         address,
-        duration, option, longitude, latitude, description, image, category } = req.body as any;
- 
+        duration, option, longitude, latitude, description, recurrence, category, recurrence_end } = req.body as any;
     
     const data = req.body; 
     // const plan: any = await Plan.findOne({
@@ -41,19 +99,18 @@ const createNewEvent = async (req: Request) => {
     // if (!Array.isArray(plan.events)) {
     //     plan.events = [];
     // }
- 
+    console.log("===Events===", date, end_date, recurrence_end);
     const requiredFields = [
         "name",
         "date",
-        "time",
-        "duration",
+        "time", 
         "option",
         "longitude",
         "latitude",
         "category",
         "end_date",
-        "address",
-        // "question"
+        "address", 
+        "recurrence",
     ];
 
     for (const field of requiredFields) {
@@ -61,8 +118,10 @@ const createNewEvent = async (req: Request) => {
             throw new ApiError(400, `${field} is required.`);
         }
     };
-    
 
+    if(recurrence!== "none" && !recurrence_end){
+        throw new ApiError(400, 'Recurrence end date is required for recurring events.');
+    } 
     const eventDate = new Date(date);
 
     if (isNaN(eventDate.getTime())) {
@@ -79,11 +138,12 @@ const createNewEvent = async (req: Request) => {
         images = event_image.map(file => `/images/events/${file.filename}`);
     } 
     
-    if(!images?.length) {
-        throw new ApiError(400, 'Event image is required.'); 
-    }
+    // if(!images?.length) {
+    //     throw new ApiError(400, 'Event image is required.'); 
+    // }
  
-    const parsMedia = JSON.parse(social_media)
+    // const parsMedia = JSON.parse(option)
+ 
 
     const newEvent = await Event.create({
         vendor: userId,
@@ -92,14 +152,16 @@ const createNewEvent = async (req: Request) => {
         time,
         duration,
         option,
-        social_media: parsMedia,
+        social_media,
         location,
         description,
         category,
         event_image: images,
         featured,
         end_date,
-        address
+        address,
+        recurrence,
+        recurrence_end
     });
 
     if (!newEvent) {
@@ -121,7 +183,7 @@ const createNewEvent = async (req: Request) => {
     // });
 
     return newEvent;
-};
+}; 
 const updateEvents = async (req: Request) => {
     const { userId } = req.user as IReqUser;
     const { eventId } = req.params;
@@ -129,7 +191,7 @@ const updateEvents = async (req: Request) => {
         event_image: Express.Multer.File[]
     };
 
-    const { name, date, time, duration, option, social_media, longitude, latitude, description, category } = req.body as any;
+    const { name, date, time, duration, address, option,end_date,featured, social_media, longitude, latitude, recurrence_end, recurrence, description, category } = req.body as any;
 
     let images: any = [];
     if (event_image && Array.isArray(event_image)) {
@@ -160,6 +222,11 @@ const updateEvents = async (req: Request) => {
     }
     if (description) existingEvent.description = description;
     if (images?.length) existingEvent.event_image = images;
+    if (recurrence_end) existingEvent.recurrence_end = recurrence_end;
+    if (recurrence) existingEvent.recurrence = recurrence;
+    if (end_date) existingEvent.end_date = end_date;
+    if (featured) existingEvent.featured = featured;
+    if (address) existingEvent.address = address; 
 
     try {
         existingEvent.status = "updated"
@@ -170,7 +237,6 @@ const updateEvents = async (req: Request) => {
         throw new ApiError(500, 'Failed to update event.');
     }
 };
-
 const deleteEvents = async (req: Request) => {
     const { eventId } = req.params;
 
@@ -221,6 +287,73 @@ const approveEvents = async (req: Request) => {
     }
     return result;
 };
+const declinedEvents = async (req: Request) => {
+    const id = req.params.id;
+    const {reason} = req.body;
+    const dataDb = await Event.findById(id).populate('vendor') as any
+    if (!dataDb) {
+        throw new ApiError(404, 'Event not found.');
+    }
+    const vendor = dataDb?.vendor ;
+    const result = await Event.findByIdAndUpdate(id, { status: 'declined' }, { new: true });
+    if(vendor){
+        sendResetEmail(
+            vendor?.email,
+            `<!DOCTYPE html>
+              <html lang="en">
+             <head>
+             <meta charset="UTF-8">
+             <meta name="viewport" content="width=device-width, initial-scale=1.0">
+             <title>Advertisement Declined</title>
+             <style>
+                body {
+                    font-family: Arial, sans-serif;
+                    background-color: #f4f4f4;
+                    margin: 0;
+                    padding: 20px;
+                }
+                .container {
+                    max-width: 600px;
+                    margin: auto;
+                    background: white;
+                    padding: 20px;
+                    border-radius: 5px;
+                    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+                }
+                h1 {
+                    color: #333;
+                }
+                p {
+                    color: #555;
+                    line-height: 1.5;
+                }
+                .footer {
+                    margin-top: 20px;
+                    font-size: 12px;
+                    color: #999;
+                }
+             </style>
+             </head>
+             <body>
+                 <div class="container">
+                      <h1>Hello, ${vendor.name}</h1>
+                      <p>Thank you for submitting your advertisement with us. Unfortunately, we must inform you that your advertisement has been declined. Here is the reason provided:</p>
+                       <p><strong>${reason}</strong></p> 
+                          <p>If you have any questions or would like to discuss this further, please feel free to reach out.</p>
+                         <p>Thank you for your understanding.</p>
+                      <div class="footer">
+                          <p>&copy; ${new Date().getFullYear()} bdCalling</p>
+                      </div>
+                 </div>
+              </body>
+              </html>`
+          );
+    }
+
+    
+
+    return result;
+};
 // -------------
 const getEvents = async (req: Request) => {
     const query = Object.fromEntries(
@@ -236,7 +369,7 @@ const getEvents = async (req: Request) => {
         }
         const customDate = parsedDate.toISOString().slice(0, 10);
         categoryQuery = new QueryBuilder(
-            Event.find({ status: 'approved', date: customDate })
+            Event.find({ status: 'approved',active: true, date: customDate })
                 .select('name event_image location category address')
                 .populate('category', 'name'),
             query,
@@ -249,7 +382,7 @@ const getEvents = async (req: Request) => {
 
     } else {
         categoryQuery = new QueryBuilder(
-            Event.find({ status: 'approved' })
+            Event.find({ status: 'approved', active: true  })
                 .select('name event_image location category address')
                 .populate('category', 'name')
             ,
@@ -267,46 +400,27 @@ const getEvents = async (req: Request) => {
     return { result, meta }
 }
 const getPopularMostEvents = async (req: Request) => {
-    const result = await Event.aggregate([
-        { $match: { status: 'approved' } },
-        {
-            $addFields: {
-                favoritesCount: { $size: { $ifNull: ["$favorites", []] } }
-            }
-        },
-        { $sort: { favoritesCount: -1 } },
-        {
-            $project: {
-                name: 1,
-                event_image: 1,
-                location: 1,
-                category: 1,
-                favoritesCount: 1,
-                address: 1,
-            }
-        },
-        {
-            $lookup: {
-                from: 'categories',
-                localField: 'category',
-                foreignField: '_id',
-                as: 'category'
-            }
-        },
-        {
-            $unwind: '$category'
-        },
-
-        { $limit: 10 }
-    ]);
-
-    return { result };
-};
+    const limit = parseInt(req.query.limit as string) || 10; 
+  
+    try {
+      const result = await  Event.find({ status: 'approved', active: true }) 
+        .sort({ favorites: -1 })  
+        .limit(limit)  
+        .select('name event_image location category favorites address') 
+        .populate('category');  
+  
+      return { result };
+    } catch (error) {
+      console.error('Error fetching popular most events:', error);
+      throw new ApiError(500, 'Internal Server Error');
+    }
+  };
+  
 const getAllEvents = async (req: Request) => {
     const query = req.query;
     const categoryQuery = new QueryBuilder(
         Event.find()
-            .select('name event_image location category address')
+            // .select('name event_image location category address')
             .populate('category', 'name'),
         query,
     )
@@ -322,6 +436,7 @@ const getAllEvents = async (req: Request) => {
 const getFeaturedEvents = async (req: Request) => {
     const result = await Event.find({
         status: 'approved',
+        active: true,
         featured: { $ne: null }
     })
     .select('name event_image location category address')
@@ -329,18 +444,26 @@ const getFeaturedEvents = async (req: Request) => {
 
     return { result }
 };
-// - no need now
-const getUserFavorites = async (req: Request) => {
-    const { authId } = req.user as IReqUser;
-
-    const favoriteEvents = await Event.find({ favorites: authId });
-
-    if (!favoriteEvents || favoriteEvents.length === 0) {
-        return { message: 'No favorite events found.' };
+const duplicateEvents = async (req: Request) => {
+    const { eventId } = req.params;
+   
+    const event = await Event.findById(eventId).lean(); 
+  
+    if (!event) {
+      throw new ApiError(404, "Event not found.");
     }
-
-    return favoriteEvents;
-};
+   
+    const { _id, createdAt, updatedAt, ...other } = event as any;
+   
+    const newEvent = new Event({
+      ...other, 
+      status: 'pending',   
+    });
+   
+    const duplicateEvent = await newEvent.save();
+  
+    return duplicateEvent;
+  };
 // ----------------------
 const getEventsByDate = async (req: Request) => {
     const { date } = req.body;
@@ -354,7 +477,7 @@ const getEventsByDate = async (req: Request) => {
     }
     const customDate = parsedDate.toISOString().slice(0, 10);
 
-    const result = await Event.find({ status: "approved", date: customDate })
+    const result = await Event.find({ status: "approved",active: true, date: customDate })
         .select('name event_image location category address')
         .populate('category', 'name')
 
@@ -406,35 +529,41 @@ const getVendorFeatured= async (req: Request) => {
 };
 // -------------
 const saveUserClickEvent = async (req: Request) => {
-    const { userId, authId } = req.user as IReqUser;
     const eventId = req.params.id;
-
+   
     const existingEvent: any = await Event.findById(eventId);
     if (!existingEvent) {
-        throw new ApiError(404, 'Event not found or unauthorized.');
+      throw new ApiError(404, 'Event not found or unauthorized.');
     }
-
-    if (!Array.isArray(existingEvent.favorites)) {
-        existingEvent.favorites = [];
-        await existingEvent.save()
-    }
-
-    const isFavorite = existingEvent.favorites.includes(authId);
-    if (isFavorite) {
-        return { message: 'User already in this event.' };
-    }
-
+   
     const updatedEvent = await Event.findByIdAndUpdate(
-        eventId,
-        { $addToSet: { favorites: authId } },
-        { new: true }
+      eventId,
+      { $inc: { favorites: 1 } },  
+      { new: true }  
     );
+  
+    return updatedEvent 
+  };
+  
+const getMyEvents = async (req: Request) => {
+   const {userId} = req.user as IReqUser;
+   const query = req.query;
+ 
+   const categoryQuery = new QueryBuilder(
+            Event.find({vendor:userId}) 
+                .populate('category', 'name'),
+            query)
+            .search(['name'])
+            .filter()
+            .sort()
+            .paginate()
+            .fields();
+ 
 
-    return {
-        massage: 'User add in this event.',
-        updatedEvent
-    }
-};
+    const result = await categoryQuery.modelQuery;
+    const meta = await categoryQuery.countTotal();
+    return { result, meta }
+}
 
 export const EventService = {
     getEvents,
@@ -443,12 +572,15 @@ export const EventService = {
     deleteEvents,
     approveEvents,
     saveUserClickEvent,
-    getPopularMostEvents,
-    getUserFavorites,
+    getPopularMostEvents, 
     getFeaturedEvents,
     getEventsByDate,
     getPastEvents,
     getAllEvents,
     getVendorEvents,
-    getVendorFeatured
+    getVendorFeatured,
+    declinedEvents,
+    duplicateEvents,
+    getMyEvents,
+
 };
