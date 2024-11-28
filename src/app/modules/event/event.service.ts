@@ -9,6 +9,7 @@ import { sendResetEmail } from "../auth/sendResetMails";
 import { logger } from "../../../shared/logger";
 import cron from "node-cron";
 import { EventDate } from "./event.helper";
+import { ClickOverview } from "../dashboard/dashboard.model";
 
 // set inactive evnets
   cron.schedule("* * * * *", async () => {
@@ -99,7 +100,7 @@ const createNewEvent = async (req: Request) => {
     // if (!Array.isArray(plan.events)) {
     //     plan.events = [];
     // }
-    console.log("===Events===", date, end_date, recurrence_end);
+    // console.log("===Events===", date, end_date, recurrence_end);
     const requiredFields = [
         "name",
         "date",
@@ -183,60 +184,83 @@ const createNewEvent = async (req: Request) => {
     // });
 
     return newEvent;
-}; 
+};  
+
 const updateEvents = async (req: Request) => {
-    const { userId } = req.user as IReqUser;
-    const { eventId } = req.params;
-    const { event_image } = req.files as {
-        event_image: Express.Multer.File[]
-    };
-
-    const { name, date, time, duration, address, option,end_date,featured, social_media, longitude, latitude, recurrence_end, recurrence, description, category } = req.body as any;
-
-    let images: any = [];
-    if (event_image && Array.isArray(event_image)) {
-        images = event_image.map(file => `/images/events/${file.filename}`);
-    }
-    const existingEvent = await Event.findOne({ _id: eventId }) as any;
-    if (!existingEvent) {
-        throw new ApiError(404, 'Event not found or unauthorized.');
-    }
-    if (name) existingEvent.name = name;
-    if (date) {
-        const eventDate = new Date(date);
-        if (isNaN(eventDate.getTime())) {
-            throw new ApiError(400, 'Invalid date format.');
-        }
-        existingEvent.date = eventDate;
-    }
-    if (time) existingEvent.time = time;
-    if (category) existingEvent.category = category;
-    if (duration) existingEvent.duration = duration;
-    if (option) existingEvent.option = option;
-    if (social_media) existingEvent.social_media = social_media;
-    if (longitude && latitude) {
-        existingEvent.location = {
-            type: 'Point',
-            coordinates: [longitude, latitude],
-        };
-    }
-    if (description) existingEvent.description = description;
-    if (images?.length) existingEvent.event_image = images;
-    if (recurrence_end) existingEvent.recurrence_end = recurrence_end;
-    if (recurrence) existingEvent.recurrence = recurrence;
-    if (end_date) existingEvent.end_date = end_date;
-    if (featured) existingEvent.featured = featured;
-    if (address) existingEvent.address = address; 
-
     try {
-        existingEvent.status = "updated"
+        // Extract and validate user ID and event ID
+        const { userId } = req.user as IReqUser;
+        const { eventId } = req.params;
+
+        if (!eventId) {
+            throw new ApiError(400, 'Event ID is required.');
+        }
+
+        const { 
+            name, date, time, duration, address, option, end_date, 
+            featured, social_media, longitude, latitude, 
+            recurrence_end, recurrence, description, category 
+        } = req.body;
+
+        console.log("featured", featured)
+
+        // Validate file uploads if any
+        const { event_image } = req.files as { event_image: Express.Multer.File[] };
+        let images: string[] = [];
+
+        if (event_image && Array.isArray(event_image)) {
+            images = event_image.map(file => `/images/events/${file.filename}`);
+        }
+
+        // Find the event in the database
+        const existingEvent = await Event.findById(eventId) as any;
+        if (!existingEvent) {
+            throw new ApiError(404, 'Event not found or unauthorized.');
+        }
+
+        // Update event fields if they exist in the request body
+        if (name) existingEvent.name = name;
+        if (date) {
+            const eventDate = new Date(date);
+            if (isNaN(eventDate.getTime())) {
+                throw new ApiError(400, 'Invalid date format.');
+            }
+            existingEvent.date = eventDate;
+        }
+        if (time) existingEvent.time = time;
+        if (duration) existingEvent.duration = duration;
+        if (address) existingEvent.address = address;
+        if (option) existingEvent.option = option;
+        if (end_date) existingEvent.end_date = end_date;
+        if (featured !== undefined) existingEvent.featured = featured; 
+        if (social_media) existingEvent.social_media = social_media;
+        if (category) existingEvent.category = category;
+        if (description) existingEvent.description = description;
+        if (recurrence_end) existingEvent.recurrence_end = recurrence_end;
+        if (recurrence) existingEvent.recurrence = recurrence;
+        if (longitude && latitude) {
+            existingEvent.location = {
+                type: 'Point',
+                coordinates: [parseFloat(longitude), parseFloat(latitude)],
+            };
+        }
+        if (images.length > 0) existingEvent.event_image = images;
+
+          existingEvent.status = 'updated';
+
+        // Save the updated event in the database
         const updatedEvent = await existingEvent.save();
+
         return updatedEvent;
     } catch (error) {
-        console.error("Error updating event:", error);
+        console.error('Error updating event:', error);
+        if (error instanceof ApiError) {
+            throw error;
+        }
         throw new ApiError(500, 'Failed to update event.');
     }
 };
+
 const deleteEvents = async (req: Request) => {
     const { eventId } = req.params;
 
@@ -249,27 +273,27 @@ const deleteEvents = async (req: Request) => {
         throw new ApiError(404, 'Event not found.');
     }
 
-    const plan = await Plan.findOne({
-        userId: event.vendor,
-        active: true,
-    });
-    if (!plan) {
-        throw new ApiError(404, 'Plan not found.');
-    }
+    // const plan = await Plan.findOne({
+    //     userId: event.vendor,
+    //     active: true,
+    // });
+    // if (!plan) {
+    //     throw new ApiError(404, 'Plan not found.');
+    // }
 
     const isFeatured = event.featured;
 
-    const updatedAvailableEvents = Math.min(plan.available_events + 1);
-    const updatedFeaturedEvents = isFeatured
-        ? Math.min(plan.featured_events + 1)
-        : plan.featured_events;
+    // const updatedAvailableEvents = Math.min(plan.available_events + 1);
+    // const updatedFeaturedEvents = isFeatured
+    //     ? Math.min(plan.featured_events + 1)
+    //     : plan.featured_events;
 
     try {
-        await Plan.findByIdAndUpdate(plan._id, {
-            available_events: updatedAvailableEvents,
-            featured_events: updatedFeaturedEvents,
-            events: plan.events.filter((eid: any) => !eid.equals((eventId)))
-        });
+        // await Plan.findByIdAndUpdate(plan._id, {
+        //     available_events: updatedAvailableEvents,
+        //     featured_events: updatedFeaturedEvents,
+        //     events: plan.events.filter((eid: any) => !eid.equals((eventId)))
+        // });
 
         await Event.findByIdAndDelete(eventId);
 
@@ -342,7 +366,7 @@ const declinedEvents = async (req: Request) => {
                           <p>If you have any questions or would like to discuss this further, please feel free to reach out.</p>
                          <p>Thank you for your understanding.</p>
                       <div class="footer">
-                          <p>&copy; ${new Date().getFullYear()} bdCalling</p>
+                          <p>&copy; ${new Date().getFullYear()} Whatsupjaco.com</p>
                       </div>
                  </div>
               </body>
@@ -421,7 +445,8 @@ const getAllEvents = async (req: Request) => {
     const categoryQuery = new QueryBuilder(
         Event.find()
             // .select('name event_image location category address')
-            .populate('category', 'name'),
+            .populate('category', 'name')
+            .populate('vendor', 'name email profile_image'),
         query,
     )
         .search(['name'])
@@ -514,6 +539,7 @@ const getVendorEvents = async (req: Request) => {
         .populate('category', 'name')
     return { result };
 };
+
 const getVendorFeatured= async (req: Request) => {
     const { vendorId } = req.params;
     if (!vendorId) {
@@ -541,6 +567,8 @@ const saveUserClickEvent = async (req: Request) => {
       { $inc: { favorites: 1 } },  
       { new: true }  
     );
+    
+    await ClickOverview.create({eventId})
   
     return updatedEvent 
   };
@@ -564,6 +592,100 @@ const getMyEvents = async (req: Request) => {
     const meta = await categoryQuery.countTotal();
     return { result, meta }
 }
+ 
+export const eventClickOverview = async (req: Request) => {
+  try {
+    const { year } = req.query as { year: string };
+    const selectedYear = year ? parseInt(year) : new Date().getFullYear();
+
+    const now = new Date();
+    const startOfYear = new Date(Date.UTC(selectedYear, 0, 1));
+    const startOfLastYear = new Date(Date.UTC(selectedYear - 1, 0, 1));
+    const endOfLastYear = startOfYear;
+    const startOfMonth = new Date(Date.UTC(selectedYear, now.getUTCMonth(), 1));
+    const startOfLastMonth = new Date(Date.UTC(selectedYear, now.getUTCMonth() - 1, 1));
+    const startOfToday = new Date(Date.UTC(selectedYear, now.getUTCMonth(), now.getUTCDate()));
+    const startOfYesterday = new Date(Date.UTC(selectedYear, now.getUTCMonth(), now.getUTCDate() - 1));
+
+    // Helper function to fetch click count
+    const countClicksInRange = async (start: Date, end: Date) => {
+      return ClickOverview.countDocuments({ createdAt: { $gte: start, $lt: end } });
+    };
+
+    // Calculate growth percentages
+    const calculateGrowth = (current: number, previous: number) => {
+      return previous > 0 ? ((current - previous) / previous) * 100 : 0;
+    };
+
+    // Yearly growth
+    const [clicksThisYear, clicksLastYear] = await Promise.all([
+      countClicksInRange(startOfYear, now),
+      countClicksInRange(startOfLastYear, endOfLastYear),
+    ]);
+    const yearlyGrowth = calculateGrowth(clicksThisYear, clicksLastYear);
+
+    // Monthly growth
+    const [clicksThisMonth, clicksLastMonth] = await Promise.all([
+      countClicksInRange(startOfMonth, now),
+      countClicksInRange(startOfLastMonth, startOfMonth),
+    ]);
+    const monthlyGrowth = calculateGrowth(clicksThisMonth, clicksLastMonth);
+
+    // Daily growth
+    const [clicksToday, clicksYesterday] = await Promise.all([
+      countClicksInRange(startOfToday, now),
+      countClicksInRange(startOfYesterday, startOfToday),
+    ]);
+    const dailyGrowth = calculateGrowth(clicksToday, clicksYesterday);
+
+    // Monthly click aggregation
+    const monthlyData = await ClickOverview.aggregate([
+      {
+        $match: {
+          createdAt: { $gte: startOfYear, $lt: new Date(Date.UTC(selectedYear + 1, 0, 1)) },
+        },
+      },
+      {
+        $group: {
+          _id: { month: { $month: "$createdAt" } },
+          totalClicks: { $sum: 1 },
+        },
+      },
+      {
+        $project: {
+          _id: 0,
+          month: "$_id.month",
+          totalClicks: 1,
+        },
+      },
+      { $sort: { month: 1 } },
+    ]);
+ 
+
+    const clickOverview = Array.from({ length: 12 }, (_, i) => {
+      const monthData = monthlyData.find((data) => data.month === i + 1) || {
+        month: i + 1,
+        totalClicks: 0,
+      };
+      return monthData.totalClicks;
+    });
+
+    // Return overview
+    return {
+      selectedYear,
+      yearlyGrowth: yearlyGrowth.toFixed(2) + '%',
+      monthlyGrowth: monthlyGrowth.toFixed(2) + '%',
+      dailyGrowth: dailyGrowth.toFixed(2) + '%',
+      clickOverview,
+    };
+  } catch (error: any) {
+    console.error("Error fetching click overview:", error);
+    throw new ApiError(500, "Internal Server Error");
+  }
+};
+
+
+ 
 
 export const EventService = {
     getEvents,
@@ -582,5 +704,6 @@ export const EventService = {
     declinedEvents,
     duplicateEvents,
     getMyEvents,
+    eventClickOverview
 
 };

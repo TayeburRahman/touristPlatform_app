@@ -41,13 +41,13 @@ export const uploadFile = () => {
         file.mimetype === 'image/jpeg' ||
         file.mimetype === 'image/png' ||
         file.mimetype === 'image/jpg' ||
-        // file.mimetype === 'image/webp' ||
+        file.mimetype === 'image/webp' || 
         file.mimetype === 'video/mp4'
       ) {
         cb(null, uploadPath);
       } else {
         //@ts-ignore
-        // cb(new Error('Invalid file type'));
+        cb(new Error('Invalid file type'));
         throw new ApiError(400, 'Invalid file type');
       }
     },
@@ -89,7 +89,7 @@ export const uploadFile = () => {
         cb(new Error('Invalid file type'));
       }
     } else {
-      // cb(new Error('Invalid fieldname'));
+      cb(new Error('Invalid fieldname'));
       throw new ApiError(400, 'Invalid fieldname');
     }
   };

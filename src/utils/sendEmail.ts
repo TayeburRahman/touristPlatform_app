@@ -20,7 +20,7 @@ const sendEmail = async (options: IEmailOptions): Promise<void> => {
     from: `${config.smtp.NAME} <${config.smtp.smtp_mail}>`,
     to: email,
     date: formattedDate,
-    signed_by: 'bdCalling.com',
+    signed_by: 'Whatsupjaco.com',
     subject,
     html,
   };

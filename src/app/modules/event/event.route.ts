@@ -85,6 +85,11 @@ router.get(
     EventController.getVendorFeatured,
 ); 
 
+router.get(
+    '/click-overview', 
+    EventController.eventClickOverview,
+); 
+ 
 
 
 export const eventRoutes = router;

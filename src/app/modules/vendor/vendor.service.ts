@@ -13,6 +13,7 @@ import { ENUM_USER_ROLE } from '../../../enums/user';
 import mongoose from 'mongoose';
 import Event from '../event/event.model'; 
 import QueryBuilder from '../../../builder/QueryBuilder';
+import { sendVendorDeclined } from '../../../mails/vendor.mail';
 
 interface DeleteAccountPayload {
   email: string;
@@ -296,7 +297,7 @@ const acceptVendorRequest = async (req: RequestData) => {
                    <p>Your vendor account request has been accepted successfully.</p>
                   <p>Thank you!</p>
                   <div class="footer">
-                      <p>&copy; ${new Date().getFullYear()} bdCalling</p>
+                      <p>&copy; ${new Date().getFullYear()} Whatsupjaco.com</p>
                   </div>
               </div>
           </body>
@@ -402,6 +403,8 @@ const updateProfile = async (req: RequestData) => {
   if (!existingVendor) {
     throw new ApiError(404, "Vendor not found or unauthorized.");
   }
+
+  console.log("authId", authId)
 
   if (files) {
     if (files.profile_image?.[0]) {
@@ -566,13 +569,12 @@ const updateVendorStatus = async (req: any) => {
   if (status === 'approved') {
     authData= await Auth.findByIdAndUpdate(vendor?.authId, { isActive: true, is_block: false });
 } 
-
-// console.log("=============", vendor.email, "---",vendor.name)
+ 
 
   const updatedVendor = await Vendor.findByIdAndUpdate(id, { status }, { new: true });
   
   if(status === 'declined'){
-    sendResetEmail(
+    sendVendorDeclined(
       vendor.email,
       `<!DOCTYPE html>
         <html lang="en">
@@ -617,7 +619,7 @@ const updateVendorStatus = async (req: any) => {
                     <p>If you have any questions or would like to discuss this further, please feel free to reach out.</p>
                    <p>Thank you for your understanding.</p>
                 <div class="footer">
-                    <p>&copy; ${new Date().getFullYear()} bdCalling</p>
+                    <p>&copy; ${new Date().getFullYear()} Whatsupjaco.com</p>
                 </div>
            </div>
         </body>

@@ -62,6 +62,24 @@ const BannerSchema  = new Schema<IBanner>(
   }, 
 );
 
+const eventClickOverview   = new Schema<{
+  eventId:  Schema.Types.ObjectId,
+}>(
+  {
+    eventId: {
+      type: Schema.Types.ObjectId, 
+      ref: 'Event',
+      required: true,
+
+    },
+  }, {
+    timestamps: true  
+  }
+);
+
+export const ClickOverview = model<{
+  eventId:  Schema.Types.ObjectId,
+}>('Overview', eventClickOverview);
 
 export const Banners = model<IBanner>('Banners', BannerSchema);
 export const Packages = model<IPackages>('Packages', PackagesSchema);

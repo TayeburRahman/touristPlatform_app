@@ -192,6 +192,18 @@ const getMyEvents : RequestHandler = catchAsync( async (req: Request, res: Respo
     });
 })
 
+const eventClickOverview : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result = await EventService.eventClickOverview(req); 
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: `Get successfully!`,
+        data: result,
+    });
+})
+
+ 
+
  
  
 
@@ -212,6 +224,7 @@ export const EventController = {
     getVendorFeatured,
     declinedEvents,
     duplicateEvents,
-    getMyEvents
+    getMyEvents,
+    eventClickOverview
     
 }

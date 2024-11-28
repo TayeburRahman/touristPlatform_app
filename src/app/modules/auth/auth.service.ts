@@ -115,6 +115,7 @@ const registrationAccount = async (payload: IAuth) => {
     activationCode,
     password,
     expirationTime: Date.now() + 3 * 60 * 1000,
+    isActive: false,
   };
 
   if (role === "USER") { 
@@ -129,7 +130,10 @@ const registrationAccount = async (payload: IAuth) => {
   }
 
   let createAuth;
-  if (role !== ENUM_USER_ROLE.SUPER_ADMIN) {
+  if (role === ENUM_USER_ROLE.VENDOR || role === ENUM_USER_ROLE.USER) { 
+    createAuth = await Auth.create(auth);
+  }else{
+    auth.isActive = true;
     createAuth = await Auth.create(auth);
   }
   if (!createAuth) {
@@ -451,7 +455,7 @@ const resendCodeActivationAccount = async (payload: { email: string }) => {
             <p>Please use this code to activate your account. If you did not request this, please ignore this email.</p>
             <p>Thank you!</p>
             <div class="footer">
-                <p>&copy; ${new Date().getFullYear()} bdCalling</p>
+                <p>&copy; ${new Date().getFullYear()} Whatsupjaco.com</p>
             </div>
         </div>
     </body>
@@ -518,7 +522,7 @@ const resendCodeForgotAccount = async (payload: ForgotPasswordPayload) => {
             <p>Please use this code to activate your account. If you did not request this, please ignore this email.</p>
             <p>Thank you!</p>
             <div class="footer">
-                <p>&copy; ${new Date().getFullYear()} bdCalling</p>
+                <p>&copy; ${new Date().getFullYear()} Whatsupjaco.com</p>
             </div>
         </div>
     </body>

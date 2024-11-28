@@ -8,10 +8,10 @@ import { IReqUser } from './auth.interface';
 
 const registrationAccount = catchAsync(async (req: Request, res: Response) => {
   const { role } = await AuthService.registrationAccount(req.body);
-  const message =
-    role === "USER"
-      ? "Please check your email for the activation OTP code."
-      : "Your account is awaiting admin approval.";
+  let message : any;
+  message= role === "USER" && "Please check your email for the activation OTP code."
+   message= role === "VENDOR" && "Your account is awaiting admin approval.";
+   message= role === "ADMIN" && "Successfully create account!.";
 
   sendResponse(res, {
     statusCode: 200,

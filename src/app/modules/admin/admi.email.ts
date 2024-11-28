@@ -53,7 +53,7 @@ export const registrationSuccess = (userData: any) => `
         <h1>Welcome to Tourist Platform App</h1>
         <p>Hello ${userData?.user?.name},</p>
         <p>Thank you for registering with Tourist Platform App.</p>
-        <p>If you have any questions, please contact us at <a href="mailto:bdCalling@gmail.com">bdCalling@gmail.com</a>.</p>
+        <p>If you have any questions, please contact us at <a href="www.whatsupjaco.com">whatsupjaco.com</a>.</p>
       </div>
     </body>
   </html>
