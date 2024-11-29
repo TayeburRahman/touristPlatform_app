@@ -680,7 +680,6 @@ export const eventClickOverview = async (req: Request) => {
   }
 };
 
-
 const updateFeatured = async (req: Request) => {
     try { 
         const { eventId } = req.params;
