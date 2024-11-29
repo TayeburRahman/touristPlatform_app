@@ -89,8 +89,7 @@ const getAllVendor = catchAsync(async (req: Request, res: Response) => {
   });
 });
 
-const updateVendorStatus = catchAsync(async (req: Request, res: Response) => {
-
+const updateVendorStatus = catchAsync(async (req: Request, res: Response) => { 
   const { status } = req.query as any;
  
   const result = await VendorService.updateVendorStatus(req as any);

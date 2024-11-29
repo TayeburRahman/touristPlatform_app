@@ -204,11 +204,11 @@ const eventClickOverview : RequestHandler = catchAsync( async (req: Request, res
 
 
 const updateFeatured : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
-    const result = await EventService.updateFeatured(req); 
+    const {result, massage} = await EventService.updateFeatured(req); 
     sendResponse(res, {
         statusCode: 200,
         success: true,
-        message: `Get successfully!`,
+        message: massage,
         data: result,
     });
 })

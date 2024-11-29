@@ -4,9 +4,7 @@ import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import routes from './app/routes';
 import { NotFoundHandler } from './errors/NotFoundHandler';
 import cookieParser from 'cookie-parser';
-import bodyParser from 'body-parser';
-import Stripe from 'stripe';
-import config from './config'; 
+import bodyParser from 'body-parser'; 
 import { PaymentController } from './app/modules/payment/payment.controller';
 
 export const app: Application = express();

@@ -13,7 +13,7 @@ import { ENUM_USER_ROLE } from '../../../enums/user';
 import mongoose from 'mongoose';
 import Event from '../event/event.model'; 
 import QueryBuilder from '../../../builder/QueryBuilder';
-import { sendVendorDeclined, sendVendorRequest } from '../../../mails/vendor.mail';
+import { acceptedVendorRequest, sendVendorDeclined, sendVendorRequest } from '../../../mails/vendor.mail';
 
 interface DeleteAccountPayload {
   email: string;
@@ -141,6 +141,72 @@ const vendorRegister = async (req: any) => {
   } else {
     throw new ApiError(httpStatus.BAD_REQUEST, "Invalid role provided!");
   }
+
+  sendVendorRequest(
+    other.email,
+    `<!DOCTYPE html>
+      <html lang="en">
+      <head>
+        <meta charset="UTF-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1.0">
+        <title>Vendor Request Submitted</title>
+        <style>
+          body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+          }
+          .container {
+            max-width: 600px;
+            margin: auto;
+            background-color: white;
+            padding: 20px;
+            border-radius: 8px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+          }
+          h1 {
+            color: #333;
+            font-size: 24px;
+          }
+          p {
+            color: #555;
+            line-height: 1.6;
+          }
+          .button {
+            display: inline-block;
+            background-color: #007bff;
+            color: white;
+            padding: 10px 20px;
+            text-decoration: none;
+            border-radius: 5px;
+            font-weight: bold;
+          }
+          .footer {
+            margin-top: 30px;
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+          }
+        </style>
+      </head>
+      <body>
+        <div class="container">
+          <h1>Hello, ${other.name}!</h1>
+          <p>We have received your vendor request for <strong>${other.business_name}</strong>. Thank you for your interest in partnering with us!</p>
+          <p>Our team will review your application and get back to you shortly. If we need any additional information, we will reach out to the email address provided.</p>
+          <p>In the meantime, if you have any questions or need further assistance, feel free to contact us.</p>
+          <p style="margin: 20px 0;">
+            <a href="www.whatsupjaco.com" class="button">Contact Support</a>
+          </p>
+          <p>We appreciate your patience and look forward to working with you!</p>
+          <div class="footer">
+            <p>&copy; ${new Date().getFullYear()} Whatsupjaco.com. All rights reserved.</p>
+          </div>
+        </div>
+      </body>
+      </html>`
+  );
   // Return success message
   return { result, message: "Your account is awaiting admin approval!" };
 };
@@ -223,59 +289,7 @@ const vendorRequest = async (req: RequestData) => {
   other.userId = userId;
 
 
-  const result = await Vendor.create(other);
-
-  sendVendorRequest(
-    other.email,
-    `<!DOCTYPE html>
-      <html lang="en">
-     <head>
-     <meta charset="UTF-8">
-     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-     <title>Advertisement Declined</title>
-     <style>
-        body {
-            font-family: Arial, sans-serif;
-            background-color: #f4f4f4;
-            margin: 0;
-            padding: 20px;
-        }
-        .container {
-            max-width: 600px;
-            margin: auto;
-            background: white;
-            padding: 20px;
-            border-radius: 5px;
-            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-        }
-        h1 {
-            color: #333;
-        }
-        p {
-            color: #555;
-            line-height: 1.5;
-        }
-        .footer {
-            margin-top: 20px;
-            font-size: 12px;
-            color: #999;
-        }
-     </style>
-     </head>
-     <body>
-         <div class="container">
-              <h1>Hello, ${other.name}</h1>
-              <p>Thank you for submitting your advertisement with us. Unfortunately, we must inform you that your advertisement has been declined. Here is the reason provided:</p>
-               <p><strong>${reasons}</strong></p> 
-                  <p>If you have any questions or would like to discuss this further, please feel free to reach out.</p>
-                 <p>Thank you for your understanding.</p>
-              <div class="footer">
-                  <p>&copy; ${new Date().getFullYear()} Whatsupjaco.com</p>
-              </div>
-         </div>
-      </body>
-      </html>`
-  );
+  const result = await Vendor.create(other); 
 
   return { result, message: "Request sent successfully!" };
 };
@@ -306,54 +320,74 @@ const acceptVendorRequest = async (req: RequestData) => {
     session.endSession();
 
     if (userUpdate) {
-      sendResetEmail(
+      acceptedVendorRequest(
         authUpdate.email,
         `<!DOCTYPE html>
-          <html lang="en">
-          <head>
-              <meta charset="UTF-8">
-              <meta name="viewport" content="width=device-width, initial-scale=1.0">
-              <title>Activation Code</title>
-              <style>
-                  body {
-                      font-family: Arial, sans-serif;
-                      background-color: #f4f4f4;
-                      margin: 0;
-                      padding: 20px;
-                  }
-                  .container {
-                      max-width: 600px;
-                      margin: auto;
-                      background: white;
-                      padding: 20px;
-                      border-radius: 5px;
-                      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
-                  }
-                  h1 {
-                      color: #333;
-                  }
-                  p {
-                      color: #555;
-                      line-height: 1.5;
-                  }
-                  .footer {
-                      margin-top: 20px;
-                      font-size: 12px;
-                      color: #999;
-                  }
-              </style>
-          </head>
-          <body>
-              <div class="container">
-                  <h1>Hello, ${authUpdate.name}</h1>
-                   <p>Your vendor account request has been accepted successfully.</p>
-                  <p>Thank you!</p>
-                  <div class="footer">
-                      <p>&copy; ${new Date().getFullYear()} Whatsupjaco.com</p>
-                  </div>
-              </div>
-          </body>
-          </html>`
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vendor Request Approval</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: #ffffff;
+            padding: 30px;
+            border-radius: 10px;
+            box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333333;
+            font-size: 24px;
+        }
+        p {
+            color: #555555;
+            font-size: 16px;
+            line-height: 1.6;
+        }
+        .cta-button {
+            display: inline-block;
+            padding: 10px 20px;
+            font-size: 16px;
+            color: #ffffff;
+            background-color: #007bff;
+            text-decoration: none;
+            border-radius: 5px;
+            margin-top: 20px;
+        }
+        .cta-button:hover {
+            background-color: #0056b3;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999999;
+            text-align: center;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>Hello, ${authUpdate.name}</h1>
+        <p>We are excited to inform you that your vendor account request has been approved!</p>
+        <p>Your account is now active, and you can start managing your business through our platform.</p>
+        <p>If you have any questions or need assistance, feel free to contact our support team.</p>
+
+        <a href="https://whatsupjaco.com/dashboard" class="cta-button">Go to Dashboard</a>
+
+        <div class="footer">
+            <p>&copy; ${new Date().getFullYear()} Whatsupjaco.com. All rights reserved.</p>
+        </div>
+    </div>
+</body>
+</html>`
       );
     }
 
@@ -620,7 +654,77 @@ const updateVendorStatus = async (req: any) => {
   }
   if (status === 'approved') {
     authData= await Auth.findByIdAndUpdate(vendor?.authId, { isActive: true, is_block: false });
-} 
+
+    acceptedVendorRequest(
+      vendor.email,
+      `<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Vendor Request Approval</title>
+  <style>
+      body {
+          font-family: Arial, sans-serif;
+          background-color: #f4f4f4;
+          margin: 0;
+          padding: 20px;
+      }
+      .container {
+          max-width: 600px;
+          margin: auto;
+          background: #ffffff;
+          padding: 30px;
+          border-radius: 10px;
+          box-shadow: 0 4px 10px rgba(0, 0, 0, 0.1);
+      }
+      h1 {
+          color: #333333;
+          font-size: 24px;
+      }
+      p {
+          color: #555555;
+          font-size: 16px;
+          line-height: 1.6;
+      }
+      .cta-button {
+          display: inline-block;
+          padding: 10px 20px;
+          font-size: 16px;
+          color: #ffffff;
+          background-color: #007bff;
+          text-decoration: none;
+          border-radius: 5px;
+          margin-top: 20px;
+      }
+      .cta-button:hover {
+          background-color: #0056b3;
+      }
+      .footer {
+          margin-top: 20px;
+          font-size: 12px;
+          color: #999999;
+          text-align: center;
+      }
+  </style>
+</head>
+<body>
+  <div class="container">
+      <h1>Hello, ${vendor.name}</h1>
+      <p>We are excited to inform you that your vendor account request has been approved!</p>
+      <p>Your account is now active, and you can start managing your business through our platform.</p>
+      <p>If you have any questions or need assistance, feel free to contact our support team.</p>
+
+      <a href="https://whatsupjaco.com/dashboard" class="cta-button">Go to Dashboard</a>
+
+      <div class="footer">
+          <p>&copy; ${new Date().getFullYear()} Whatsupjaco.com. All rights reserved.</p>
+      </div>
+  </div>
+</body>
+</html>`
+    );
+  } 
  
 
   const updatedVendor = await Vendor.findByIdAndUpdate(id, { status }, { new: true });

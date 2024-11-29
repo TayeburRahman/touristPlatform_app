@@ -4,29 +4,29 @@ import { ManageService } from './settings.service';
 import sendResponse from '../../../shared/sendResponse';
 
 const addAboutUs = catchAsync(async (req: Request, res: Response) => {
-  const result = await ManageService.addAboutUs(req.body);
+  const {result, message} = await ManageService.addAboutUs(req.body);
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Successful',
+    message: message,
     data: result,
   });
 });
 const addFacts = catchAsync(async (req: Request, res: Response) => {
-  const result = await ManageService.addFacts(req.body);
+  const {result, message} = await ManageService.addFacts(req.body);
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Successful',
+    message: message,
     data: result,
   });
 });
 const addTermsConditions = catchAsync(async (req: Request, res: Response) => {
-  const result = await ManageService.addTermsConditions(req.body);
+  const {result, message} = await ManageService.addTermsConditions(req.body);
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Successful',
+    message: message,
     data: result,
   });
 });
@@ -90,7 +90,7 @@ const getFaq = catchAsync(async (req: Request, res: Response) => {
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: 'Successfully Delete!',
+    message: 'Successfully get!',
     data: result,
   });
 });

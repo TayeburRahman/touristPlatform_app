@@ -15,7 +15,7 @@ const addFacts = async (payload: any) => {
     result= await Facts.create(payload);
     message = 'Facts added successfully!';
   }
-  return
+  return {result, message};
 };
 const getFacts = async () => {
   return await Facts.findOne();
@@ -65,7 +65,7 @@ const getTermsConditions = async () => {
 };
 //! Faqs
 const addFaq = async (payload: any) => {
-  console.log(payload)
+ 
   if (!payload?.questions || !payload?.answer){
     throw new Error("Question and answer are required");
   }

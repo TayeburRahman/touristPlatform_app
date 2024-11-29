@@ -684,6 +684,8 @@ const updateFeatured = async (req: Request) => {
     try { 
         const { eventId } = req.params;
 
+        console.log("====eventId===", eventId,)
+
         if (!eventId) {
             throw new ApiError(400, 'Event ID is required.');
         } 
@@ -694,9 +696,12 @@ const updateFeatured = async (req: Request) => {
         } 
 
         existingEvent.featured = featured;   
-        const updatedEvent = await existingEvent.save();
+        const result = await existingEvent.save();
+        
+        let massage = featured === null ? "Featured add successfully":
+        "Featured cancel successfully"
 
-        return updatedEvent;
+        return {result, massage };
     } catch (error) {
         console.error('Error updating event:', error); 
         throw new ApiError(500, 'Failed to update event.');
