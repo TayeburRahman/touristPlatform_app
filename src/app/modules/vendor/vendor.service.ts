@@ -13,7 +13,7 @@ import { ENUM_USER_ROLE } from '../../../enums/user';
 import mongoose from 'mongoose';
 import Event from '../event/event.model'; 
 import QueryBuilder from '../../../builder/QueryBuilder';
-import { sendVendorDeclined } from '../../../mails/vendor.mail';
+import { sendVendorDeclined, sendVendorRequest } from '../../../mails/vendor.mail';
 
 interface DeleteAccountPayload {
   email: string;
@@ -224,6 +224,58 @@ const vendorRequest = async (req: RequestData) => {
 
 
   const result = await Vendor.create(other);
+
+  sendVendorRequest(
+    other.email,
+    `<!DOCTYPE html>
+      <html lang="en">
+     <head>
+     <meta charset="UTF-8">
+     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+     <title>Advertisement Declined</title>
+     <style>
+        body {
+            font-family: Arial, sans-serif;
+            background-color: #f4f4f4;
+            margin: 0;
+            padding: 20px;
+        }
+        .container {
+            max-width: 600px;
+            margin: auto;
+            background: white;
+            padding: 20px;
+            border-radius: 5px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+        }
+        h1 {
+            color: #333;
+        }
+        p {
+            color: #555;
+            line-height: 1.5;
+        }
+        .footer {
+            margin-top: 20px;
+            font-size: 12px;
+            color: #999;
+        }
+     </style>
+     </head>
+     <body>
+         <div class="container">
+              <h1>Hello, ${other.name}</h1>
+              <p>Thank you for submitting your advertisement with us. Unfortunately, we must inform you that your advertisement has been declined. Here is the reason provided:</p>
+               <p><strong>${reasons}</strong></p> 
+                  <p>If you have any questions or would like to discuss this further, please feel free to reach out.</p>
+                 <p>Thank you for your understanding.</p>
+              <div class="footer">
+                  <p>&copy; ${new Date().getFullYear()} Whatsupjaco.com</p>
+              </div>
+         </div>
+      </body>
+      </html>`
+  );
 
   return { result, message: "Request sent successfully!" };
 };

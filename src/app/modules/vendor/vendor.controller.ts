@@ -90,12 +90,14 @@ const getAllVendor = catchAsync(async (req: Request, res: Response) => {
 });
 
 const updateVendorStatus = catchAsync(async (req: Request, res: Response) => {
+
+  const { status } = req.query as any;
  
   const result = await VendorService.updateVendorStatus(req as any);
   sendResponse(res, {
     statusCode: 200,
     success: true,
-    message: "Status Update successfully",
+    message: `Vendor ${status} successfully`,
     data: result,
   });
 });
