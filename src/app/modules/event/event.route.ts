@@ -89,6 +89,11 @@ router.get(
     '/click-overview', 
     EventController.eventClickOverview,
 ); 
+
+router.patch(
+    '/featured/:eventId',  
+    EventController.updateFeatured,
+); 
  
 
 

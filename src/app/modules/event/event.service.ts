@@ -188,7 +188,6 @@ const createNewEvent = async (req: Request) => {
 
 const updateEvents = async (req: Request) => {
     try {
-        // Extract and validate user ID and event ID
         const { userId } = req.user as IReqUser;
         const { eventId } = req.params;
 
@@ -200,25 +199,23 @@ const updateEvents = async (req: Request) => {
             name, date, time, duration, address, option, end_date, 
             featured, social_media, longitude, latitude, 
             recurrence_end, recurrence, description, category 
-        } = req.body;
+        } = req.body; 
+
 
         console.log("featured", featured)
-
-        // Validate file uploads if any
+ 
         const { event_image } = req.files as { event_image: Express.Multer.File[] };
         let images: string[] = [];
 
         if (event_image && Array.isArray(event_image)) {
             images = event_image.map(file => `/images/events/${file.filename}`);
         }
-
-        // Find the event in the database
+ 
         const existingEvent = await Event.findById(eventId) as any;
         if (!existingEvent) {
             throw new ApiError(404, 'Event not found or unauthorized.');
         }
-
-        // Update event fields if they exist in the request body
+ 
         if (name) existingEvent.name = name;
         if (date) {
             const eventDate = new Date(date);
@@ -233,6 +230,7 @@ const updateEvents = async (req: Request) => {
         if (option) existingEvent.option = option;
         if (end_date) existingEvent.end_date = end_date;
         if (featured !== undefined) existingEvent.featured = featured; 
+        if (featured === undefined) existingEvent.featured = null; 
         if (social_media) existingEvent.social_media = social_media;
         if (category) existingEvent.category = category;
         if (description) existingEvent.description = description;
@@ -246,9 +244,7 @@ const updateEvents = async (req: Request) => {
         }
         if (images.length > 0) existingEvent.event_image = images;
 
-          existingEvent.status = 'updated';
-
-        // Save the updated event in the database
+        existingEvent.status = 'updated';
         const updatedEvent = await existingEvent.save();
 
         return updatedEvent;
@@ -685,6 +681,30 @@ export const eventClickOverview = async (req: Request) => {
 };
 
 
+const updateFeatured = async (req: Request) => {
+    try { 
+        const { eventId } = req.params;
+
+        if (!eventId) {
+            throw new ApiError(400, 'Event ID is required.');
+        } 
+        const { featured } = req.body;  
+        const existingEvent = await Event.findById(eventId) as any;
+        if (!existingEvent) {
+            throw new ApiError(404, 'Event not found or unauthorized.');
+        } 
+
+        existingEvent.featured = featured;   
+        const updatedEvent = await existingEvent.save();
+
+        return updatedEvent;
+    } catch (error) {
+        console.error('Error updating event:', error); 
+        throw new ApiError(500, 'Failed to update event.');
+    }
+};
+
+
  
 
 export const EventService = {
@@ -704,6 +724,7 @@ export const EventService = {
     declinedEvents,
     duplicateEvents,
     getMyEvents,
-    eventClickOverview
+    eventClickOverview,
+    updateFeatured
 
 };

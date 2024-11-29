@@ -202,6 +202,17 @@ const eventClickOverview : RequestHandler = catchAsync( async (req: Request, res
     });
 })
 
+
+const updateFeatured : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result = await EventService.updateFeatured(req); 
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: `Get successfully!`,
+        data: result,
+    });
+})
+
  
 
  
@@ -225,6 +236,7 @@ export const EventController = {
     declinedEvents,
     duplicateEvents,
     getMyEvents,
-    eventClickOverview
+    eventClickOverview,
+    updateFeatured
     
 }
