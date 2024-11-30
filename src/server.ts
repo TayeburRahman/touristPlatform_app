@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/ban-ts-comment */
-const mongoose = require('mongoose'); 
+import mongoose from 'mongoose';
+import { Server } from 'socket.io';
 import { app } from './app';
 import config from './config/index';
 import { errorLogger, logger } from './shared/logger'; 
