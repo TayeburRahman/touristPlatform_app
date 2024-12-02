@@ -106,9 +106,7 @@ const saveUserClickEvent : RequestHandler = catchAsync( async (req: Request, res
         message: `Event Approved Successfully!`,
         data: result,
     });
-}) 
-
- 
+})  
 
 const getFeaturedEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
     const result = await EventService.getFeaturedEvents(req); 
@@ -213,8 +211,16 @@ const updateFeatured : RequestHandler = catchAsync( async (req: Request, res: Re
     });
 })
 
- 
 
+const getPastEventsByVendor : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result  = await EventService.getPastEventsByVendor(req.query.vendor as string); 
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: 'get past events successfully',
+        data: result,
+    })
+})
  
  
 
@@ -237,6 +243,7 @@ export const EventController = {
     duplicateEvents,
     getMyEvents,
     eventClickOverview,
-    updateFeatured
+    updateFeatured,
+    getPastEventsByVendor
     
 }

@@ -46,6 +46,7 @@ export interface IVendor extends Document {
   business_name: string | null
   userId: string | null;
   business_profile: string | null;
+  category: string | null;
 }
 
 

@@ -94,6 +94,13 @@ router.patch(
     '/featured/:eventId',  
     EventController.updateFeatured,
 ); 
+
+router.get(
+    '/past-vendor',  
+    EventController.getPastEventsByVendor,
+); 
+
+ 
  
 
 

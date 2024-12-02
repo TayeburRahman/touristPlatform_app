@@ -104,6 +104,10 @@ const VendorSchema = new Schema<IVendor>(
     location_map: {
       type: locationSchema,
     }, 
+    category: { 
+      type: String,
+       required: true,
+    },
     package: {
       type:  Schema.Types.ObjectId,
       ref: 'Packages',
