@@ -11,10 +11,18 @@ router.get('/popular-events', EventController.getPopularMostEvents);
 
 router.post(
     '/create',
-    auth(ENUM_USER_ROLE.VENDOR),
+    auth(ENUM_USER_ROLE.VENDOR,ENUM_USER_ROLE.ADMIN),
     uploadFile(),
     EventController.createNewEvent,
 );  
+
+router.post(
+    '/admin-create',
+    auth(ENUM_USER_ROLE.VENDOR,ENUM_USER_ROLE.ADMIN),
+    uploadFile(),
+    EventController.createAdminNewEvent,
+);  
+ 
 router.patch(
     '/update/:eventId',
     auth(ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN ),

@@ -45,6 +45,19 @@ const createNewEvent : RequestHandler = catchAsync( async (req: Request, res: Re
     });
 })
 
+const createAdminNewEvent : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+    const result = await EventService.createAdminNewEvent(req)
+    sendResponse(res, {
+        statusCode: 200,
+        success: true,
+        message: `Event Created Successfully`,
+        data: result,
+    });
+})
+
+
+ 
+
 const updateEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
     const result = await EventService.updateEvents(req)
     sendResponse(res, {
@@ -224,6 +237,9 @@ const getPastEventsByVendor : RequestHandler = catchAsync( async (req: Request, 
  
  
 
+ 
+ 
+
 export const EventController = {
     getEvents,
     getAllEvents,    
@@ -244,6 +260,7 @@ export const EventController = {
     getMyEvents,
     eventClickOverview,
     updateFeatured,
-    getPastEventsByVendor
+    getPastEventsByVendor,
+    createAdminNewEvent
     
 }

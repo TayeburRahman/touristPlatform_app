@@ -601,7 +601,7 @@ const getVendorProfileDetails = async (params: { id: string }) => {
   const events = await Event.find({
     status: 'approved', vendor: id
   })
-    .select('name event_image location category address')
+    .select('name event_image location category address end_date date')
     .populate('category', 'name')
 
   return { result, events, featured };

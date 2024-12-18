@@ -11,7 +11,7 @@ import cron from "node-cron";
 import { EventDate } from "./event.helper";
 import { ClickOverview } from "../dashboard/dashboard.model";
 
-// set inactive evnets
+// set inactive events
 cron.schedule("* * * * *", async () => {
     try {
         const now = new Date();
@@ -32,6 +32,7 @@ cron.schedule("* * * * *", async () => {
         logger.error("Error set event active:", error);
     }
 });
+
 cron.schedule("* * * * *", async () => {
     try {
         const now = new Date();
@@ -67,6 +68,7 @@ cron.schedule("* * * * *", async () => {
         logger.error("Error setting event active:", error);
     }
 });
+
 const createNewEvent = async (req: Request) => {
     const { userId, authId, role } = req.user as IReqUser;
     const { event_image } = req.files as { event_image: Express.Multer.File[] };
@@ -148,6 +150,120 @@ const createNewEvent = async (req: Request) => {
 
     const newEvent = await Event.create({
         vendor: userId,
+        name,
+        date: eventDate,
+        time,
+        duration,
+        option,
+        social_media,
+        location,
+        description,
+        category,
+        event_image: images,
+        featured,
+        end_date,
+        address,
+        recurrence,
+        recurrence_end
+    });
+
+    if (!newEvent) {
+        throw new ApiError(500, 'Failed to create event.');
+    };
+
+    // const available_events = Math.max(0, plan.available_events - 1);
+    // let featured_events
+    // if (featured) {
+    //     featured_events = Math.max(0, plan.featured_events - 1);
+    // } else {
+    //     featured_events = plan.featured_events;
+    // };
+
+    // await Plan.findByIdAndUpdate(plan._id, {
+    //     available_events,
+    //     featured_events,
+    //     events: [...plan.events, newEvent._id],
+    // });
+
+    return newEvent;
+};
+
+const createAdminNewEvent = async (req: Request) => {
+    const { userId, authId, role } = req.user as IReqUser;
+    const { event_image } = req.files as { event_image: Express.Multer.File[] };
+    const { name, date, time, featured,
+        vendor,
+        social_media,
+        end_date,
+        address,
+        duration, option, longitude, latitude, description, recurrence, category, recurrence_end } = req.body as any;
+
+    const data = req.body;
+    // const plan: any = await Plan.findOne({
+    //     userId: userId,
+    //     active: true,
+    //     available_events: { $gt: 0 }
+    // });
+
+    // if (!plan) {
+    //     throw new ApiError(403, 'You do not have enough available events for this plan.');
+    // }
+
+    // const featuredEvent: any = await Plan.findOne({
+    //     userId: userId,
+    //     active: true,
+    //     featured_events: { $gt: 0 }
+    // });
+
+    // if (featured && !featuredEvent) {
+    //     throw new ApiError(403, 'You do not have enough available to feature the date of this event.');
+    // }
+
+    // if (!Array.isArray(plan.events)) {
+    //     plan.events = [];
+    // }
+    // console.log("===Events===", date, end_date, recurrence_end);
+    const requiredFields = [
+        "name",
+        "date",
+        "time",
+        "option",
+        "longitude",
+        "latitude",
+        "category",
+        "end_date",
+        "address",
+        "recurrence",
+        "vendor"
+    ];
+
+    for (const field of requiredFields) {
+        if (!data[field]) {
+            throw new ApiError(400, `${field} is required.`);
+        }
+    };
+
+    if (recurrence !== "none" && !recurrence_end) {
+        throw new ApiError(400, 'Recurrence end date is required for recurring events.');
+    }
+    const eventDate = new Date(date);
+
+    if (isNaN(eventDate.getTime())) {
+        throw new ApiError(400, 'Invalid date format.');
+    };
+
+    const location = {
+        type: 'Point',
+        coordinates: [longitude, latitude],
+    };
+
+    let images: any = [];
+    if (event_image && Array.isArray(event_image)) {
+        images = event_image.map(file => `/images/events/${file.filename}`);
+    } 
+
+    const newEvent = await Event.create({
+        vendor: vendor,
         name,
         date: eventDate,
         time,
@@ -781,6 +897,7 @@ export const EventService = {
     getMyEvents,
     eventClickOverview,
     updateFeatured,
-    getPastEventsByVendor
+    getPastEventsByVendor,
+    createAdminNewEvent
 
 };
