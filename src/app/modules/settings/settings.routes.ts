@@ -46,11 +46,7 @@ router.delete(
 router.get(
   '/get-faqs',
   ManageController.getFaq,
-); 
-router.get(
-  '/get-faqs',
-  ManageController.getFaq,
-); 
+);  
  
 
 export const ManageRoutes = router;

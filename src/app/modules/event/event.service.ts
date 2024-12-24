@@ -106,8 +106,7 @@ const createNewEvent = async (req: Request) => {
     const requiredFields = [
         "name",
         "date",
-        "time",
-        "option",
+        "time", 
         "longitude",
         "latitude",
         "category",
@@ -542,6 +541,7 @@ const getEvents = async (req: Request) => {
     }
 
     let categoryQuery = Event.find(filterConditions)
+        .sort({ date: 1 })
         .select('name event_image location category address date')
         .populate({
             path: 'category',
@@ -700,6 +700,7 @@ const getVendorFeatured = async (req: Request) => {
     const result = await Event.find({
         status: 'approved', vendor: vendorId, featured: { $ne: null }
     })
+    .sort({ date: 1 })
         .select('name event_image location category address')
         .populate('category', 'name')
 
