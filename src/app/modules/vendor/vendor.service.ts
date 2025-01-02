@@ -298,30 +298,22 @@ const acceptVendorRequest = async (req: RequestData) => {
   const vendorDb = await Vendor.findById(id) as IVendor;
   const authDb: any = await Auth.findById(vendorDb?.authId);
 
-  console.log("==id=", id, )
-  console.log("==vendor=", vendorDb )
-  console.log("==auth=", authDb )
+  console.log("==id=", id);
+  console.log("==vendor=", vendorDb);
+  console.log("==auth=", authDb);
 
   if (!vendorDb || !authDb) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Vendor or Auth not found');
   }
 
-  const session = await mongoose.startSession();
-  session.startTransaction();
-
   try {
-
     if (authDb.role === "USER") {
       authDb.role = "VENDOR";
       await authDb.save();
     }
 
-    const userUpdate = await Vendor.findByIdAndUpdate(id, { status: "approved" }, { new: true, session });
-
-    const authUpdate = await Auth.findByIdAndUpdate(authDb._id, { isActive: true }, { new: true, session }) as IAuth;
-
-    await session.commitTransaction();
-    session.endSession();
+    const userUpdate = await Vendor.findByIdAndUpdate(id, { status: "approved" }, { new: true });
+    const authUpdate = await Auth.findByIdAndUpdate(authDb._id, { isActive: true }, { new: true }) as IAuth;
 
     if (userUpdate) {
       acceptedVendorRequest(
@@ -394,16 +386,13 @@ const acceptVendorRequest = async (req: RequestData) => {
 </html>`
       );
     }
-
     return { userUpdate, authUpdate };
 
   } catch (error) {
-    // Abort transaction if any error occurs
-    await session.abortTransaction();
-    session.endSession();
     throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, 'Failed to accept vendor request');
   }
 };
+
 // const declinedVendor = async (req: RequestData) => {
 //   const { id }: any = req.params
 //   const data = req.body as {
