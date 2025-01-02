@@ -24,7 +24,8 @@ app.use(
       "https://whatsupjaco.com",
       "https://www.whatsupjaco.com", 
       "https://dashboard.whatsupjaco.com",
-      "https://www.dashboard.whatsupjaco.com"
+      "https://www.dashboard.whatsupjaco.com",
+      "http://localhost:3001"
     ],
     credentials: true,
   }),
