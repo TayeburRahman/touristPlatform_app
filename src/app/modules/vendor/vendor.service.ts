@@ -298,6 +298,10 @@ const acceptVendorRequest = async (req: RequestData) => {
   const vendorDb = await Vendor.findById(id) as IVendor;
   const authDb: any = await Auth.findById(vendorDb?.authId);
 
+  console.log("==id=", id, )
+  console.log("==vendor=", vendorDb )
+  console.log("==auth=", authDb )
+
   if (!vendorDb || !authDb) {
     throw new ApiError(httpStatus.NOT_FOUND, 'Vendor or Auth not found');
   }
