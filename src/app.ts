@@ -20,12 +20,12 @@ app.use(
       "http://192.168.10.25:3002",
       "http://167.71.179.42:3000",
       "http://167.71.179.42:3002",
+      
       "http://localhost:3001 ",
       "https://whatsupjaco.com",
       "https://www.whatsupjaco.com", 
       "https://dashboard.whatsupjaco.com",
-      "https://www.dashboard.whatsupjaco.com",
-      "http://localhost:3001"
+      "https://www.dashboard.whatsupjaco.com", 
     ],
     credentials: true,
   }),

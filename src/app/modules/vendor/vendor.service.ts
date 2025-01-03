@@ -11,7 +11,7 @@ import cron from "node-cron";
 import { Plan } from '../payment/payment.model';
 import { ENUM_USER_ROLE } from '../../../enums/user';
 import mongoose from 'mongoose';
-import Event from '../event/event.model'; 
+import Event from '../event/event.model';
 import QueryBuilder from '../../../builder/QueryBuilder';
 import { acceptedVendorRequest, sendVendorDeclined, sendVendorRequest } from '../../../mails/vendor.mail';
 
@@ -289,7 +289,7 @@ const vendorRequest = async (req: RequestData) => {
   other.userId = userId;
 
 
-  const result = await Vendor.create(other); 
+  const result = await Vendor.create(other);
 
   return { result, message: "Request sent successfully!" };
 };
@@ -600,20 +600,20 @@ const getVendorProfileDetails = async (params: { id: string }) => {
   return { result, events, featured };
 };
 const getAllVendor = async (req: any) => {
-  const query =  req.query as any; 
+  const query = req.query as any;
   const categoryQuery = new QueryBuilder(
-          Vendor.find()
-              // .select('name event_image location category address')
-              .populate('userId')
-          ,
-          query,
-      )
-          .search(['name'])
-          .filter()
-          .sort()
-          .paginate()
-          .fields();
- 
+    Vendor.find()
+      // .select('name event_image location category address')
+      .populate('userId')
+    ,
+    query,
+  )
+    .search(['name'])
+    .filter()
+    .sort()
+    .paginate()
+    .fields();
+
 
   const result = await categoryQuery.modelQuery;
   const meta = await categoryQuery.countTotal();
@@ -624,29 +624,29 @@ const updateVendorStatus = async (req: any) => {
   const { reasons } = req.body as any;
 
   if (!id || !status) {
-      throw new ApiError(httpStatus.BAD_REQUEST, "Missing vendor Id or status");
+    throw new ApiError(httpStatus.BAD_REQUEST, "Missing vendor Id or status");
   }
 
   const validStatuses = ['pending', 'approved', 'declined', 'deactivate'];
   if (!validStatuses.includes(status)) {
-      throw new ApiError(httpStatus.BAD_REQUEST, "Invalid status");
+    throw new ApiError(httpStatus.BAD_REQUEST, "Invalid status");
   }
 
-  if(status === 'declined' && !reasons){
+  if (status === 'declined' && !reasons) {
     throw new ApiError(httpStatus.BAD_REQUEST, "Reasons are required for declining vendor");
   }
 
   const vendor = await Vendor.findById(id);
   if (!vendor) {
-      throw new ApiError(httpStatus.NOT_FOUND, "Vendor not found");
+    throw new ApiError(httpStatus.NOT_FOUND, "Vendor not found");
   }
 
   let authData;
   if (status === 'deactivate') {
-    authData= await Auth.findByIdAndUpdate(vendor?.authId, { isActive: false, is_block: true });
+    authData = await Auth.findByIdAndUpdate(vendor?.authId, { isActive: false, is_block: true });
   }
   if (status === 'approved') {
-    authData= await Auth.findByIdAndUpdate(vendor?.authId, { isActive: true, is_block: false });
+    authData = await Auth.findByIdAndUpdate(vendor?.authId, { isActive: true, is_block: false });
 
     acceptedVendorRequest(
       vendor.email,
@@ -717,12 +717,12 @@ const updateVendorStatus = async (req: any) => {
 </body>
 </html>`
     );
-  } 
- 
+  }
+
 
   const updatedVendor = await Vendor.findByIdAndUpdate(id, { status }, { new: true });
-  
-  if(status === 'declined'){
+
+  if (status === 'declined') {
     sendVendorDeclined(
       vendor.email,
       `<!DOCTYPE html>
@@ -775,8 +775,8 @@ const updateVendorStatus = async (req: any) => {
         </html>`
     );
   }
-  
-  return updatedVendor  
+
+  return updatedVendor
 };
 
 
