@@ -53,6 +53,8 @@ const vendorRegister = async (req: any) => {
     const { files, body: data } = req;
     const { password, confirmPassword, email, longitude, latitude, social_media, questions, ...other } = data;
 
+    console.log("=======",password, confirmPassword, email, longitude, latitude, social_media, questions, ...other )
+
     const role = "VENDOR";
     if (!password || !confirmPassword || !email) {
       throw new ApiError(httpStatus.BAD_REQUEST, "Email, Password, and Confirm Password are required!");
