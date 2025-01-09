@@ -9,6 +9,7 @@ import { PaymentController } from './app/modules/payment/payment.controller';
 
 export const app: Application = express();
 
+// Use CORS middleware early in the stack
 app.use(
   cors({
     origin: [ 
@@ -19,15 +20,12 @@ app.use(
       "https://www.dashboard.whatsupjaco.com", 
     ],
     credentials: true,
+    methods: ['GET', 'POST', 'PUT', 'DELETE'], // Explicitly allow methods you want to support
+    allowedHeaders: ['Content-Type', 'Authorization'], // Specify allowed headers
   }),
 );
- 
-app.post(
-  '/payments/webhook',
-  express.raw({ type: 'application/json' }), 
-  PaymentController.checkAndUpdateStatusByWebhook
-);
 
+// Body parsers and other middlewares should be defined after CORS
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 app.use(cookieParser());
@@ -35,6 +33,11 @@ app.use(bodyParser.urlencoded({ extended: true }));
 app.use(bodyParser.json());
 app.use(express.static("uploads"));  
 
+app.post(
+  '/payments/webhook',
+  express.raw({ type: 'application/json' }), 
+  PaymentController.checkAndUpdateStatusByWebhook
+);
 
 app.use('/', routes);
 
