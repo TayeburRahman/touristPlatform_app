@@ -50,17 +50,25 @@ cron.schedule("* * * * *", async () => {
 });
 const vendorRegister = async (req: any) => {
   const { files, body: data } = req;
-  const { password, confirmPassword, email, longitude, latitude, social_media, questions, ...other } = data;
+  const {authId} =  req.user
+  const { password:pass, confirmPasswordc: Pass, email: eM, longitude, latitude, social_media, questions, ...other } = data;
+
+  let authU;
+  if(authId){
+    authU = await Auth.findById(authId)
+  }
+
+  const password = authId? authU?.password : pass;
+  const email = authId? authU?.email : eM;
+
+if(!password || !email){
+  throw new ApiError(httpStatus.BAD_REQUEST, "In complite information, email, password are requerd");
+}
+
 
 
   const role = "VENDOR"
-  if (!password || !confirmPassword || !email) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Email, Password, and Confirm Password are required!");
-  }
-
-  if (password !== confirmPassword) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Password and Confirm Password didn't match");
-  }
+ 
 
 
   if (!questions) {
