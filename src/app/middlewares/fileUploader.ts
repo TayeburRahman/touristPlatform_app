@@ -62,6 +62,7 @@ export const uploadFile = () => {
         cb(null, uploadPath);
       } else {
         // cb(new Error('Invalid file type'));
+        console.log("Invalid file type")
         throw new ApiError(400, 'Invalid file type');
       }
     },
