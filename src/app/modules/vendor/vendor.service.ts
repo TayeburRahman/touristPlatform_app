@@ -50,7 +50,7 @@ cron.schedule("* * * * *", async () => {
 });
 const vendorRegister = async (req: any) => {
   const { files, body: data } = req;
-  const {authId} =  req.user
+  const { authId, userId } = req.user as IReqUser;
   const { password:pass, confirmPasswordc: Pass, email: eM, longitude, latitude, social_media, questions, ...other } = data;
 
   let authU;
