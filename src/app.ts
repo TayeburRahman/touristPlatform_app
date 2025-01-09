@@ -11,18 +11,9 @@ export const app: Application = express();
 
 app.use(
   cors({
-    origin: [
-      'http://192.168.10.16:3000',
-      "http://167.71.179.42:3001",
-      "http://localhost:3000", 
-      "http://192.168.10.25:3000",
-      "http://192.168.10.25:3001",
-      "http://192.168.10.25:3002",
-      "http://167.71.179.42:3000",
-      "http://167.71.179.42:3002",
-      
-      "http://localhost:3001 ",
+    origin: [ 
       "https://whatsupjaco.com",
+      "http://whatsupjaco.com",
       "https://www.whatsupjaco.com", 
       "https://dashboard.whatsupjaco.com",
       "https://www.dashboard.whatsupjaco.com", 
