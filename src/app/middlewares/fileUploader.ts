@@ -46,16 +46,7 @@ export const uploadFile = () => {
         'image/tiff',
         'image/bmp',
         'video/mp4',
-        'audio/mpeg',
-        'audio/wav',
-        'audio/ogg',
-        'audio/aac',
-        'audio/flac',
-        'video/x-matroska', // MKV
-        'video/x-msvideo', // AVI
-        'video/quicktime', // MOV
-        'video/webm',
-        'application/pdf', // Optional if you want to allow PDF uploads
+        'audio/mpeg', 
       ];
 
       if (allowedMimeTypes.includes(file.mimetype)) {
@@ -84,15 +75,6 @@ export const uploadFile = () => {
       'image/bmp',
       'video/mp4',
       'audio/mpeg',
-      'audio/wav',
-      'audio/ogg',
-      'audio/aac',
-      'audio/flac',
-      'video/x-matroska', // MKV
-      'video/x-msvideo', // AVI
-      'video/quicktime', // MOV
-      'video/webm',
-      'application/pdf', // Optional if you want to allow PDF uploads
     ];
 
     if (file.fieldname === undefined) {
