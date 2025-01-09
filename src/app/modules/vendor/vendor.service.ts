@@ -49,102 +49,101 @@ cron.schedule("* * * * *", async () => {
   }
 });
 const vendorRegister = async (req: any) => {
-  const { files, body: data } = req;
-  const { password, confirmPassword, email, longitude, latitude, social_media, questions, ...other } = data;
+  try {
+    const { files, body: data } = req;
+    const { password, confirmPassword, email, longitude, latitude, social_media, questions, ...other } = data;
 
-
-  const role = "VENDOR"
-  if (!password || !confirmPassword || !email) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Email, Password, and Confirm Password are required!");
-  }
-
-  if (password !== confirmPassword) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Password and Confirm Password didn't match");
-  }
-
-
-  if (!questions) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Questions are required!");
-  } else {
-    const parsedQuestions = JSON.parse(questions);
-    if (!Array.isArray(parsedQuestions)) {
-      throw new ApiError(httpStatus.BAD_REQUEST, "Questions must be an array!");
+    const role = "VENDOR";
+    if (!password || !confirmPassword || !email) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Email, Password, and Confirm Password are required!");
     }
-    parsedQuestions.map((q: any) => {
-      if (!q?.question || q?.answer === undefined) {
-        throw new ApiError(httpStatus.BAD_REQUEST, "Each question must include a question and an answer!");
+
+    if (password !== confirmPassword) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Password and Confirm Password didn't match");
+    }
+
+    if (!questions) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Questions are required!");
+    } else {
+      const parsedQuestions = JSON.parse(questions);
+      if (!Array.isArray(parsedQuestions)) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Questions must be an array!");
       }
-    });
-  }
-
-
-  const existingAuth: any = await Auth.findOne({ email });
-  if (existingAuth) {
-    if (existingAuth.isActive) {
-      throw new ApiError(httpStatus.BAD_REQUEST, "Email already exists");
-    } else {
-      // Delete inactive existing user
-      await Auth.deleteOne({ _id: existingAuth._id });
+      parsedQuestions.forEach((q: any) => {
+        if (!q?.question || q?.answer === undefined) {
+          throw new ApiError(httpStatus.BAD_REQUEST, "Each question must include a question and an answer!");
+        }
+      });
     }
-  }
 
-  const existingVendor: any = await Vendor.findOne({ email });
-  if (existingVendor) {
-    if (existingVendor.status === "active") {
-      throw new ApiError(httpStatus.BAD_REQUEST, "Vendor Profile Already Exists");
-    } else {
-      // Delete inactive existing vendor
-      await Vendor.deleteOne({ email });
+    const existingAuth: any = await Auth.findOne({ email });
+    if (existingAuth) {
+      if (existingAuth.isActive) {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Email already exists");
+      } else {
+        // Delete inactive existing user
+        await Auth.deleteOne({ _id: existingAuth._id });
+      }
     }
-  }
 
-  if (role === "VENDOR" && (longitude && latitude)) {
-    const location_map = {
-      type: 'Point',
-      coordinates: [longitude, latitude],
+    const existingVendor: any = await Vendor.findOne({ email });
+    if (existingVendor) {
+      if (existingVendor.status === "active") {
+        throw new ApiError(httpStatus.BAD_REQUEST, "Vendor Profile Already Exists");
+      } else {
+        // Delete inactive existing vendor
+        await Vendor.deleteOne({ email });
+      }
+    }
+
+    if (role === "VENDOR" && (longitude && latitude)) {
+      const location_map = {
+        type: 'Point',
+        coordinates: [longitude, latitude],
+      };
+      other.location_map = location_map;
+    } else if (role === "VENDOR" && (!longitude || !latitude)) {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Vendor location is required!");
+    }
+
+    if (files) {
+      if (files.profile_image?.[0]) {
+        other.profile_image = `/images/profile/${files.profile_image[0].filename}`;
+      }
+      if (files.banner?.[0]) {
+        other.banner = `/vendor/${files.banner[0].filename}`;
+      }
+      if (files.business_profile?.[0]) {
+        other.business_profile = `/vendor/${files.business_profile[0].filename}`;
+      }
+    }
+
+    const auth = {
+      role,
+      name: other.name,
+      email,
+      password,
+      expirationTime: Date.now() + 3 * 60 * 1000,
     };
-    other.location_map = location_map;
-  } else if (role === "VENDOR" && (!longitude || !latitude)) {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Vendor location is required!");
-  }
 
-  if (files) {
-    if (files.profile_image?.[0]) {
-      other.profile_image = `/images/profile/${files.profile_image[0].filename}`;
+    let createAuth = await Auth.create(auth);
+
+    if (social_media) other.social_media = JSON.parse(social_media);
+    if (questions) other.questions = JSON.parse(questions);
+    other.authId = createAuth?._id;
+    other.email = email;
+
+    // Create vendor record if role is VENDOR
+    let result;
+    if (role === ENUM_USER_ROLE.VENDOR) {
+      result = await Vendor.create(other);
+    } else {
+      throw new ApiError(httpStatus.BAD_REQUEST, "Invalid role provided!");
     }
-    if (files.banner?.[0]) {
-      other.banner = `/vendor/${files.banner[0].filename}`;
-    }
-    if (files.business_profile?.[0]) {
-      other.business_profile = `/vendor/${files.business_profile[0].filename}`;
-    }
-  }
 
-  const auth = {
-    role,
-    name: other.name,
-    email,
-    password,
-    expirationTime: Date.now() + 3 * 60 * 1000,
-  };
-
-  let createAuth = await Auth.create(auth);
-
-  if (social_media) other.social_media = JSON.parse(social_media)
-  if (questions) other.questions = JSON.parse(questions)
-  other.authId = createAuth?._id
-  other.email = email;
-  // Create vendor record if role is VENDOR
-  let result;
-  if (role === ENUM_USER_ROLE.VENDOR) {
-    result = await Vendor.create(other);
-  } else {
-    throw new ApiError(httpStatus.BAD_REQUEST, "Invalid role provided!");
-  }
-
-  sendVendorRequest(
-    other.email,
-    `<!DOCTYPE html>
+    sendVendorRequest(
+      other.email,
+      `<!DOCTYPE html>
       <html lang="en">
       <head>
         <meta charset="UTF-8">
@@ -206,10 +205,32 @@ const vendorRegister = async (req: any) => {
         </div>
       </body>
       </html>`
-  );
-  // Return success message
-  return { result, message: "Your account is awaiting admin approval!" };
+    );
+
+    // Return success message
+    return { result, message: "Your account is awaiting admin approval!" };
+
+  } catch (error: any) {
+    console.error("Error in vendorRegister function:", error.message, error.stack);
+    throw new ApiError(httpStatus.INTERNAL_SERVER_ERROR, "An unexpected error occurred!");
+  }
 };
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 const vendorRequest = async (req: RequestData) => {
   const { files, body: data } = req;
   const { longitude, latitude, social_media, questions, ...other } = req.body as any;
