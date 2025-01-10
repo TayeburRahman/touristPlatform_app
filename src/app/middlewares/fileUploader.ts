@@ -7,6 +7,7 @@ import ApiError from '../../errors/ApiError';
 export const uploadFile = () => {
   const storage = multer.diskStorage({
     destination: function (req, file, cb) {
+      console.log("==================",file)
       let uploadPath = '';  
       if (
         file.fieldname === 'cover_image' ||

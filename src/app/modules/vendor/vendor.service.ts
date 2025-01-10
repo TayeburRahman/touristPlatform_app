@@ -49,21 +49,9 @@ cron.schedule("* * * * *", async () => {
   }
 });
 const vendorRegister = async (req: any) => {
-  const { files, body: data } = req;
-  const { authId, userId } = req.user as IReqUser;
-  const { password:pass, confirmPasswordc: Pass, email: eM, longitude, latitude, social_media, questions, ...other } = data;
+  const { files, body: data } = req; 
+  const { password, confirmPasswordc, email, longitude, latitude, social_media, questions, ...other } = data;
 
-  let authU;
-  if(authId){
-    authU = await Auth.findById(authId)
-  }
-
-  const password = authId? authU?.password : pass;
-  const email = authId? authU?.email : eM;
-
-if(!password || !email){
-  throw new ApiError(httpStatus.BAD_REQUEST, "In complite information, email, password are requerd");
-}
 
 
 
