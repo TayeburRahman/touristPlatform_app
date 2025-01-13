@@ -97,7 +97,7 @@ const retrieveEvent: RequestHandler = catchAsync(async (req: Request, res: Respo
     .populate('category')
     .populate({
         path: 'vendor',
-        select: 'name profile_image email _id', 
+        select: 'name profile_image email _id vendor', 
     });
 
     if (!event) {

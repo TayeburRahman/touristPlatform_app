@@ -900,5 +900,4 @@ export const EventService = {
     updateFeatured,
     getPastEventsByVendor,
     createAdminNewEvent
-
 };
