@@ -12,8 +12,7 @@ export const app: Application = express();
 
 app.use(
   cors({
-    origin: [ 
-      "http://localhost:3000",
+    origin: [  
       "https://whatsupjaco.com",
       "https://www.whatsupjaco.com", 
       "https://dashboard.whatsupjaco.com",
