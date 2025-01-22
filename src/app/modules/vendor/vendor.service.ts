@@ -49,12 +49,12 @@ cron.schedule("* * * * *", async () => {
   }
 });
 const vendorRegister = async (req: any) => {
-  const { files, body: data } = req; 
+  const { files, body: data } = req;
   const { password, confirmPasswordc, email, longitude, latitude, social_media, questions, ...other } = data;
 
-if(!password || !email){
-  throw new ApiError(404, "Password and email are requerd!")
-}
+  if (!password || !email) {
+    throw new ApiError(404, "Password and email are requerd!")
+  }
 
   const role = "VENDOR"
 

@@ -6,7 +6,7 @@ import { VendorController } from './vendor.controller';
 
 const router = express.Router();
 
-router.post("/register", 
+router.post("/register",
   uploadFile(),
   VendorController.vendorRegister);
 
@@ -14,12 +14,11 @@ router.patch("/send-vendor-request",
   auth(ENUM_USER_ROLE.USER),
   uploadFile(),
   VendorController.vendorRequest);
-  router.patch('/update', 
-    uploadFile(),
-    auth(ENUM_USER_ROLE.VENDOR),
-    VendorController.updateProfile,
-  );
-
+router.patch('/update',
+  uploadFile(),
+  auth(ENUM_USER_ROLE.VENDOR),
+  VendorController.updateProfile,
+);
 // -----Admin -------------
 router.get("/get-all-vendor-request",
   auth(ENUM_USER_ROLE.ADMIN),
@@ -36,19 +35,20 @@ router.patch("/accept-request/:id",
 // ); 
 
 router.get(
-  '/get-details/:id', 
+  '/get-details/:id',
   VendorController.getVendorProfileDetails,
-); 
+);
 router.get("/get-all-vendor",
   auth(ENUM_USER_ROLE.ADMIN),
   VendorController.getAllVendor);
 
-  router.patch("/status",
-    auth(ENUM_USER_ROLE.ADMIN),
-    VendorController.updateVendorStatus);
-   
 
- 
+router.patch("/status",
+  auth(ENUM_USER_ROLE.ADMIN),
+  VendorController.updateVendorStatus);
+
+
+
 
 
 export const VendorRoutes = router;

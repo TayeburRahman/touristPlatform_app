@@ -56,6 +56,9 @@ cron.schedule("* * * * *", async () => {
                     case "yearly":
                         newEvent.date = EventDate.getNextYear(currentDate);
                         break;
+                    case "daily":
+                        newEvent.date = EventDate.getNextDay(currentDate);
+                        break;
                     default:
                         continue;
                 }
@@ -106,7 +109,7 @@ const createNewEvent = async (req: Request) => {
     const requiredFields = [
         "name",
         "date",
-        "time", 
+        "time",
         "longitude",
         "latitude",
         "category",
@@ -259,7 +262,7 @@ const createAdminNewEvent = async (req: Request) => {
     let images: any = [];
     if (event_image && Array.isArray(event_image)) {
         images = event_image.map(file => `/images/events/${file.filename}`);
-    } 
+    }
 
     const newEvent = await Event.create({
         vendor: vendor,
@@ -700,7 +703,7 @@ const getVendorFeatured = async (req: Request) => {
     const result = await Event.find({
         status: 'approved', vendor: vendorId, featured: { $ne: null }
     })
-    .sort({ date: 1 })
+        .sort({ date: 1 })
         .select('name event_image location category address')
         .populate('category', 'name')
 

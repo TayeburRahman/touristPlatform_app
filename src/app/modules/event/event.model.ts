@@ -1,7 +1,7 @@
 import mongoose, { Document, Model, Schema } from "mongoose";
-import { IEvent } from "./event.interface"; 
+import { IEvent } from "./event.interface";
 import { ILocation, ISocialMedia } from "../vendor/vendor.interface";
- 
+
 
 const locationSchema = new Schema<ILocation>({
   type: {
@@ -17,7 +17,7 @@ const locationSchema = new Schema<ILocation>({
 
 const socialMedia = new Schema<ISocialMedia>({
   name: {
-    type: String,  
+    type: String,
     required: true,
   },
   link: {
@@ -26,87 +26,87 @@ const socialMedia = new Schema<ISocialMedia>({
   },
 });
 
-const eventSchema = new Schema<IEvent>({ 
+const eventSchema = new Schema<IEvent>({
   vendor: {
-    type: Schema.Types.ObjectId, 
+    type: Schema.Types.ObjectId,
     ref: 'Vendor',
     required: true,
   },
-  name: { 
-    type: String, 
-    required: true 
-  }, 
-  date: { 
-    type: Date, 
-    required: true 
+  name: {
+    type: String,
+    required: true
   },
-  end_date:{ 
-    type: Date, 
-    required: true 
+  date: {
+    type: Date,
+    required: true
   },
-  time: { 
-    type: String, 
-    required: true 
+  end_date: {
+    type: Date,
+    required: true
   },
-  duration: { 
-    type: String,  
+  time: {
+    type: String,
+    required: true
   },
-  category: { 
-    type:  Schema.Types.ObjectId,
-     ref: 'Category',
-     required: true,
+  duration: {
+    type: String,
   },
-  option: { 
-    type: [String],  
+  category: {
+    type: Schema.Types.ObjectId,
+    ref: 'Category',
+    required: true,
   },
-  social_media: { 
-    type: String, 
-    default: null 
+  option: {
+    type: [String],
   },
-  location: { 
-    type: locationSchema, 
-    required: true 
+  social_media: {
+    type: String,
+    default: null
+  },
+  location: {
+    type: locationSchema,
+    required: true
   },
   description: {
-    type: String, 
-    default: null 
+    type: String,
+    default: null
   },
-  event_image: { 
-    type: [String], 
-    default: null 
+  event_image: {
+    type: [String],
+    default: null
   },
-  featured: { 
-    type: Date, 
-    default: null 
+  featured: {
+    type: Date,
+    default: null
   },
-  favorites: { 
-    type: Number, 
+  favorites: {
+    type: Number,
     default: 0
   },
-  address: { 
-    type:String, 
+  address: {
+    type: String,
   },
-  status: { 
-    type: String, 
-    enum: ['pending','updated' ,'approved', 'declined'], 
+  status: {
+    type: String,
+    enum: ['pending', 'updated', 'approved', 'declined'],
     default: 'pending'
   },
   recurrence: {
     type: String,
-    enum: ['none', 'weekly', 'monthly', 'yearly'],
+    enum: ['none', 'daily', 'weekly', 'monthly', 'yearly'],
     default: 'none',
   },
-  recurrence_end: { 
-    type: Date, 
-    default: null 
+  recurrence_end: {
+    type: Date,
+    default: null
   },
-  active: { 
-    type: Boolean,   
+  active: {
+    type: Boolean,
     default: true
   },
 }, {
-  timestamps: true  
+  timestamps: true
 });
- 
-const Event = mongoose.model<IEvent>('Event', eventSchema); 
+
+const Event = mongoose.model<IEvent>('Event', eventSchema);
 export default Event;

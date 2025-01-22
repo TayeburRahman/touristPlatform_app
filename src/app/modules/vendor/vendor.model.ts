@@ -1,5 +1,5 @@
-import mongoose, { Schema, Model, model } from 'mongoose'; 
-import { ILocation,  IVendor, ISocialMedia, IAdvertise, IQuestion } from './vendor.interface'; 
+import mongoose, { Schema, Model, model } from 'mongoose';
+import { ILocation, IVendor, ISocialMedia, IAdvertise, IQuestion } from './vendor.interface';
 import { any } from 'zod';
 // Define the Location schema
 const locationSchema = new Schema<ILocation>({
@@ -16,7 +16,7 @@ const locationSchema = new Schema<ILocation>({
 
 const socialMedia = new Schema<ISocialMedia>({
   name: {
-    type: String,  
+    type: String,
     required: true,
   },
   link: {
@@ -27,7 +27,7 @@ const socialMedia = new Schema<ISocialMedia>({
 
 const Question = new Schema<IQuestion>({
   question: {
-    type: String,  
+    type: String,
     required: true,
   },
   answer: {
@@ -38,29 +38,29 @@ const Question = new Schema<IQuestion>({
 
 // Define the Vendor schema
 const VendorSchema = new Schema<IVendor>(
-  { 
+  {
     authId: {
-      type:  Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'Auth',
-    }, 
-    userId:{
-      type:  Schema.Types.ObjectId,
+    },
+    userId: {
+      type: Schema.Types.ObjectId,
       ref: 'User',
-    }, 
+    },
     username: {
-      type: String,  
-    }, 
+      type: String,
+    },
     business_name: {
-      type: String,  
-    }, 
+      type: String,
+    },
     name: {
       type: String,
       required: true,
-    },  
+    },
     email: {
       type: String,
       required: true,
-    }, 
+    },
     banner: {
       type: String,
       default: null,
@@ -72,20 +72,20 @@ const VendorSchema = new Schema<IVendor>(
     phone_number: {
       type: String,
       default: null,
-    }, 
+    },
     profile_image: {
       type: String,
       default: null,
-    },   
+    },
     business_profile: {
       type: String,
       default: null,
-    },   
+    },
     description: {
       type: String,
       default: null,
-    },  
-    social_media:{
+    },
+    social_media: {
       type: [socialMedia],
       default: null,
     },
@@ -98,30 +98,30 @@ const VendorSchema = new Schema<IVendor>(
     },
     status: {
       type: String,
-      enum: ['pending', 'approved', 'declined',"deactivate"],
+      enum: ['pending', 'approved', 'declined', "deactivate"],
       default: 'pending',
-    }, 
+    },
     location_map: {
       type: locationSchema,
-    }, 
-    category: { 
+    },
+    category: {
       type: String,
-       required: true,
+      required: true,
     },
     package: {
-      type:  Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'Packages',
       default: null,
-    }, 
+    },
     questions: {
-      type:  [Question], 
+      type: [Question],
       default: [],
     },
-    plan:{
-      type:  Schema.Types.ObjectId,
+    plan: {
+      type: Schema.Types.ObjectId,
       ref: 'Plans',
       default: null,
-    }, 
+    },
   },
   {
     timestamps: true,
@@ -130,16 +130,16 @@ const VendorSchema = new Schema<IVendor>(
 
 
 
-const AdvertiseSchema  = new Schema<IAdvertise>(
+const AdvertiseSchema = new Schema<IAdvertise>(
   {
     userId: {
       type: Schema.Types.ObjectId,
       ref: 'User',
-    }, 
+    },
     authId: {
-      type:  Schema.Types.ObjectId,
+      type: Schema.Types.ObjectId,
       ref: 'Auth',
-    }, 
+    },
     name: {
       type: String,
       required: true,
@@ -160,20 +160,20 @@ const AdvertiseSchema  = new Schema<IAdvertise>(
       required: true,
     },
     verify_code: {
-      type: String, 
-    }, 
-    declined_text:{
       type: String,
     },
-    otp_verify:{
-      type: Boolean, 
+    declined_text: {
+      type: String,
+    },
+    otp_verify: {
+      type: Boolean,
       default: false,
     },
     status: {
-       type: String,
-       enum: ['pending', 'active', 'declined', "deactivate"],
-       default: 'pending',
-    }, 
+      type: String,
+      enum: ['pending', 'active', 'declined', "deactivate"],
+      default: 'pending',
+    },
   },
   {
     timestamps: true,
@@ -182,7 +182,7 @@ const AdvertiseSchema  = new Schema<IAdvertise>(
     },
   },
 );
- 
-const Vendor: Model<IVendor> = model<IVendor>('Vendor', VendorSchema); 
+
+const Vendor: Model<IVendor> = model<IVendor>('Vendor', VendorSchema);
 export default Vendor;
 export const Advertise = model<IAdvertise>('Advertise', AdvertiseSchema);
