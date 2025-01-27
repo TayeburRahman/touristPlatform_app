@@ -79,7 +79,7 @@ const createNewEvent = async (req: Request) => {
         social_media,
         end_date,
         address,
-        duration, option, longitude, latitude, description, recurrence, category, recurrence_end } = req.body as any;
+        duration, option, longitude, latitude, description, recurrence, category, recurrence_end, spanishDescription } = req.body as any;
 
     const data = req.body;
     // const plan: any = await Plan.findOne({
@@ -166,7 +166,8 @@ const createNewEvent = async (req: Request) => {
         end_date,
         address,
         recurrence,
-        recurrence_end
+        recurrence_end,
+        spanishDescription
     });
 
     if (!newEvent) {
@@ -316,7 +317,7 @@ const updateEvents = async (req: Request) => {
         const {
             name, date, time, duration, address, option, end_date,
             featured, social_media, longitude, latitude,
-            recurrence_end, recurrence, description, category
+            recurrence_end, recurrence, description, category, spanishDescription
         } = req.body;
 
 
@@ -352,6 +353,7 @@ const updateEvents = async (req: Request) => {
         if (social_media) existingEvent.social_media = social_media;
         if (category) existingEvent.category = category;
         if (description) existingEvent.description = description;
+        if (spanishDescription) existingEvent.spanishDescription = spanishDescription;
         if (recurrence_end) existingEvent.recurrence_end = recurrence_end;
         if (recurrence) existingEvent.recurrence = recurrence;
         if (longitude && latitude) {
@@ -540,7 +542,12 @@ const getEvents = async (req: Request) => {
     }
 
     if (query.searchTerm) {
-        filterConditions.name = new RegExp(query.searchTerm, 'i');
+        const searchRegex = new RegExp(query.searchTerm, 'i');
+        filterConditions.$or = [
+            { name: searchRegex },
+            { description: searchRegex },
+            { spanishDescription: searchRegex },
+        ];
     }
 
     let categoryQuery = Event.find(filterConditions)

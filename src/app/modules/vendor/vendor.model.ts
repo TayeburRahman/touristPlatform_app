@@ -52,10 +52,12 @@ const VendorSchema = new Schema<IVendor>(
     },
     business_name: {
       type: String,
+      unique: true,
     },
     name: {
       type: String,
       required: true,
+      unique: true,
     },
     email: {
       type: String,

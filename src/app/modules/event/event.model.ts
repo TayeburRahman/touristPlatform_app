@@ -71,6 +71,10 @@ const eventSchema = new Schema<IEvent>({
     type: String,
     default: null
   },
+  spanishDescription: {
+    type: String,
+    default: null
+  },
   event_image: {
     type: [String],
     default: null

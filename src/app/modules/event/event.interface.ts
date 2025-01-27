@@ -10,7 +10,8 @@ export interface IEvent extends Document {
   option: string[];
   social_media: [ISocialMedia] | null;
   location: ILocation;
-  description?: string;
+  description?: string | null;
+  spanishDescription: string | null;
   event_image: string[] | null;
   status: 'pending' | 'approved' | 'declined';
   category: mongoose.Types.ObjectId | null;
