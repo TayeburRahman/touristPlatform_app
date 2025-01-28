@@ -531,6 +531,8 @@ const getEvents = async (req: Request) => {
             }
         });
 
+        console.log("===========", validDates, dateArray)
+
 
         if (validDates.length === 1) {
             filterConditions.date = { $gte: validDates[0], $lte: validDates[0] };
@@ -557,7 +559,11 @@ const getEvents = async (req: Request) => {
             path: 'category',
             match: query.searchTerm ? { name: new RegExp(query.searchTerm, 'i') } : {},
             select: 'name',
-        });
+        })
+        .populate({
+            path: 'vendor',
+            select: 'business_name email name',
+        })
 
     if (query.sort) {
         const sortField = query.sort.startsWith('-') ? query.sort.slice(1) : query.sort;

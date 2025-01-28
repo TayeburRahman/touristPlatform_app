@@ -4,7 +4,7 @@ import globalErrorHandler from './app/middlewares/globalErrorHandler';
 import routes from './app/routes';
 import { NotFoundHandler } from './errors/NotFoundHandler';
 import cookieParser from 'cookie-parser';
-import bodyParser from 'body-parser'; 
+import bodyParser from 'body-parser';
 import multer from 'multer';
 import { PaymentController } from './app/modules/payment/payment.controller';
 
@@ -12,12 +12,13 @@ export const app: Application = express();
 
 app.use(
   cors({
-    origin: [  
+    origin: [
+      "http://localhost:3001",
       "http://localhost:3000",
       "https://whatsupjaco.com",
-      "https://www.whatsupjaco.com", 
+      "https://www.whatsupjaco.com",
       "https://dashboard.whatsupjaco.com",
-      "https://www.dashboard.whatsupjaco.com", 
+      "https://www.dashboard.whatsupjaco.com",
     ],
     credentials: true,
   }),
@@ -25,7 +26,7 @@ app.use(
 
 app.post(
   '/payments/webhook',
-  express.raw({ type: 'application/json' }), 
+  express.raw({ type: 'application/json' }),
   PaymentController.checkAndUpdateStatusByWebhook
 );
 
