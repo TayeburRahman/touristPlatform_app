@@ -82,30 +82,7 @@ const createNewEvent = async (req: Request) => {
         duration, option, longitude, latitude, description, recurrence, category, recurrence_end, spanishDescription } = req.body as any;
 
     const data = req.body;
-    // const plan: any = await Plan.findOne({
-    //     userId: userId,
-    //     active: true,
-    //     available_events: { $gt: 0 }
-    // });
 
-    // if (!plan) {
-    //     throw new ApiError(403, 'You do not have enough available events for this plan.');
-    // }
-
-    // const featuredEvent: any = await Plan.findOne({
-    //     userId: userId,
-    //     active: true,
-    //     featured_events: { $gt: 0 }
-    // });
-
-    // if (featured && !featuredEvent) {
-    //     throw new ApiError(403, 'You do not have enough available to feature the date of this event.');
-    // }
-
-    // if (!Array.isArray(plan.events)) {
-    //     plan.events = [];
-    // }
-    // console.log("===Events===", date, end_date, recurrence_end);
     const requiredFields = [
         "name",
         "date",
@@ -142,12 +119,6 @@ const createNewEvent = async (req: Request) => {
     if (event_image && Array.isArray(event_image)) {
         images = event_image.map(file => `/images/events/${file.filename}`);
     }
-
-    // if(!images?.length) {
-    //     throw new ApiError(400, 'Event image is required.'); 
-    // }
-
-    // const parsMedia = JSON.parse(option)
 
 
     const newEvent = await Event.create({
@@ -202,35 +173,10 @@ const createAdminNewEvent = async (req: Request) => {
         duration, option, longitude, latitude, description, recurrence, category, recurrence_end } = req.body as any;
 
     const data = req.body;
-    // const plan: any = await Plan.findOne({
-    //     userId: userId,
-    //     active: true,
-    //     available_events: { $gt: 0 }
-    // });
-
-    // if (!plan) {
-    //     throw new ApiError(403, 'You do not have enough available events for this plan.');
-    // }
-
-    // const featuredEvent: any = await Plan.findOne({
-    //     userId: userId,
-    //     active: true,
-    //     featured_events: { $gt: 0 }
-    // });
-
-    // if (featured && !featuredEvent) {
-    //     throw new ApiError(403, 'You do not have enough available to feature the date of this event.');
-    // }
-
-    // if (!Array.isArray(plan.events)) {
-    //     plan.events = [];
-    // }
-    // console.log("===Events===", date, end_date, recurrence_end);
     const requiredFields = [
         "name",
         "date",
         "time",
-        "option",
         "longitude",
         "latitude",
         "category",
@@ -288,19 +234,6 @@ const createAdminNewEvent = async (req: Request) => {
         throw new ApiError(500, 'Failed to create event.');
     };
 
-    // const available_events = Math.max(0, plan.available_events - 1);
-    // let featured_events
-    // if (featured) {
-    //     featured_events = Math.max(0, plan.featured_events - 1);
-    // } else {
-    //     featured_events = plan.featured_events;
-    // };
-
-    // await Plan.findByIdAndUpdate(plan._id, {
-    //     available_events,
-    //     featured_events,
-    //     events: [...plan.events, newEvent._id],
-    // });
 
     return newEvent;
 };
