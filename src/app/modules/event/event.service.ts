@@ -476,7 +476,7 @@ const getEvents = async (req: Request) => {
     }
 
     if (query.date) {
-        const dateArray = query.date.split(',');
+        const dateArray = query.date.split(',').map((date: any) => date.trim());
 
         const validDates = dateArray.map((dateStr: string) => {
             const dateParts = dateStr.split('-');
@@ -491,19 +491,12 @@ const getEvents = async (req: Request) => {
             }
         });
 
-        if (validDates.length === 1) {
-            filterConditions.$or = [
-                { date: { $lte: validDates[0] }, end_date: { $gte: validDates[0] } },
-                { date: validDates[0] },
-                { end_date: validDates[0] },
-            ];
-        } else if (validDates.length > 1) {
-            filterConditions.$or = [
-                { date: { $in: validDates } },
-                { end_date: { $in: validDates } }
-            ];
-        }
+        filterConditions.$or = validDates.map((date: any) => ({
+            date: { $lte: date },
+            end_date: { $gte: date }
+        }));
     }
+
 
 
     if (query.searchTerm) {
