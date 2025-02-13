@@ -479,23 +479,22 @@ const getEvents = async (req: Request) => {
         const dateArray = query.date.split(',').map((date: any) => date.trim());
 
         const validDates = dateArray.map((dateStr: string) => {
-            const dateParts = dateStr.split('-');
-            if (dateParts.length === 3) {
-                const date = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
-                if (isNaN(date.getTime())) {
-                    throw new ApiError(400, `Invalid date format: ${dateStr}`);
-                }
-                return date;
-            } else {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) {
                 throw new ApiError(400, `Invalid date format: ${dateStr}`);
             }
+            return date;
         });
 
         filterConditions.$or = validDates.map((date: any) => ({
-            date: { $lte: date },
-            end_date: { $gte: date }
+            $or: [
+                { date: { $lte: date }, end_date: { $gte: date } }, // Event spans the date
+                { date: date }, // Event starts on the date
+                { end_date: date } // Event ends on the date
+            ]
         }));
     }
+
 
 
 
