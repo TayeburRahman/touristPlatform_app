@@ -498,10 +498,10 @@ const getEvents = async (req: Request) => {
 
         if (validDates.length === 1) {
             filterConditions.date = { $gte: validDates[0], $lte: validDates[0] };
-            filterConditions.end_date = { $gte: validDates[0], $lte: validDates[0] };
+            // filterConditions.end_date = { $gte: validDates[0], $lte: validDates[0] };
         } else if (validDates.length > 1) {
             filterConditions.date = { $in: validDates };
-            filterConditions.end_date = { $in: validDates };
+            // filterConditions.end_date = { $in: validDates };
         }
     }
 
