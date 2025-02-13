@@ -50,7 +50,6 @@ const eventSchema = new Schema<IEvent>({
   },
   end_time: {
     type: String,
-    required: true
   },
   duration: {
     type: String,
