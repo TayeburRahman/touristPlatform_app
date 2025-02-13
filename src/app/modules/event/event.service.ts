@@ -38,7 +38,7 @@ cron.schedule("* * * * *", async () => {
         const now = new Date();
         const result = await Event.updateMany(
             {
-                active: true,
+                active: false,
                 end_date: { $gt: now },
             },
             {
@@ -461,8 +461,6 @@ const getEvents = async (req: Request) => {
     const query = Object.fromEntries(
         Object.entries(req.query).filter(([_, value]) => value)
     ) as any;
-
-    console.log("==============================", query)
 
     let filterConditions: any = { status: 'approved', active: true };
 
