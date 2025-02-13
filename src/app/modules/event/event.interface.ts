@@ -3,6 +3,7 @@ import { ILocation, ISocialMedia } from '../vendor/vendor.interface';
 
 export interface IEvent extends Document {
   vendor: mongoose.Types.ObjectId;
+  end_time: string;
   name: string;
   date: Date;
   time: string;

@@ -18,7 +18,7 @@ cron.schedule("* * * * *", async () => {
         const result = await Event.updateMany(
             {
                 active: true,
-                date: { $lte: now },
+                end_date: { $lte: now },
             },
             {
                 $set: { active: false },
@@ -36,6 +36,27 @@ cron.schedule("* * * * *", async () => {
 cron.schedule("* * * * *", async () => {
     try {
         const now = new Date();
+        const result = await Event.updateMany(
+            {
+                active: true,
+                end_date: { $gt: now },
+            },
+            {
+                $set: { active: true },
+            }
+        );
+
+        if (result.modifiedCount > 0) {
+            logger.info(`Set ${result.modifiedCount} inactive events.`);
+        }
+    } catch (error) {
+        logger.error("Error setting event active:", error);
+    }
+});
+
+cron.schedule("* * * * *", async () => {
+    try {
+        const now = new Date();
         const events = await Event.find({
             active: false,
             recurrence_end: { $gt: now },
@@ -45,19 +66,24 @@ cron.schedule("* * * * *", async () => {
             for (const event of events) {
                 let newEvent = event.toObject();
                 const currentDate = event.date;
+                const endDate = event.date;
                 //   console.log("currentDate",currentDate)
                 switch (event.recurrence) {
                     case "weekly":
                         newEvent.date = EventDate.getNextWeek(currentDate);
+                        newEvent.end_date = EventDate.getNextWeek(endDate);
                         break;
                     case "monthly":
                         newEvent.date = EventDate.getNextMonth(currentDate);
+                        newEvent.end_date = EventDate.getNextMonth(endDate);
                         break;
                     case "yearly":
                         newEvent.date = EventDate.getNextYear(currentDate);
+                        newEvent.end_date = EventDate.getNextYear(endDate);
                         break;
                     case "daily":
                         newEvent.date = EventDate.getNextDay(currentDate);
+                        newEvent.end_date = EventDate.getNextDay(endDate);
                         break;
                     default:
                         continue;
@@ -170,7 +196,7 @@ const createAdminNewEvent = async (req: Request) => {
         social_media,
         end_date,
         address,
-        duration, option, longitude, latitude, description, recurrence, category, recurrence_end } = req.body as any;
+        duration, option, longitude, latitude, description, recurrence, category, recurrence_end, end_time } = req.body as any;
 
     const data = req.body;
     const requiredFields = [
@@ -227,7 +253,8 @@ const createAdminNewEvent = async (req: Request) => {
         end_date,
         address,
         recurrence,
-        recurrence_end
+        recurrence_end,
+        end_time
     });
 
     if (!newEvent) {
@@ -250,7 +277,7 @@ const updateEvents = async (req: Request) => {
         const {
             name, date, time, duration, address, option, end_date,
             featured, social_media, longitude, latitude,
-            recurrence_end, recurrence, description, category, spanishDescription
+            recurrence_end, recurrence, description, category, spanishDescription, end_time
         } = req.body;
 
 
@@ -277,9 +304,11 @@ const updateEvents = async (req: Request) => {
             existingEvent.date = eventDate;
         }
         if (time) existingEvent.time = time;
+
         if (duration) existingEvent.duration = duration;
         if (address) existingEvent.address = address;
         if (option) existingEvent.option = option;
+        if (end_time) existingEvent.end_time = end_time;
         if (end_date) existingEvent.end_date = end_date;
         if (featured !== undefined) existingEvent.featured = featured;
         if (featured === undefined) existingEvent.featured = null;
