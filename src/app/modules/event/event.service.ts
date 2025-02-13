@@ -481,7 +481,7 @@ const getEvents = async (req: Request) => {
         const validDates = dateArray.map((dateStr: string) => {
             const dateParts = dateStr.split('-');
             if (dateParts.length === 3) {
-                const date = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}T00:00:00.000Z`);
+                const date = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
                 if (isNaN(date.getTime())) {
                     throw new ApiError(400, `Invalid date format: ${dateStr}`);
                 }
