@@ -462,6 +462,8 @@ const getEvents = async (req: Request) => {
         Object.entries(req.query).filter(([_, value]) => value)
     ) as any;
 
+    console.log("====query=======", query);
+
     let filterConditions: any = { status: 'approved', active: true };
 
     // Filter for category
