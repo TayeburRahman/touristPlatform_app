@@ -457,12 +457,106 @@ const declinedEvents = async (req: Request) => {
     return result;
 };
 
+// const getEvents = async (req: Request) => {
+//     const query = Object.fromEntries(
+//         Object.entries(req.query).filter(([_, value]) => value)
+//     ) as any;
+
+//     console.log("====query=======", query);
+
+//     let filterConditions: any = { status: 'approved', active: true };
+
+//     // Filter for category
+//     if (query.category) {
+//         filterConditions.category = query.category;
+//     }
+
+//     // Filter for options
+//     if (query.option) {
+//         const options = query.option.split(',');
+//         filterConditions.option = { $in: options };
+//     }
+
+//     if (query.date) {
+//         const dateArray = query.date.split(',');
+
+//         const validDates = dateArray.map((dateStr: string) => {
+//             const dateParts = dateStr.split('-');
+//             if (dateParts.length === 3) {
+//                 const formattedDateStr = `${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`;
+//                 const date = new Date(formattedDateStr);
+
+//                 if (isNaN(date.getTime())) {
+//                     throw new ApiError(400, `Invalid date format: ${dateStr}`);
+//                 }
+//                 return date;
+//             } else {
+//                 throw new ApiError(400, `Invalid date format: ${dateStr}`);
+//             }
+//         });
+
+//         console.log("===========", validDates, dateArray)
+
+
+//         if (validDates.length === 1) {
+//             filterConditions.date = { $gte: validDates[0], $lte: validDates[0] };
+//             filterConditions.end_date = { $gte: validDates[0], $lte: validDates[0] };
+//         } else if (validDates.length > 1) {
+//             filterConditions.date = { $in: validDates };
+//             filterConditions.end_date = { $in: validDates };
+//         }
+//     }
+
+//     if (query.searchTerm) {
+//         const searchRegex = new RegExp(query.searchTerm, 'i');
+//         filterConditions.$or = [
+//             { name: searchRegex },
+//             { description: searchRegex },
+//             { spanishDescription: searchRegex },
+//         ];
+//     }
+
+//     let categoryQuery = Event.find(filterConditions)
+//         .sort({ date: 1 })
+//         .select('name event_image location category address date')
+//         .populate({
+//             path: 'category',
+//             match: query.searchTerm ? { name: new RegExp(query.searchTerm, 'i') } : {},
+//             select: 'name',
+//         })
+//         .populate({
+//             path: 'vendor',
+//             select: 'business_name email name',
+//         })
+
+//     if (query.sort) {
+//         const sortField = query.sort.startsWith('-') ? query.sort.slice(1) : query.sort;
+//         const sortOrder = query.sort.startsWith('-') ? -1 : 1;
+//         categoryQuery = categoryQuery.sort({ [sortField]: sortOrder });
+//     }
+
+//     const page = parseInt(query.page || '1', 10);
+//     const limit = parseInt(query.limit || '10', 10);
+//     categoryQuery = categoryQuery.skip((page - 1) * limit).limit(limit);
+
+//     const result = await categoryQuery.exec();
+
+//     const total = await Event.countDocuments(filterConditions);
+//     const meta = {
+//         total,
+//         page,
+//         limit,
+//         totalPages: Math.ceil(total / limit),
+//     };
+
+//     return { result, meta };
+// };
+
+
 const getEvents = async (req: Request) => {
     const query = Object.fromEntries(
         Object.entries(req.query).filter(([_, value]) => value)
     ) as any;
-
-    console.log("====query=======", query);
 
     let filterConditions: any = { status: 'approved', active: true };
 
@@ -495,25 +589,18 @@ const getEvents = async (req: Request) => {
             }
         });
 
-        console.log("===========", validDates, dateArray)
-
 
         if (validDates.length === 1) {
             filterConditions.date = { $gte: validDates[0], $lte: validDates[0] };
-            // filterConditions.end_date = { $gte: validDates[0], $lte: validDates[0] };
+            filterConditions.end_date = { $gte: validDates[0], $lte: validDates[0] };
         } else if (validDates.length > 1) {
             filterConditions.date = { $in: validDates };
-            // filterConditions.end_date = { $in: validDates };
+            filterConditions.end_date = { $in: validDates };
         }
     }
 
     if (query.searchTerm) {
-        const searchRegex = new RegExp(query.searchTerm, 'i');
-        filterConditions.$or = [
-            { name: searchRegex },
-            { description: searchRegex },
-            { spanishDescription: searchRegex },
-        ];
+        filterConditions.name = new RegExp(query.searchTerm, 'i');
     }
 
     let categoryQuery = Event.find(filterConditions)
@@ -522,12 +609,8 @@ const getEvents = async (req: Request) => {
         .populate({
             path: 'category',
             match: query.searchTerm ? { name: new RegExp(query.searchTerm, 'i') } : {},
-            select: 'name',
-        })
-        .populate({
-            path: 'vendor',
-            select: 'business_name email name',
-        })
+            // select: 'name',
+        });
 
     if (query.sort) {
         const sortField = query.sort.startsWith('-') ? query.sort.slice(1) : query.sort;
@@ -551,7 +634,6 @@ const getEvents = async (req: Request) => {
 
     return { result, meta };
 };
-
 const getPopularMostEvents = async (req: Request) => {
     const limit = parseInt(req.query.limit as string) || 10;
 
