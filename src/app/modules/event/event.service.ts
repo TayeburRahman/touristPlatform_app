@@ -586,7 +586,7 @@ const getFeaturedEvents = async (req: Request) => {
         active: true,
         featured: { $ne: null }
     })
-        .select('name event_image location category address vendor')
+        .select('name date event_image location category address vendor')
         .populate('category', 'name')
         .populate('vendor', 'business_name')
 
