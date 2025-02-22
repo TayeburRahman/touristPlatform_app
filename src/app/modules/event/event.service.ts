@@ -466,20 +466,22 @@ const getEvents = async (req: Request) => {
 
     // Filter for category
     if (query.category) {
+        delete query.upcoming;
         filterConditions.category = query.category;
     }
 
     // Filter for options
     if (query.option) {
+        delete query.upcoming;
         const options = query.option.split(',');
         filterConditions.option = { $in: options };
     }
-    query.upcoming = "upcoming"
     if (query.upcoming === "upcoming") {
         filterConditions.date = { $gte: new Date() };
     }
 
     if (query.date) {
+        delete query.upcoming;
         const dateArray = query.date.split(',').map((date: any) => date.trim());
 
         const validDates = dateArray.map((dateStr: string) => {
@@ -504,6 +506,7 @@ const getEvents = async (req: Request) => {
 
 
     if (query.searchTerm) {
+        delete query.upcoming;
         const searchRegex = new RegExp(query.searchTerm, 'i');
         filterConditions.$or = [
             { name: searchRegex },
