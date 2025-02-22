@@ -462,8 +462,6 @@ const getEvents = async (req: Request) => {
         Object.entries(req.query).filter(([_, value]) => value)
     ) as any;
 
-    console.log("hello", query);
-
     let filterConditions: any = { status: 'approved', active: true };
 
     // Filter for category
@@ -475,6 +473,10 @@ const getEvents = async (req: Request) => {
     if (query.option) {
         const options = query.option.split(',');
         filterConditions.option = { $in: options };
+    }
+    query.upcoming = "upcoming"
+    if (query.upcoming === "upcoming") {
+        filterConditions.date = { $gte: new Date() };
     }
 
     if (query.date) {
