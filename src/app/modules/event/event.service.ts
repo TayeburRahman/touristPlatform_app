@@ -458,9 +458,11 @@ const declinedEvents = async (req: Request) => {
 };
 
 const getEvents = async (req: Request) => {
-    const query = Object.fromEntries(
+    let query = Object.fromEntries(
         Object.entries(req.query).filter(([_, value]) => value)
     ) as any;
+
+    query.limit = 12;
 
     let filterConditions: any = { status: 'approved', active: true };
 
