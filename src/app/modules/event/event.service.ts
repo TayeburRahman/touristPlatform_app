@@ -491,6 +491,8 @@ const getEvents = async (req: Request) => {
             return date;
         });
 
+        console.log("qqqq", query.date, validDates)
+
         filterConditions.$or = validDates.map((date: Date) => ({
             $and: [
                 { date: { $gte: date } },
