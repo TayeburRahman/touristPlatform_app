@@ -477,6 +477,7 @@ const getEvents = async (req: Request) => {
     if (query.upcoming === "upcoming") {
         filterConditions.date = { $gte: new Date() };
     }
+
     if (query.date) {
         delete query.upcoming;
 
@@ -504,7 +505,6 @@ const getEvents = async (req: Request) => {
             end_date: { $gte: date } // ✅ Event end date must be after or on this date
         }));
     }
-
 
     if (query.searchTerm) {
         delete query.upcoming;
