@@ -477,7 +477,6 @@ const getEvents = async (req: Request) => {
     if (query.upcoming === "upcoming") {
         filterConditions.date = { $gte: new Date() };
     }
-
     if (query.date) {
         delete query.upcoming;
 
@@ -492,7 +491,13 @@ const getEvents = async (req: Request) => {
             return formattedDate;
         });
 
-        console.log("qqqq", query.date, validDates);
+        console.log("📅 Query Dates:", query.date, validDates);
+
+        // Check for invalid events where `end_date < date`
+        const invalidEvents = await Event.find({ end_date: { $lt: "$date" } });
+        if (invalidEvents.length > 0) {
+            console.error("⚠️ Invalid events found:", invalidEvents);
+        }
 
         filterConditions.$or = validDates.map((date: Date) => ({
             date: { $lte: date },  // ✅ Event start date must be before or on this date
