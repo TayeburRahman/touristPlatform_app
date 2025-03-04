@@ -492,8 +492,12 @@ const getEvents = async (req: Request) => {
         });
 
         filterConditions.$or = validDates.map((date: Date) => ({
-            date: { $lte: date },
-            end_date: { $gte: date }
+            $and: [
+                { date: { $gte: date } },
+                { end_date: { $lte: date } },
+            ]
+            // date: { $lte: date },
+            // end_date: { $gte: date }
         }));
     }
 
