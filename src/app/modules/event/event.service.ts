@@ -495,14 +495,11 @@ const getEvents = async (req: Request) => {
 
         console.log("✅ Valid Dates:", validDates);
 
-        // Adjust filterConditions to cover exact matches between date and end_date
         filterConditions.$or = validDates.map((date: Date) => ({
             $or: [
-                // Match events where the date and end_date are the same
-                { date: { $eq: date }, end_date: { $eq: date } },
-                // Match events where the event is within the query date range (including exact match)
+                { date: { $eq: date } },
+                { end_date: { $eq: date } },
                 { date: { $lte: date }, end_date: { $gte: date } },
-                // Match events that span across the date range
                 { date: { $gte: date }, end_date: { $lte: date } },
             ]
         }));
