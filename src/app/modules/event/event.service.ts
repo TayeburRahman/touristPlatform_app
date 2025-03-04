@@ -476,6 +476,7 @@ const getEvents = async (req: Request) => {
     }
     if (query.upcoming === "upcoming") {
         filterConditions.date = { $gte: new Date() };
+        filterConditions.category = '677ba67ac2771b3198bcbf2c'
     }
     if (query.date) {
         delete query.upcoming;
@@ -491,8 +492,6 @@ const getEvents = async (req: Request) => {
             formattedDate.setHours(0, 0, 0, 0);
             return formattedDate;
         });
-
-        console.log("✅ Valid Dates:", validDates);
 
         filterConditions.$or = validDates.map((date: Date) => ({
             $or: [
