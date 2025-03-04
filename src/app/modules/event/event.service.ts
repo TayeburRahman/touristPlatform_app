@@ -464,13 +464,11 @@ const getEvents = async (req: Request) => {
 
     let filterConditions: any = { status: 'approved', active: true };
 
-    // Filter for category
     if (query.category) {
         delete query.upcoming;
         filterConditions.category = query.category;
     }
 
-    // Filter for options
     if (query.option) {
         delete query.upcoming;
         const options = query.option.split(',');
@@ -482,28 +480,22 @@ const getEvents = async (req: Request) => {
 
     if (query.date) {
         delete query.upcoming;
-        const dateArray = query.date.split(',').map((date: any) => date.trim());
+
+        const dateArray = query.date.split(',').map((date: string) => date.trim());
 
         const validDates = dateArray.map((dateStr: string) => {
-            const dateParts = dateStr.split('-');
-            if (dateParts.length === 3) {
-                const date = new Date(`${dateParts[2]}-${dateParts[1]}-${dateParts[0]}`);
-                if (isNaN(date.getTime())) {
-                    throw new ApiError(400, `Invalid date format: ${dateStr}`);
-                }
-                return date;
-            } else {
+            const date = new Date(dateStr);
+            if (isNaN(date.getTime())) {
                 throw new ApiError(400, `Invalid date format: ${dateStr}`);
             }
+            return date;
         });
 
-        filterConditions.$or = validDates.map((date: any) => ({
+        filterConditions.$or = validDates.map((date: Date) => ({
             date: { $lte: date },
             end_date: { $gte: date }
         }));
     }
-
-
 
     if (query.searchTerm) {
         delete query.upcoming;

@@ -3,20 +3,20 @@ import { Router } from 'express';
 import auth from '../../middlewares/auth';
 import { ENUM_USER_ROLE } from '../../../enums/user';
 import { PaymentController } from './payment.controller';
-import bodyParser from 'body-parser'; 
+import bodyParser from 'body-parser';
 
 const router = Router();
 
 router.post(
   '/success_intent',
-  auth(ENUM_USER_ROLE.USER,ENUM_USER_ROLE.VENDOR),
+  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR),
   PaymentController.paymentSuccessAndSave,
 );
 router.post(
   '/checkout-session',
-  auth(ENUM_USER_ROLE.USER,ENUM_USER_ROLE.VENDOR),
+  auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR),
   PaymentController.createCheckoutSession,
-); 
+);
 
 // router.post(
 //   '/payments/webhook',
@@ -31,7 +31,7 @@ router.get(
 );
 
 
- 
- 
+
+
 
 export const PaymentRoutes = router;
