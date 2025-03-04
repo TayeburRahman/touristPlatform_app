@@ -497,12 +497,21 @@ const getEvents = async (req: Request) => {
 
         filterConditions.$or = validDates.map((date: Date) => ({
             $or: [
-                { date: date, end_date: date },
+                // Match events where the start date and end date are the same (normalized to midnight)
+                {
+                    $and: [
+                        { date: { $gte: date } },
+                        { end_date: { $lt: new Date(date.getTime() + 86400000) } } // +1 day to match the end date being the same day
+                    ]
+                },
+                // Match events where the event is within the query date range
                 { date: { $lte: date }, end_date: { $gte: date } },
+                // Match events that span across the query date
                 { date: { $gte: date }, end_date: { $lte: date } },
             ]
         }));
     }
+
 
 
     if (query.searchTerm) {
