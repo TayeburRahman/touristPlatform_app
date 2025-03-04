@@ -499,8 +499,8 @@ const getEvents = async (req: Request) => {
             $or: [
                 { date: { $eq: date } },
                 { end_date: { $eq: date } },
-                { date: { $lte: date }, end_date: { $gte: date } },
-                { date: { $gte: date }, end_date: { $lte: date } },
+                // { date: { $lte: date }, end_date: { $gte: date } },
+                // { date: { $gte: date }, end_date: { $lte: date } },
             ]
         }));
     }
