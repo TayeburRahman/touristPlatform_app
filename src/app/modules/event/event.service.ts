@@ -484,24 +484,22 @@ const getEvents = async (req: Request) => {
         const dateArray = query.date.split(',').map((date: string) => date.trim());
 
         const validDates = dateArray.map((dateStr: string) => {
-            const date = new Date(dateStr);
-            if (isNaN(date.getTime())) {
+            const [day, month, year] = dateStr.split('-'); // Convert DD-MM-YYYY to YYYY-MM-DD
+            const formattedDate = new Date(`${year}-${month}-${day}`);
+            if (isNaN(formattedDate.getTime())) {
                 throw new ApiError(400, `Invalid date format: ${dateStr}`);
             }
-            return date;
+            return formattedDate;
         });
 
-        console.log("qqqq", query.date, validDates)
+        console.log("qqqq", query.date, validDates);
 
         filterConditions.$or = validDates.map((date: Date) => ({
-            $and: [
-                { date: { $gte: date } },
-                { end_date: { $lte: date } },
-            ]
-            // date: { $lte: date },
-            // end_date: { $gte: date }
+            date: { $lte: date },  // ✅ Event start date must be before or on this date
+            end_date: { $gte: date } // ✅ Event end date must be after or on this date
         }));
     }
+
 
     if (query.searchTerm) {
         delete query.upcoming;
