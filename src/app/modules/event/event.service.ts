@@ -484,7 +484,7 @@ const getEvents = async (req: Request) => {
         const dateArray = query.date.split(',').map((date: string) => date.trim());
 
         const validDates = dateArray.map((dateStr: string) => {
-            const [day, month, year] = dateStr.split('-'); // Convert DD-MM-YYYY to YYYY-MM-DD
+            const [day, month, year] = dateStr.split('-');
             const formattedDate = new Date(`${year}-${month}-${day}`);
             if (isNaN(formattedDate.getTime())) {
                 throw new ApiError(400, `Invalid date format: ${dateStr}`);
@@ -492,17 +492,11 @@ const getEvents = async (req: Request) => {
             return formattedDate;
         });
 
-        console.log("📅 Query Dates:", query.date, validDates);
-
-        // Check for invalid events where `end_date < date`
-        const invalidEvents = await Event.find({ end_date: { $lt: "$date" } });
-        if (invalidEvents.length > 0) {
-            console.error("⚠️ Invalid events found:", invalidEvents);
-        }
+        console.log("✅ Valid Dates:", validDates);
 
         filterConditions.$or = validDates.map((date: Date) => ({
-            date: { $lte: date },  // ✅ Event start date must be before or on this date
-            end_date: { $gte: date } // ✅ Event end date must be after or on this date
+            date: { $lte: date },
+            end_date: { $gte: date }
         }));
     }
 
