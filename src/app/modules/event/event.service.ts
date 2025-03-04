@@ -488,8 +488,7 @@ const getEvents = async (req: Request) => {
             if (isNaN(formattedDate.getTime())) {
                 throw new ApiError(400, `Invalid date format: ${dateStr}`);
             }
-            // Normalize the date by removing the time part to only compare the date
-            formattedDate.setHours(0, 0, 0, 0);  // Set the time to midnight (00:00:00)
+            formattedDate.setHours(0, 0, 0, 0);
             return formattedDate;
         });
 
@@ -497,16 +496,13 @@ const getEvents = async (req: Request) => {
 
         filterConditions.$or = validDates.map((date: Date) => ({
             $or: [
-                // Match events where the start date and end date are the same (normalized to midnight)
                 {
                     $and: [
                         { date: { $gte: date } },
-                        { end_date: { $lt: new Date(date.getTime() + 86400000) } } // +1 day to match the end date being the same day
+                        { end_date: { $lt: new Date(date.getTime() + 86400000) } }
                     ]
                 },
-                // Match events where the event is within the query date range
                 { date: { $lte: date }, end_date: { $gte: date } },
-                // Match events that span across the query date
                 { date: { $gte: date }, end_date: { $lte: date } },
             ]
         }));
