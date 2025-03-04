@@ -493,13 +493,20 @@ const getEvents = async (req: Request) => {
         });
 
         console.log("✅ Valid Dates:", validDates);
+
+        // Adjust filterConditions to cover exact matches between date and end_date
         filterConditions.$or = validDates.map((date: Date) => ({
             $or: [
+                // Case where event's date is before or on the query date, and end_date is after or on the query date
                 { date: { $lte: date }, end_date: { $gte: date } },
+                // Case where the event's date is the same as the query date, and end_date is also the same or after
+                { date: { $eq: date }, end_date: { $eq: date } },
+                // Case where event's date is after or on the query date, and end_date is before or on the query date
                 { date: { $gte: date }, end_date: { $lte: date } },
             ]
         }));
     }
+
 
     if (query.searchTerm) {
         delete query.upcoming;
