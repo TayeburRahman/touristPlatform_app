@@ -476,7 +476,7 @@ const getEvents = async (req: Request) => {
     }
     if (query.upcoming === "upcoming") {
         filterConditions.date = { $gte: new Date() };
-        filterConditions.category = '677ba67ac2771b3198bcbf2c'
+        filterConditions.category = { $ne: '677ba67ac2771b3198bcbf2c' };
     }
     if (query.date) {
         delete query.upcoming;
