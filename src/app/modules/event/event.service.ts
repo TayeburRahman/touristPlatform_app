@@ -312,8 +312,9 @@ const updateEvents = async (req: Request) => {
 
         if (name) existingEvent.name = name;
 
-        if (date) {
-            const inputDate = new Date(date);
+        let dateUpdate = date ? date : existingEvent.date
+        if (dateUpdate) {
+            const inputDate = new Date(dateUpdate);
             const eventDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
             console.log("eventDate", eventDate)
             if (isNaN(eventDate.getTime())) {
@@ -322,8 +323,9 @@ const updateEvents = async (req: Request) => {
             existingEvent.date = eventDate;
         }
 
-        if (end_date) {
-            const inputDate = new Date(end_date);
+        let endDateUpdate = end_date ? end_date : existingEvent.end_date;
+        if (endDateUpdate) {
+            const inputDate = new Date(endDateUpdate);
             const eventEndDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
             if (isNaN(eventEndDate.getTime())) {
                 throw new ApiError(400, 'Invalid end_date format.');
@@ -331,9 +333,9 @@ const updateEvents = async (req: Request) => {
             existingEvent.end_date = eventEndDate;
         }
 
-        let featuredDate
-        if (featured) {
-            const inputDate = new Date(featured);
+        let featuredDate = featured ? featured : existingEvent.featured;
+        if (featuredDate) {
+            const inputDate = new Date(featuredDate);
             featuredDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
             console.log("featuredDate", featuredDate)
             if (isNaN(featuredDate.getTime())) {
@@ -341,8 +343,9 @@ const updateEvents = async (req: Request) => {
             }
         }
 
-        if (recurrence_end) {
-            const inputDate = new Date(end_date);
+        let recurrence_endUpdate = recurrence_end ? recurrence_end : existingEvent.recurrence_end;
+        if (recurrence_endUpdate) {
+            const inputDate = new Date(recurrence_endUpdate);
             const recurrence_endEndDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
             if (isNaN(recurrence_endEndDate.getTime())) {
                 throw new ApiError(400, 'Invalid end_date format.');
