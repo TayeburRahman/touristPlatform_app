@@ -296,23 +296,33 @@ const updateEvents = async (req: Request) => {
 
         if (name) existingEvent.name = name;
         if (date) {
-            const eventDateUTC = DateTime.fromISO(date, { zone: "utc" });
+            // Ensure input is a valid string and trim spaces
+            const cleanedDate = String(date).trim();
+
+            // Try parsing as an ISO date
+            const eventDateUTC = DateTime.fromISO(cleanedDate, { zone: "utc" });
 
             if (!eventDateUTC.isValid) {
-                throw new ApiError(400, 'Invalid date format. Use a valid ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ).');
+                throw new ApiError(400, `Invalid date format: ${cleanedDate}. Use a valid ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ).`);
             }
 
+            // Convert to Costa Rica timezone
             const eventDate = eventDateUTC.setZone("America/Costa_Rica", { keepLocalTime: false });
             existingEvent.date = eventDate.toJSDate();
         }
 
         if (end_date) {
-            const eventEndDateUTC = DateTime.fromISO(end_date, { zone: "utc" });
+            // Ensure input is a valid string and trim spaces
+            const cleanedEndDate = String(end_date).trim();
+
+            // Try parsing as an ISO date
+            const eventEndDateUTC = DateTime.fromISO(cleanedEndDate, { zone: "utc" });
 
             if (!eventEndDateUTC.isValid) {
-                throw new ApiError(400, 'Invalid end_date format. Use a valid ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ).');
+                throw new ApiError(400, `Invalid end_date format: ${cleanedEndDate}. Use a valid ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ).`);
             }
 
+            // Convert to Costa Rica timezone
             const eventEndDate = eventEndDateUTC.setZone("America/Costa_Rica", { keepLocalTime: false });
             existingEvent.end_date = eventEndDate.toJSDate();
         }
