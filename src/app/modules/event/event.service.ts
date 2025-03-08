@@ -296,7 +296,7 @@ const updateEvents = async (req: Request) => {
 
         if (name) existingEvent.name = name;
         if (date) {
-            console.log("date", date)
+            console.log("date==========", date)
             // Ensure input is a valid string and trim spaces
             const cleanedDate = String(date).trim();
 
