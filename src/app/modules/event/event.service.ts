@@ -309,6 +309,8 @@ const updateEvents = async (req: Request) => {
         if (!existingEvent) {
             throw new ApiError(404, 'Event not found or unauthorized.');
         }
+        console.log("date==", date)
+        console.log("end_date===", date)
 
         if (name) existingEvent.name = name;
 
