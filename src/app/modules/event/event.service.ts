@@ -295,38 +295,23 @@ const updateEvents = async (req: Request) => {
         }
 
         if (name) existingEvent.name = name;
+
         if (date) {
-            // Ensure input is a valid string and trim spaces
-            const cleanedDate = String(date).trim();
-
-            // Convert from ISO string, explicitly assuming it is UTC
-            const eventDateUTC = DateTime.fromISO(cleanedDate, { zone: "utc" });
-
-            if (!eventDateUTC.isValid) {
-                throw new ApiError(400, `Invalid date format: ${cleanedDate}. Use a valid ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ).`);
+            console.log("date", date)
+            const eventDate = DateTime.fromISO(date, { zone: "America/Costa_Rica" }).toJSDate();
+            if (isNaN(eventDate.getTime())) {
+                throw new ApiError(400, 'Invalid date format.');
             }
-
-            // Convert to Costa Rica timezone (GMT-6)
-            const eventDateCR = eventDateUTC.setZone("America/Costa_Rica", { keepLocalTime: false });
-            console.log("Converted Event Date (Costa Rica Time):", eventDateCR.toISO()); // Debugging
-
-            existingEvent.date = eventDateCR.toJSDate();
+            existingEvent.date = eventDate;
         }
 
         if (end_date) {
-            // Ensure input is a valid string and trim spaces
-            const cleanedEndDate = String(end_date).trim();
-
-            // Try parsing as an ISO date
-            const eventEndDateUTC = DateTime.fromISO(cleanedEndDate, { zone: "utc" });
-
-            if (!eventEndDateUTC.isValid) {
-                throw new ApiError(400, `Invalid end_date format: ${cleanedEndDate}. Use a valid ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ).`);
+            console.log("end_date", end_date)
+            const eventEndDate = DateTime.fromISO(end_date, { zone: "America/Costa_Rica" }).toJSDate();
+            if (isNaN(eventEndDate.getTime())) {
+                throw new ApiError(400, 'Invalid end_date format.');
             }
-
-            // Convert to Costa Rica timezone
-            const eventEndDate = eventEndDateUTC.setZone("America/Costa_Rica", { keepLocalTime: false });
-            existingEvent.end_date = eventEndDate.toJSDate();
+            existingEvent.end_date = eventEndDate;
         }
 
 
