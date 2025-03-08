@@ -139,6 +139,22 @@ const createNewEvent = async (req: Request) => {
         throw new ApiError(400, 'Invalid date format.');
     }
 
+    let recurrence_endDate;
+    if (recurrence_end) {
+        recurrence_endDate = DateTime.fromISO(recurrence_end, { zone: "America/Costa_Rica" }).toJSDate();
+        if (isNaN(recurrence_end.getTime())) {
+            throw new ApiError(400, 'Invalid recurrence end date format.');
+        }
+    }
+
+    let featuredDate;
+    if (featured) {
+        featuredDate = DateTime.fromISO(featured, { zone: "America/Costa_Rica" }).toJSDate();
+        if (isNaN(featuredDate.getTime())) {
+            throw new ApiError(400, 'Invalid recurrence end date format.');
+        }
+    }
+
     const location = {
         type: 'Point',
         coordinates: [longitude, latitude],
@@ -161,11 +177,11 @@ const createNewEvent = async (req: Request) => {
         description,
         category,
         event_image: images,
-        featured,
+        featured: featuredDate,
         end_date: eventEndDate,
         address,
         recurrence,
-        recurrence_end,
+        recurrence_end: recurrence_endDate,
         spanishDescription
     });
 
