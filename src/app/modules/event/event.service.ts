@@ -296,20 +296,21 @@ const updateEvents = async (req: Request) => {
 
         if (name) existingEvent.name = name;
         if (date) {
-            console.log("date==========", date)
             // Ensure input is a valid string and trim spaces
             const cleanedDate = String(date).trim();
 
-            // Try parsing as an ISO date
+            // Convert from ISO string, explicitly assuming it is UTC
             const eventDateUTC = DateTime.fromISO(cleanedDate, { zone: "utc" });
 
             if (!eventDateUTC.isValid) {
                 throw new ApiError(400, `Invalid date format: ${cleanedDate}. Use a valid ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ).`);
             }
 
-            // Convert to Costa Rica timezone
-            const eventDate = eventDateUTC.setZone("America/Costa_Rica", { keepLocalTime: false });
-            existingEvent.date = eventDate.toJSDate();
+            // Convert to Costa Rica timezone (GMT-6)
+            const eventDateCR = eventDateUTC.setZone("America/Costa_Rica", { keepLocalTime: false });
+            console.log("Converted Event Date (Costa Rica Time):", eventDateCR.toISO()); // Debugging
+
+            existingEvent.date = eventDateCR.toJSDate();
         }
 
         if (end_date) {
