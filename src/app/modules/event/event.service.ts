@@ -315,19 +315,37 @@ const updateEvents = async (req: Request) => {
             existingEvent.end_date = eventEndDate;
         }
 
+        let featuredDate
+        if (featured) {
+            const inputDate = new Date(featured);
+            featuredDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
+            console.log("featuredDate", featuredDate)
+            if (isNaN(featuredDate.getTime())) {
+                throw new ApiError(400, 'Invalid date format.');
+            }
+        }
+
+        if (recurrence_end) {
+            const inputDate = new Date(end_date);
+            const recurrence_endEndDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
+            if (isNaN(recurrence_endEndDate.getTime())) {
+                throw new ApiError(400, 'Invalid end_date format.');
+            }
+            existingEvent.recurrence_end = recurrence_endEndDate;
+        }
 
         if (time) existingEvent.time = time;
         if (duration) existingEvent.duration = duration;
         if (address) existingEvent.address = address;
         if (option) existingEvent.option = option;
         if (end_time) existingEvent.end_time = end_time;
-        if (featured !== undefined) existingEvent.featured = featured;
+        if (featured !== undefined) existingEvent.featured = featuredDate;
         if (featured === undefined) existingEvent.featured = null;
         if (social_media) existingEvent.social_media = social_media;
         if (category) existingEvent.category = category;
         if (description) existingEvent.description = description;
         if (spanishDescription) existingEvent.spanishDescription = spanishDescription;
-        if (recurrence_end) existingEvent.recurrence_end = recurrence_end;
+        // if (recurrence_end) existingEvent.recurrence_end = recurrence_end;
         if (recurrence) existingEvent.recurrence = recurrence;
 
         if (longitude && latitude) {
