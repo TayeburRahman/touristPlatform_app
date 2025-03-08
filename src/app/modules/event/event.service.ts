@@ -164,7 +164,11 @@ const createNewEvent = async (req: Request) => {
     if (event_image && Array.isArray(event_image)) {
         images = event_image.map(file => `/images/events/${file.filename}`);
     }
-
+    console.log("date", date)
+    console.log("featuredDate", featuredDate)
+    console.log("featured", end_date)
+    console.log("recurrence_end", eventEndDate)
+     
     const newEvent = await Event.create({
         vendor: userId,
         name,
