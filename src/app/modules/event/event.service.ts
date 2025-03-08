@@ -320,6 +320,7 @@ const updateEvents = async (req: Request) => {
             if (isNaN(eventDate.getTime())) {
                 throw new ApiError(400, 'Invalid date format.');
             }
+            console.log("eventDate", eventDate)
             existingEvent.date = eventDate;
         }
 
@@ -330,6 +331,7 @@ const updateEvents = async (req: Request) => {
             if (isNaN(eventEndDate.getTime())) {
                 throw new ApiError(400, 'Invalid end_date format.');
             }
+            console.log("eventEndDate", eventEndDate)
             existingEvent.end_date = eventEndDate;
         }
 
