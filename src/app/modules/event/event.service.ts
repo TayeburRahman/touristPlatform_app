@@ -317,6 +317,8 @@ const updateEvents = async (req: Request) => {
         let dateUpdate = date ? date : existingEvent.date
         if (dateUpdate) {
             const inputDate = new Date(dateUpdate);
+            console.log("date==inputDate", date)
+           
             const eventDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
             console.log("eventDate", eventDate)
             if (isNaN(eventDate.getTime())) {
@@ -329,6 +331,7 @@ const updateEvents = async (req: Request) => {
         let endDateUpdate = end_date ? end_date : existingEvent.end_date;
         if (endDateUpdate) {
             const inputDate = new Date(endDateUpdate);
+            console.log("end_date===inputDate", inputDate)
             const eventEndDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
             if (isNaN(eventEndDate.getTime())) {
                 throw new ApiError(400, 'Invalid end_date format.');
