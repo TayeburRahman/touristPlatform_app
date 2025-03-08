@@ -297,8 +297,8 @@ const updateEvents = async (req: Request) => {
         if (name) existingEvent.name = name;
 
         if (date) {
-            console.log("date", date)
-            const eventDate = DateTime.fromISO(date, { zone: "America/Costa_Rica" }).toJSDate();
+            const inputDate = new Date(date);
+            const eventDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
             console.log("eventDate", eventDate)
             if (isNaN(eventDate.getTime())) {
                 throw new ApiError(400, 'Invalid date format.');
@@ -307,8 +307,8 @@ const updateEvents = async (req: Request) => {
         }
 
         if (end_date) {
-            console.log("end_date", end_date)
-            const eventEndDate = DateTime.fromISO(end_date, { zone: "America/Costa_Rica" }).toJSDate();
+            const inputDate = new Date(end_date);
+            const eventEndDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
             if (isNaN(eventEndDate.getTime())) {
                 throw new ApiError(400, 'Invalid end_date format.');
             }
