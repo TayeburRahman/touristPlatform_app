@@ -299,6 +299,7 @@ const updateEvents = async (req: Request) => {
         if (date) {
             console.log("date", date)
             const eventDate = DateTime.fromISO(date, { zone: "America/Costa_Rica" }).toJSDate();
+            console.log("eventDate", eventDate)
             if (isNaN(eventDate.getTime())) {
                 throw new ApiError(400, 'Invalid date format.');
             }
