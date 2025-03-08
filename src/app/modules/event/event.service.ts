@@ -295,20 +295,25 @@ const updateEvents = async (req: Request) => {
         }
 
         if (name) existingEvent.name = name;
-
         if (date) {
-            const eventDate = DateTime.fromISO(date, { zone: "America/Costa_Rica" });
-            if (!eventDate.isValid) {
+            const eventDateUTC = DateTime.fromISO(date, { zone: "utc" });
+
+            if (!eventDateUTC.isValid) {
                 throw new ApiError(400, 'Invalid date format. Use a valid ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ).');
             }
+
+            const eventDate = eventDateUTC.setZone("America/Costa_Rica", { keepLocalTime: false });
             existingEvent.date = eventDate.toJSDate();
         }
 
         if (end_date) {
-            const eventEndDate = DateTime.fromISO(end_date, { zone: "America/Costa_Rica" });
-            if (!eventEndDate.isValid) {
+            const eventEndDateUTC = DateTime.fromISO(end_date, { zone: "utc" });
+
+            if (!eventEndDateUTC.isValid) {
                 throw new ApiError(400, 'Invalid end_date format. Use a valid ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ).');
             }
+
+            const eventEndDate = eventEndDateUTC.setZone("America/Costa_Rica", { keepLocalTime: false });
             existingEvent.end_date = eventEndDate.toJSDate();
         }
 
