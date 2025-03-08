@@ -10,6 +10,7 @@ import { logger } from "../../../shared/logger";
 import cron from "node-cron";
 import { EventDate } from "./event.helper";
 import { ClickOverview } from "../dashboard/dashboard.model";
+import { DateTime } from "luxon";
 
 // set inactive events
 cron.schedule("* * * * *", async () => {
@@ -130,11 +131,13 @@ const createNewEvent = async (req: Request) => {
     if (recurrence !== "none" && !recurrence_end) {
         throw new ApiError(400, 'Recurrence end date is required for recurring events.');
     }
-    const eventDate = new Date(date);
 
-    if (isNaN(eventDate.getTime())) {
+    const eventDate = DateTime.fromISO(date, { zone: "America/Costa_Rica" }).toJSDate();
+    const eventEndDate = DateTime.fromISO(end_date, { zone: "America/Costa_Rica" }).toJSDate();
+
+    if (isNaN(eventDate.getTime()) || isNaN(eventEndDate.getTime())) {
         throw new ApiError(400, 'Invalid date format.');
-    };
+    }
 
     const location = {
         type: 'Point',
@@ -145,7 +148,6 @@ const createNewEvent = async (req: Request) => {
     if (event_image && Array.isArray(event_image)) {
         images = event_image.map(file => `/images/events/${file.filename}`);
     }
-
 
     const newEvent = await Event.create({
         vendor: userId,
@@ -160,7 +162,7 @@ const createNewEvent = async (req: Request) => {
         category,
         event_image: images,
         featured,
-        end_date,
+        end_date: eventEndDate,
         address,
         recurrence,
         recurrence_end,
@@ -280,9 +282,6 @@ const updateEvents = async (req: Request) => {
             recurrence_end, recurrence, description, category, spanishDescription, end_time
         } = req.body;
 
-
-        console.log("featured", featured)
-
         const { event_image } = req.files as { event_image: Express.Multer.File[] };
         let images: string[] = [];
 
@@ -296,20 +295,29 @@ const updateEvents = async (req: Request) => {
         }
 
         if (name) existingEvent.name = name;
+
         if (date) {
-            const eventDate = new Date(date);
+            const eventDate = DateTime.fromISO(date, { zone: "America/Costa_Rica" }).toJSDate();
             if (isNaN(eventDate.getTime())) {
                 throw new ApiError(400, 'Invalid date format.');
             }
             existingEvent.date = eventDate;
         }
-        if (time) existingEvent.time = time;
 
+        if (end_date) {
+            const eventEndDate = DateTime.fromISO(end_date, { zone: "America/Costa_Rica" }).toJSDate();
+            if (isNaN(eventEndDate.getTime())) {
+                throw new ApiError(400, 'Invalid end_date format.');
+            }
+            existingEvent.end_date = eventEndDate;
+        }
+
+
+        if (time) existingEvent.time = time;
         if (duration) existingEvent.duration = duration;
         if (address) existingEvent.address = address;
         if (option) existingEvent.option = option;
         if (end_time) existingEvent.end_time = end_time;
-        if (end_date) existingEvent.end_date = end_date;
         if (featured !== undefined) existingEvent.featured = featured;
         if (featured === undefined) existingEvent.featured = null;
         if (social_media) existingEvent.social_media = social_media;
@@ -318,6 +326,7 @@ const updateEvents = async (req: Request) => {
         if (spanishDescription) existingEvent.spanishDescription = spanishDescription;
         if (recurrence_end) existingEvent.recurrence_end = recurrence_end;
         if (recurrence) existingEvent.recurrence = recurrence;
+
         if (longitude && latitude) {
             existingEvent.location = {
                 type: 'Point',
@@ -381,6 +390,7 @@ const deleteEvents = async (req: Request) => {
         throw new ApiError(500, 'Error while deleting the event or updating the plan.');
     }
 };
+
 const approveEvents = async (req: Request) => {
     const id = req.params.id;
     const result = await Event.findByIdAndUpdate(id, { status: 'approved' }, { new: true });
