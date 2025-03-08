@@ -131,7 +131,8 @@ const createNewEvent = async (req: Request) => {
     if (recurrence !== "none" && !recurrence_end) {
         throw new ApiError(400, 'Recurrence end date is required for recurring events.');
     }
-
+    console.log("date", date)
+    console.log("featured", end_date)
     const eventDate = DateTime.fromISO(date, { zone: "America/Costa_Rica" }).toJSDate();
     const eventEndDate = DateTime.fromISO(end_date, { zone: "America/Costa_Rica" }).toJSDate();
 
@@ -164,9 +165,10 @@ const createNewEvent = async (req: Request) => {
     if (event_image && Array.isArray(event_image)) {
         images = event_image.map(file => `/images/events/${file.filename}`);
     }
-    console.log("date", date)
+    
+
     console.log("featuredDate", featuredDate)
-    console.log("featured", end_date)
+   
     console.log("recurrence_end", eventEndDate)
      
     const newEvent = await Event.create({
