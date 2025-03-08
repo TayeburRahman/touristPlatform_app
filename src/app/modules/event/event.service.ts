@@ -378,6 +378,8 @@ const updateEvents = async (req: Request) => {
         existingEvent.status = 'updated';
         const updatedEvent = await existingEvent.save();
 
+        console.log("updatedEvent", updatedEvent)
+
         return updatedEvent;
     } catch (error) {
         console.error('Error updating event:', error);
