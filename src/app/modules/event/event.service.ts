@@ -297,19 +297,19 @@ const updateEvents = async (req: Request) => {
         if (name) existingEvent.name = name;
 
         if (date) {
-            const eventDate = DateTime.fromISO(date, { zone: "America/Costa_Rica" }).toJSDate();
-            if (isNaN(eventDate.getTime())) {
-                throw new ApiError(400, 'Invalid date format.');
+            const eventDate = DateTime.fromISO(date, { zone: "America/Costa_Rica" });
+            if (!eventDate.isValid) {
+                throw new ApiError(400, 'Invalid date format. Use a valid ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ).');
             }
-            existingEvent.date = eventDate;
+            existingEvent.date = eventDate.toJSDate();
         }
 
         if (end_date) {
-            const eventEndDate = DateTime.fromISO(end_date, { zone: "America/Costa_Rica" }).toJSDate();
-            if (isNaN(eventEndDate.getTime())) {
-                throw new ApiError(400, 'Invalid end_date format.');
+            const eventEndDate = DateTime.fromISO(end_date, { zone: "America/Costa_Rica" });
+            if (!eventEndDate.isValid) {
+                throw new ApiError(400, 'Invalid end_date format. Use a valid ISO 8601 format (YYYY-MM-DDTHH:mm:ssZ).');
             }
-            existingEvent.end_date = eventEndDate;
+            existingEvent.end_date = eventEndDate.toJSDate();
         }
 
 
