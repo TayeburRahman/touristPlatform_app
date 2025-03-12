@@ -145,21 +145,22 @@ const createNewEvent = async (req: Request) => {
         throw new ApiError(400, 'Invalid date format.');
     }
 
-    let recurrence_endDate;
+    let recurrence_endDate = recurrence_end;
     if (recurrence_end) {
         recurrence_endDate = DateTime.fromISO(recurrence_end, { zone: "America/Costa_Rica" }).toJSDate();
-        if (isNaN(recurrence_end.getTime())) {
+        if (isNaN(recurrence_endDate.getTime())) {
             throw new ApiError(400, 'Invalid recurrence end date format.');
         }
     }
 
-    let featuredDate;
+    let featuredDate = featured;
     if (featured) {
         featuredDate = DateTime.fromISO(featured, { zone: "America/Costa_Rica" }).toJSDate();
         if (isNaN(featuredDate.getTime())) {
-            throw new ApiError(400, 'Invalid recurrence end date format.');
+            throw new ApiError(400, 'Invalid featured date format.');
         }
     }
+
 
     const location = {
         type: 'Point',
