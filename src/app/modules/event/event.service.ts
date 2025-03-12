@@ -170,12 +170,12 @@ const createNewEvent = async (req: Request) => {
     if (event_image && Array.isArray(event_image)) {
         images = event_image.map(file => `/images/events/${file.filename}`);
     }
-    
+
 
     console.log("featuredDate", featuredDate)
-   
+
     console.log("recurrence_end", eventEndDate)
-     
+
     const newEvent = await Event.create({
         vendor: userId,
         name,
@@ -339,7 +339,7 @@ const updateEvents = async (req: Request) => {
         if (dateUpdate) {
             const inputDate = new Date(dateUpdate);
             console.log("date==inputDate", date)
-           
+
             const eventDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
             console.log("eventDate", eventDate)
             if (isNaN(eventDate.getTime())) {
