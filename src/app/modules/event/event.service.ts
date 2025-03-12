@@ -108,6 +108,11 @@ const createNewEvent = async (req: Request) => {
         address,
         duration, option, longitude, latitude, description, recurrence, category, recurrence_end, spanishDescription } = req.body as any;
 
+    console.log("=a=recurrence_end=", recurrence_end)
+    console.log("=a=end_date=", end_date)
+    console.log("=a=date=", date)
+    console.log("=a=featured=", featured)
+
     const data = req.body;
 
     const requiredFields = [
@@ -230,6 +235,11 @@ const createAdminNewEvent = async (req: Request) => {
         "vendor"
     ];
 
+    console.log("=a=recurrence_end=", recurrence_end)
+    console.log("=a=end_date=", end_date)
+    console.log("=a=date=", date)
+    console.log("=a=featured=", featured)
+
     for (const field of requiredFields) {
         if (!data[field]) {
             throw new ApiError(400, `${field} is required.`);
@@ -297,6 +307,11 @@ const updateEvents = async (req: Request) => {
             featured, social_media, longitude, latitude,
             recurrence_end, recurrence, description, category, spanishDescription, end_time
         } = req.body;
+
+        console.log("=u=recurrence_end=", recurrence_end)
+        console.log("=u=end_date=", end_date)
+        console.log("=u=date=", date)
+        console.log("=u=featured=", featured)
 
         const { event_image } = req.files as { event_image: Express.Multer.File[] };
         let images: string[] = [];
