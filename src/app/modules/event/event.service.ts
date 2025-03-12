@@ -136,7 +136,8 @@ const createNewEvent = async (req: Request) => {
     if (recurrence !== "none" && !recurrence_end) {
         throw new ApiError(400, 'Recurrence end date is required for recurring events.');
     }
-
+    console.log("date", date)
+    console.log("featured", end_date)
     const eventDate = DateTime.fromISO(date, { zone: "America/Costa_Rica" }).toJSDate();
     const eventEndDate = DateTime.fromISO(end_date, { zone: "America/Costa_Rica" }).toJSDate();
 
@@ -169,7 +170,12 @@ const createNewEvent = async (req: Request) => {
     if (event_image && Array.isArray(event_image)) {
         images = event_image.map(file => `/images/events/${file.filename}`);
     }
+    
 
+    console.log("featuredDate", featuredDate)
+   
+    console.log("recurrence_end", eventEndDate)
+     
     const newEvent = await Event.create({
         vendor: userId,
         name,
@@ -324,27 +330,34 @@ const updateEvents = async (req: Request) => {
         if (!existingEvent) {
             throw new ApiError(404, 'Event not found or unauthorized.');
         }
+        console.log("date==", date)
+        console.log("end_date===", date)
 
         if (name) existingEvent.name = name;
 
         let dateUpdate = date ? date : existingEvent.date
         if (dateUpdate) {
             const inputDate = new Date(dateUpdate);
+            console.log("date==inputDate", date)
+           
             const eventDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
             console.log("eventDate", eventDate)
             if (isNaN(eventDate.getTime())) {
                 throw new ApiError(400, 'Invalid date format.');
             }
+            console.log("eventDate", eventDate)
             existingEvent.date = eventDate;
         }
 
         let endDateUpdate = end_date ? end_date : existingEvent.end_date;
         if (endDateUpdate) {
             const inputDate = new Date(endDateUpdate);
+            console.log("end_date===inputDate", inputDate)
             const eventEndDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
             if (isNaN(eventEndDate.getTime())) {
                 throw new ApiError(400, 'Invalid end_date format.');
             }
+            console.log("eventEndDate", eventEndDate)
             existingEvent.end_date = eventEndDate;
         }
 
@@ -392,6 +405,8 @@ const updateEvents = async (req: Request) => {
 
         existingEvent.status = 'updated';
         const updatedEvent = await existingEvent.save();
+
+        console.log("updatedEvent", updatedEvent)
 
         return updatedEvent;
     } catch (error) {
