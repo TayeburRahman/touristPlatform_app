@@ -108,10 +108,10 @@ const createNewEvent = async (req: Request) => {
         address,
         duration, option, longitude, latitude, description, recurrence, category, recurrence_end, spanishDescription } = req.body as any;
 
-    console.log("=a=recurrence_end=", recurrence_end)
-    console.log("=a=end_date=", end_date)
-    console.log("=a=date=", date)
-    console.log("=a=featured=", featured)
+    // console.log("=a=recurrence_end=", recurrence_end)
+    // console.log("=a=end_date=", end_date)
+    // console.log("=a=date=", date)
+    // console.log("=a=featured=", featured)
 
     const data = req.body;
 
@@ -161,7 +161,6 @@ const createNewEvent = async (req: Request) => {
         }
     }
 
-
     const location = {
         type: 'Point',
         coordinates: [longitude, latitude],
@@ -173,9 +172,6 @@ const createNewEvent = async (req: Request) => {
     }
 
 
-    console.log("featuredDate", featuredDate)
-
-    console.log("recurrence_end", eventEndDate)
 
     const newEvent = await Event.create({
         vendor: userId,
@@ -590,8 +586,6 @@ const getEvents = async (req: Request) => {
         }));
     }
 
-
-
     if (query.searchTerm) {
         delete query.upcoming;
         const searchRegex = new RegExp(query.searchTerm, 'i');
@@ -635,6 +629,26 @@ const getEvents = async (req: Request) => {
         limit,
         totalPages: Math.ceil(total / limit),
     };
+
+    if (query?.defaultDate) {
+
+        // const event = await Event.updateMany(
+        //     {
+        //         active: true,
+        //         end_date: { $lte: now },
+        //     },
+        //     {
+        //         $set: { active: false },
+        //     }
+        // );
+        console.log(`Eventsresult:`, query?.defaultDate);
+        // if (event.modifiedCount > 0) {
+        //     logger.info(`Set ${event.modifiedCount} inactive events.`);
+        // }
+
+    }
+
+
 
     return { result, meta };
 };

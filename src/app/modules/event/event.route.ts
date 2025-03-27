@@ -3,29 +3,29 @@ import auth from '../../middlewares/auth';
 import { ENUM_USER_ROLE } from '../../../enums/user';
 import { EventController } from './event.controller';
 import { uploadFile } from '../../middlewares/fileUploader';
-const router = express.Router(); 
+const router = express.Router();
 
-router.get( '/', EventController.getEvents);
-router.get( '/admin', auth(ENUM_USER_ROLE.ADMIN), EventController.getAllEvents); 
-router.get('/popular-events', EventController.getPopularMostEvents); 
+router.get('/', EventController.getEvents);
+router.get('/admin', auth(ENUM_USER_ROLE.ADMIN), EventController.getAllEvents);
+router.get('/popular-events', EventController.getPopularMostEvents);
 
 router.post(
     '/create',
-    auth(ENUM_USER_ROLE.VENDOR,ENUM_USER_ROLE.ADMIN),
+    auth(ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN),
     uploadFile(),
     EventController.createNewEvent,
-);  
+);
 
 router.post(
     '/admin-create',
-    auth(ENUM_USER_ROLE.VENDOR,ENUM_USER_ROLE.ADMIN),
+    auth(ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN),
     uploadFile(),
     EventController.createAdminNewEvent,
-);  
- 
+);
+
 router.patch(
     '/update/:eventId',
-    auth(ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN ),
+    auth(ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN),
     uploadFile(),
     EventController.updateEvents
 );
@@ -36,20 +36,20 @@ router.get(
 );
 router.get(
     '/my-event',
-    auth(ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN ),
+    auth(ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN),
     EventController.getMyEvents
 );
- 
+
 
 router.patch(
-    '/duplicate-events/:eventId', 
+    '/duplicate-events/:eventId',
     EventController.duplicateEvents,
 );
 
 router.get(
     '/featured_events',
     EventController.getFeaturedEvents
-); 
+);
 
 router.delete(
     '/delete/:eventId',
@@ -66,50 +66,50 @@ router.patch(
     '/cancel/:id',
     auth(ENUM_USER_ROLE.ADMIN),
     EventController.declinedEvents,
-); 
+);
 
 router.patch(
     '/save-click/:id',
     // auth(ENUM_USER_ROLE.USER, ENUM_USER_ROLE.VENDOR, ENUM_USER_ROLE.ADMIN),
     EventController.saveUserClickEvent,
-); 
+);
 
 router.get(
-    '/events_by_date', 
+    '/events_by_date',
     EventController.getEventsByDate,
 );
 
 router.get(
-    '/events_by_past', 
+    '/events_by_past',
     EventController.getPastEvents,
 );
 
 router.get(
-    '/vendor-events/:vendorId', 
+    '/vendor-events/:vendorId',
     EventController.getVendorEvents,
 );
 router.get(
-    '/vendor-featured/:vendorId', 
+    '/vendor-featured/:vendorId',
     EventController.getVendorFeatured,
-); 
+);
 
 router.get(
-    '/click-overview', 
+    '/click-overview',
     EventController.eventClickOverview,
-); 
+);
 
 router.patch(
-    '/featured/:eventId',  
+    '/featured/:eventId',
     EventController.updateFeatured,
-); 
+);
 
 router.get(
-    '/past-vendor',  
+    '/past-vendor',
     EventController.getPastEventsByVendor,
-); 
+);
 
- 
- 
+
+
 
 
 export const eventRoutes = router;
