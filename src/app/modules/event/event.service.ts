@@ -197,19 +197,6 @@ const createNewEvent = async (req: Request) => {
         throw new ApiError(500, 'Failed to create event.');
     };
 
-    // const available_events = Math.max(0, plan.available_events - 1);
-    // let featured_events
-    // if (featured) {
-    //     featured_events = Math.max(0, plan.featured_events - 1);
-    // } else {
-    //     featured_events = plan.featured_events;
-    // };
-
-    // await Plan.findByIdAndUpdate(plan._id, {
-    //     available_events,
-    //     featured_events,
-    //     events: [...plan.events, newEvent._id],
-    // });
 
     return newEvent;
 };
@@ -427,27 +414,9 @@ const deleteEvents = async (req: Request) => {
         throw new ApiError(404, 'Event not found.');
     }
 
-    // const plan = await Plan.findOne({
-    //     userId: event.vendor,
-    //     active: true,
-    // });
-    // if (!plan) {
-    //     throw new ApiError(404, 'Plan not found.');
-    // }
-
     const isFeatured = event.featured;
 
-    // const updatedAvailableEvents = Math.min(plan.available_events + 1);
-    // const updatedFeaturedEvents = isFeatured
-    //     ? Math.min(plan.featured_events + 1)
-    //     : plan.featured_events;
-
     try {
-        // await Plan.findByIdAndUpdate(plan._id, {
-        //     available_events: updatedAvailableEvents,
-        //     featured_events: updatedFeaturedEvents,
-        //     events: plan.events.filter((eid: any) => !eid.equals((eventId)))
-        // });
 
         await Event.findByIdAndDelete(eventId);
 
@@ -528,8 +497,6 @@ const declinedEvents = async (req: Request) => {
               </html>`
         );
     }
-
-
 
     return result;
 };
@@ -620,7 +587,6 @@ const getEvents = async (req: Request) => {
     categoryQuery = categoryQuery.skip((page - 1) * limit).limit(limit);
 
     const result = await categoryQuery.exec();
-    console.log("result", result)
 
     const total = await Event.countDocuments(filterConditions);
     const meta = {
@@ -641,7 +607,8 @@ const getEvents = async (req: Request) => {
         //         $set: { active: false },
         //     }
         // );
-        console.log(`Eventsresult:`, query?.defaultDate);
+        const now = new Date();
+        console.log(`Eventsresult:`, now);
         // if (event.modifiedCount > 0) {
         //     logger.info(`Set ${event.modifiedCount} inactive events.`);
         // }
