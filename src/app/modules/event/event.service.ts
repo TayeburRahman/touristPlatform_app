@@ -597,7 +597,6 @@ const getEvents = async (req: Request) => {
     };
 
     if (query?.defaultDate) {
-
         const event = await Event.updateMany(
             {
                 active: true,
@@ -607,14 +606,10 @@ const getEvents = async (req: Request) => {
                 $set: { active: false },
             }
         );
-
         if (event.modifiedCount > 0) {
             logger.info(`Set ${event.modifiedCount} inactive events.`);
         }
     }
-
-
-
     return { result, meta };
 };
 
