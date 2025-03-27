@@ -606,9 +606,8 @@ const getEvents = async (req: Request) => {
         //     {
         //         $set: { active: false },
         //     }
-        // );
-        const now = new Date();
-        console.log(`Eventsresult:`, now);
+        // ); 
+        console.log(`Eventsresult:`, query?.defaultDate);
         // if (event.modifiedCount > 0) {
         //     logger.info(`Set ${event.modifiedCount} inactive events.`);
         // }
