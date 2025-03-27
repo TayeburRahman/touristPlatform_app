@@ -13,26 +13,26 @@ import { ClickOverview } from "../dashboard/dashboard.model";
 import { DateTime } from "luxon";
 
 // set inactive events
-cron.schedule("* * * * *", async () => {
-    try {
-        const now = new Date();
-        const result = await Event.updateMany(
-            {
-                active: true,
-                end_date: { $lte: now },
-            },
-            {
-                $set: { active: false },
-            }
-        );
-        // console.log(`Eventsresult:`, result);
-        if (result.modifiedCount > 0) {
-            logger.info(`Set ${result.modifiedCount} inactive events.`);
-        }
-    } catch (error) {
-        logger.error("Error set event active:", error);
-    }
-});
+// cron.schedule("* * * * *", async () => {
+//     try {
+//         const now = new Date();
+//         const result = await Event.updateMany(
+//             {
+//                 active: true,
+//                 end_date: { $lte: now },
+//             },
+//             {
+//                 $set: { active: false },
+//             }
+//         );
+//         // console.log(`Eventsresult:`, result);
+//         if (result.modifiedCount > 0) {
+//             logger.info(`Set ${result.modifiedCount} inactive events.`);
+//         }
+//     } catch (error) {
+//         logger.error("Error set event active:", error);
+//     }
+// });
 
 cron.schedule("* * * * *", async () => {
     try {
@@ -598,20 +598,19 @@ const getEvents = async (req: Request) => {
 
     if (query?.defaultDate) {
 
-        // const event = await Event.updateMany(
-        //     {
-        //         active: true,
-        //         end_date: { $lte: now },
-        //     },
-        //     {
-        //         $set: { active: false },
-        //     }
-        // ); 
-        console.log(`Eventsresult:`, query?.defaultDate);
-        // if (event.modifiedCount > 0) {
-        //     logger.info(`Set ${event.modifiedCount} inactive events.`);
-        // }
+        const event = await Event.updateMany(
+            {
+                active: true,
+                end_date: { $lte: query?.defaultDate },
+            },
+            {
+                $set: { active: false },
+            }
+        );
 
+        if (event.modifiedCount > 0) {
+            logger.info(`Set ${event.modifiedCount} inactive events.`);
+        }
     }
 
 
