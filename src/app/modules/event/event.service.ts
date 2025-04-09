@@ -154,13 +154,13 @@ const createNewEvent = async (req: Request) => {
     //     }
     // }
 
-    let featuredDate = featured;
-    if (featured) {
-        featuredDate = DateTime.fromISO(featured, { zone: "America/Costa_Rica" }).toJSDate();
-        if (isNaN(featuredDate.getTime())) {
-            throw new ApiError(400, 'Invalid featured date format.');
-        }
-    }
+    // let featuredDate = featured;
+    // if (featured) {
+    //     featuredDate = DateTime.fromISO(featured, { zone: "America/Costa_Rica" }).toJSDate();
+    //     if (isNaN(featuredDate.getTime())) {
+    //         throw new ApiError(400, 'Invalid featured date format.');
+    //     }
+    // }
 
     const location = {
         type: 'Point',
@@ -186,7 +186,7 @@ const createNewEvent = async (req: Request) => {
         description,
         category,
         event_image: images,
-        featured: featuredDate,
+        featured: featured,
         end_date: end_date,
         address,
         recurrence,
