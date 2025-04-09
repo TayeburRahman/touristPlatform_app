@@ -510,6 +510,9 @@ const getEvents = async (req: Request) => {
     ) as any;
 
     query.limit = 12;
+    if (!query.page) {
+        query.page = 1
+    }
 
     console.log('query', query)
 
