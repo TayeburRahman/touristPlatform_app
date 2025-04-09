@@ -505,8 +505,10 @@ const declinedEvents = async (req: Request) => {
 };
 
 const getEvents = async (req: Request) => {
-    console.log("ss", req.header);
-    console.log("GG", req.header);
+    const clientTime = req.header("X-Request-Timestamp");
+    console.log("Client Time:", clientTime || "No time provided");
+
+
     let query = Object.fromEntries(
         Object.entries(req.query).filter(([_, value]) => value)
     ) as any;
