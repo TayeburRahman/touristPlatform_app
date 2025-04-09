@@ -505,10 +505,6 @@ const declinedEvents = async (req: Request) => {
 };
 
 const getEvents = async (req: Request) => {
-    const clientTime = req.header("X-Request-Timestamp");
-    console.log("Client Time:", clientTime || "No time provided");
-
-
     let query = Object.fromEntries(
         Object.entries(req.query).filter(([_, value]) => value)
     ) as any;
@@ -573,7 +569,7 @@ const getEvents = async (req: Request) => {
     }
 
     let categoryQuery = Event.find(filterConditions)
-        // .sort({ date: })
+        .sort({ date: -1 })
         .select('name event_image location category address date')
         .populate({
             path: 'category',
@@ -605,7 +601,7 @@ const getEvents = async (req: Request) => {
         totalPages: Math.ceil(total / limit),
     };
 
-    // console.log("defaultDate=========", query?.defaultDate)
+    console.log("defaultDate=========", query?.defaultDate)
 
     if (query?.defaultDate) {
         const event = await Event.updateMany(
