@@ -613,11 +613,13 @@ const getEvents = async (req: Request) => {
                 $set: { active: false },
             }
         );
-        console.log("=====================", event)
         if (event.modifiedCount > 0) {
             logger.info(`Set ${event.modifiedCount} inactive events.`);
         }
     }
+
+    console.log("=====================", result.reverse())
+
     return { result, meta };
 };
 
