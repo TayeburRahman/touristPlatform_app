@@ -618,7 +618,7 @@ const getEvents = async (req: Request) => {
         }
     }
 
-    console.log("=====================", result.reverse())
+    console.log("=====================", result)
 
     return { result, meta };
 };
