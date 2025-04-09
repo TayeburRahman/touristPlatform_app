@@ -514,8 +514,6 @@ const getEvents = async (req: Request) => {
         query.page = 1
     }
 
-    console.log('query', query)
-
     let filterConditions: any = { status: 'approved', active: true };
 
     if (query.category) {
@@ -529,7 +527,7 @@ const getEvents = async (req: Request) => {
         filterConditions.option = { $in: options };
     }
     if (query.upcoming === "upcoming") {
-        filterConditions.date = { $gte: new Date() };
+        filterConditions.date = { $gte: query?.defaultDate };
         filterConditions.category = { $ne: '677ba67ac2771b3198bcbf2c' };
     }
     if (query.date) {
