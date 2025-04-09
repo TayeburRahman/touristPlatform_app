@@ -511,6 +511,8 @@ const getEvents = async (req: Request) => {
 
     query.limit = 12;
 
+    console.log('query', query)
+
     let filterConditions: any = { status: 'approved', active: true };
 
     if (query.category) {
