@@ -505,8 +505,8 @@ const declinedEvents = async (req: Request) => {
 };
 
 const getEvents = async (req: Request) => {
-    console.log("ss", req.header("user-agent")); // Logs the User-Agent header
-    console.log("GG", req.header("X-Request-Timestamp")); // Logs a custom header
+    console.log("ss", req.header);
+    console.log("GG", req.header);
     let query = Object.fromEntries(
         Object.entries(req.query).filter(([_, value]) => value)
     ) as any;
