@@ -138,20 +138,21 @@ const createNewEvent = async (req: Request) => {
     }
     console.log("date", date)
     console.log("featured", end_date)
-    const eventDate = DateTime.fromISO(date, { zone: "America/Costa_Rica" }).toJSDate();
-    const eventEndDate = DateTime.fromISO(end_date, { zone: "America/Costa_Rica" }).toJSDate();
 
-    if (isNaN(eventDate.getTime()) || isNaN(eventEndDate.getTime())) {
-        throw new ApiError(400, 'Invalid date format.');
-    }
+    // const eventDate = DateTime.fromISO(date, { zone: "America/Costa_Rica" }).toJSDate();
+    // const eventEndDate = DateTime.fromISO(end_date, { zone: "America/Costa_Rica" }).toJSDate();
 
-    let recurrence_endDate = recurrence_end;
-    if (recurrence_end) {
-        recurrence_endDate = DateTime.fromISO(recurrence_end, { zone: "America/Costa_Rica" }).toJSDate();
-        if (isNaN(recurrence_endDate.getTime())) {
-            throw new ApiError(400, 'Invalid recurrence end date format.');
-        }
-    }
+    // if (isNaN(eventDate.getTime()) || isNaN(eventEndDate.getTime())) {
+    //     throw new ApiError(400, 'Invalid date format.');
+    // }
+
+    // let recurrence_endDate = recurrence_end;
+    // if (recurrence_end) {
+    //     recurrence_endDate = DateTime.fromISO(recurrence_end, { zone: "America/Costa_Rica" }).toJSDate();
+    //     if (isNaN(recurrence_endDate.getTime())) {
+    //         throw new ApiError(400, 'Invalid recurrence end date format.');
+    //     }
+    // }
 
     let featuredDate = featured;
     if (featured) {
@@ -176,7 +177,7 @@ const createNewEvent = async (req: Request) => {
     const newEvent = await Event.create({
         vendor: userId,
         name,
-        date: eventDate,
+        date: date,
         time,
         duration,
         option,
@@ -186,10 +187,10 @@ const createNewEvent = async (req: Request) => {
         category,
         event_image: images,
         featured: featuredDate,
-        end_date: eventEndDate,
+        end_date: end_date,
         address,
         recurrence,
-        recurrence_end: recurrence_endDate,
+        recurrence_end: recurrence_end,
         spanishDescription
     });
 
