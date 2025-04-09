@@ -318,7 +318,6 @@ const updateEvents = async (req: Request) => {
         console.log("date==", date)
         console.log("end_date===", date)
 
-        if (name) existingEvent.name = name;
 
         // let dateUpdate = date ? date : existingEvent.date;
         // if (dateUpdate) {
@@ -366,6 +365,7 @@ const updateEvents = async (req: Request) => {
         //     existingEvent.recurrence_end = recurrence_endEndDate;
         // }
 
+        if (name) existingEvent.name = name;
         if (time) existingEvent.time = time;
         if (date) existingEvent.date = date;
         if (duration) existingEvent.duration = duration;
