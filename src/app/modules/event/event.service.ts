@@ -569,7 +569,7 @@ const getEvents = async (req: Request) => {
     }
 
     let categoryQuery = Event.find(filterConditions)
-        .sort({ date: 1 })
+        // .sort({ date: })
         .select('name event_image location category address date')
         .populate({
             path: 'category',
