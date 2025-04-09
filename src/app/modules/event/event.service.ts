@@ -526,6 +526,9 @@ const getEvents = async (req: Request) => {
         const options = query.option.split(',');
         filterConditions.option = { $in: options };
     }
+
+    console.log("=========", query)
+
     if (query.upcoming === "upcoming") {
         filterConditions.date = { $gte: query?.defaultDate };
         filterConditions.category = { $ne: '677ba67ac2771b3198bcbf2c' };
