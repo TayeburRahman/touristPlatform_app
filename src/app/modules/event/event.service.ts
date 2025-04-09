@@ -618,8 +618,6 @@ const getEvents = async (req: Request) => {
         }
     }
 
-    console.log("=====================", result)
-
     return { result, meta };
 };
 
