@@ -320,64 +320,66 @@ const updateEvents = async (req: Request) => {
 
         if (name) existingEvent.name = name;
 
-        let dateUpdate = date ? date : existingEvent.date
-        if (dateUpdate) {
-            const inputDate = new Date(dateUpdate);
-            console.log("date==inputDate", date)
+        // let dateUpdate = date ? date : existingEvent.date;
+        // if (dateUpdate) {
+        //     const inputDate = new Date(dateUpdate);
+        //     console.log("date==inputDate", date)
 
-            const eventDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
-            console.log("eventDate", eventDate)
-            if (isNaN(eventDate.getTime())) {
-                throw new ApiError(400, 'Invalid date format.');
-            }
-            console.log("eventDate", eventDate)
-            existingEvent.date = eventDate;
-        }
+        //     const eventDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
+        //     console.log("eventDate", eventDate)
+        //     if (isNaN(eventDate.getTime())) {
+        //         throw new ApiError(400, 'Invalid date format.');
+        //     }
+        //     console.log("eventDate", eventDate)
+        //     existingEvent.date = eventDate;
+        // }
 
-        let endDateUpdate = end_date ? end_date : existingEvent.end_date;
-        if (endDateUpdate) {
-            const inputDate = new Date(endDateUpdate);
-            console.log("end_date===inputDate", inputDate)
-            const eventEndDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
-            if (isNaN(eventEndDate.getTime())) {
-                throw new ApiError(400, 'Invalid end_date format.');
-            }
-            console.log("eventEndDate", eventEndDate)
-            existingEvent.end_date = eventEndDate;
-        }
+        // let endDateUpdate = end_date ? end_date : existingEvent.end_date;
+        // if (endDateUpdate) {
+        //     const inputDate = new Date(endDateUpdate);
+        //     console.log("end_date===inputDate", inputDate)
+        //     // const eventEndDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
+        //     // if (isNaN(eventEndDate.getTime())) {
+        //     //     throw new ApiError(400, 'Invalid end_date format.');
+        //     // }
+        //     // console.log("eventEndDate", eventEndDate)
+        //     // existingEvent.end_date = eventEndDate;
+        // }
 
-        let featuredDate = featured ? featured : existingEvent.featured;
-        if (featuredDate) {
-            const inputDate = new Date(featuredDate);
-            featuredDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
-            console.log("featuredDate", featuredDate)
-            if (isNaN(featuredDate.getTime())) {
-                throw new ApiError(400, 'Invalid date format.');
-            }
-        }
+        // let featuredDate = featured ? featured : existingEvent.featured;
+        // if (featuredDate) {
+        //     const inputDate = new Date(featuredDate);
+        //     featuredDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
+        //     console.log("featuredDate", featuredDate)
+        //     if (isNaN(featuredDate.getTime())) {
+        //         throw new ApiError(400, 'Invalid date format.');
+        //     }
+        // }
 
-        let recurrence_endUpdate = recurrence_end ? recurrence_end : existingEvent.recurrence_end;
-        if (recurrence_endUpdate) {
-            const inputDate = new Date(recurrence_endUpdate);
-            const recurrence_endEndDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
-            if (isNaN(recurrence_endEndDate.getTime())) {
-                throw new ApiError(400, 'Invalid end_date format.');
-            }
-            existingEvent.recurrence_end = recurrence_endEndDate;
-        }
+        // let recurrence_endUpdate = recurrence_end ? recurrence_end : existingEvent.recurrence_end;
+        // if (recurrence_endUpdate) {
+        //     const inputDate = new Date(recurrence_endUpdate);
+        //     const recurrence_endEndDate = DateTime.fromJSDate(inputDate, { zone: "America/Costa_Rica" }).toJSDate();
+        //     if (isNaN(recurrence_endEndDate.getTime())) {
+        //         throw new ApiError(400, 'Invalid end_date format.');
+        //     }
+        //     existingEvent.recurrence_end = recurrence_endEndDate;
+        // }
 
         if (time) existingEvent.time = time;
+        if (date) existingEvent.date = date;
         if (duration) existingEvent.duration = duration;
         if (address) existingEvent.address = address;
         if (option) existingEvent.option = option;
         if (end_time) existingEvent.end_time = end_time;
-        if (featured !== undefined) existingEvent.featured = featuredDate;
+        if (end_date) existingEvent.end_date = end_date;
+        if (featured !== undefined) existingEvent.featured = featured;
         if (featured === undefined) existingEvent.featured = null;
         if (social_media) existingEvent.social_media = social_media;
         if (category) existingEvent.category = category;
         if (description) existingEvent.description = description;
         if (spanishDescription) existingEvent.spanishDescription = spanishDescription;
-        // if (recurrence_end) existingEvent.recurrence_end = recurrence_end;
+        if (recurrence_end) existingEvent.recurrence_end = recurrence_end;
         if (recurrence) existingEvent.recurrence = recurrence;
 
         if (longitude && latitude) {
