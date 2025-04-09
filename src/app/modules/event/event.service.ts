@@ -505,6 +505,8 @@ const declinedEvents = async (req: Request) => {
 };
 
 const getEvents = async (req: Request) => {
+    console.log("ss", req.header("user-agent")); // Logs the User-Agent header
+    console.log("GG", req.header("X-Request-Timestamp")); // Logs a custom header
     let query = Object.fromEntries(
         Object.entries(req.query).filter(([_, value]) => value)
     ) as any;
@@ -601,7 +603,7 @@ const getEvents = async (req: Request) => {
         totalPages: Math.ceil(total / limit),
     };
 
-    console.log("defaultDate=========", query?.defaultDate)
+    // console.log("defaultDate=========", query?.defaultDate)
 
     if (query?.defaultDate) {
         const event = await Event.updateMany(
