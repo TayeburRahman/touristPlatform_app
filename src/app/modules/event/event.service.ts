@@ -596,6 +596,8 @@ const getEvents = async (req: Request) => {
         totalPages: Math.ceil(total / limit),
     };
 
+    console.log("defaultDate=========", query?.defaultDate)
+
     if (query?.defaultDate) {
         const event = await Event.updateMany(
             {
@@ -606,6 +608,7 @@ const getEvents = async (req: Request) => {
                 $set: { active: false },
             }
         );
+        console.log("=====================", event)
         if (event.modifiedCount > 0) {
             logger.info(`Set ${event.modifiedCount} inactive events.`);
         }
