@@ -613,7 +613,7 @@ const getEvents = async (req: Request) => {
         totalPages: Math.ceil(total / limit),
     };
 
-    // console.log("defaultDate=========", query?.defaultDate)
+    console.log("defaultDate=========", query)
 
     // if (dates) {
     //     const event = await Event.updateMany(
