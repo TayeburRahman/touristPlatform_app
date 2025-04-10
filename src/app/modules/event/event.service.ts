@@ -37,7 +37,7 @@ import { DateTime } from "luxon";
 // });
 
 
-cron.schedule("*/1 * * * *", async () => {
+cron.schedule("* * * * *", async () => {
     try {
         const dates = new Date();
         dates.setHours(dates.getHours() - 6);
@@ -47,14 +47,12 @@ cron.schedule("*/1 * * * *", async () => {
         const targetDate = new Date(dates);
         targetDate.setHours(0, 0, 0, 0);
 
-        const currentTime = new Date(dates);  // Create a new date object for the current time comparison
+        const currentTime = new Date(dates);
         const hours = currentTime.getHours();
         const minutes = currentTime.getMinutes();
         const ampm = hours >= 12 ? 'PM' : 'AM';
         const hours12 = hours % 12 || 12;
         const formattedTime = `${hours12}:${minutes < 10 ? '0' : ''}${minutes} ${ampm}`;
-
-        console.log("Formatted current time:", formattedTime);
 
         const convertTo24Hr = (timeStr: any) => {
             const [time, modifier] = timeStr.split(' ');
@@ -68,9 +66,6 @@ cron.schedule("*/1 * * * *", async () => {
         };
 
         const targetEndTimeObj = convertTo24Hr(formattedTime);
-
-        console.log("=========", targetDate, targetEndTimeObj);
-
         const result = await Event.updateMany(
             {
                 active: true,
@@ -100,7 +95,6 @@ cron.schedule("* * * * *", async () => {
     try {
         const now = new Date();
         now.setHours(now.getHours() - 6);
-        console.log("=111==", now)
         const result = await Event.updateMany(
             {
                 active: false,
@@ -135,7 +129,6 @@ cron.schedule("* * * * *", async () => {
                 let newEvent = event.toObject();
                 const currentDate = event.date;
                 const endDate = event.date;
-                //   console.log("currentDate",currentDate)
                 switch (event.recurrence) {
                     case "weekly":
                         newEvent.date = EventDate.getNextWeek(currentDate);
@@ -156,7 +149,7 @@ cron.schedule("* * * * *", async () => {
                     default:
                         continue;
                 }
-                newEvent.active = true; // Reactivate event
+                newEvent.active = true;
                 await Event.findByIdAndUpdate(event._id, newEvent, { new: true });
             }
             logger.info(`Set ${events.length} active events from recurring events.`);
@@ -570,133 +563,6 @@ const declinedEvents = async (req: Request) => {
 
     return result;
 };
-
-// const getEvents = async (req: Request) => {
-//     let query = Object.fromEntries(
-//         Object.entries(req.query).filter(([_, value]) => value)
-//     ) as any;
-
-//     const dates = new Date();
-//     dates.setHours(dates.getHours() - 6);
-//     console.log("=========", dates.toISOString());
-
-
-//     query.limit = 12;
-//     if (!query.page) {
-//         query.page = 1
-//     }
-
-//     let filterConditions: any = { status: 'approved', active: true };
-
-//     if (query.category) {
-//         delete query.upcoming;
-//         filterConditions.category = query.category;
-//     }
-
-//     if (query.option) {
-//         delete query.upcoming;
-//         const options = query.option.split(',');
-//         filterConditions.option = { $in: options };
-//     }
-
-//     console.log("=========", query)
-
-//     if (query.upcoming === "upcoming") {
-//         filterConditions.date = { $gte: dates.toISOString() };
-//         filterConditions.category = { $ne: '677ba67ac2771b3198bcbf2c' };
-//     }
-//     if (query.date) {
-//         delete query.upcoming;
-
-//         const dateArray = query.date.split(',').map((date: string) => date.trim());
-
-//         const validDates = dateArray.map((dateStr: string) => {
-//             const [day, month, year] = dateStr.split('-');
-//             const formattedDate = new Date(`${year}-${month}-${day}`);
-//             if (isNaN(formattedDate.getTime())) {
-//                 throw new ApiError(400, `Invalid date format: ${dateStr}`);
-//             }
-//             formattedDate.setHours(0, 0, 0, 0);
-//             return formattedDate;
-//         });
-
-//         filterConditions.$or = validDates.map((date: Date) => ({
-//             $or: [
-//                 {
-//                     $and: [
-//                         { date: { $gte: date } },
-//                         { end_date: { $lt: new Date(date.getTime() + 86400000) } }
-//                     ]
-//                 },
-//                 { date: { $lte: date }, end_date: { $gte: date } },
-//                 { date: { $gte: date }, end_date: { $lte: date } },
-//             ]
-//         }));
-//     }
-
-//     if (query.searchTerm) {
-//         delete query.upcoming;
-//         const searchRegex = new RegExp(query.searchTerm, 'i');
-//         filterConditions.$or = [
-//             { name: searchRegex },
-//             { description: searchRegex },
-//             { spanishDescription: searchRegex },
-//         ];
-//     }
-
-//     let categoryQuery = Event.find(filterConditions)
-//         .sort({ date: 1 })
-//         .select('name event_image location category address date')
-//         .populate({
-//             path: 'category',
-//             match: query.searchTerm ? { name: new RegExp(query.searchTerm, 'i') } : {},
-//             select: 'name',
-//         })
-//         .populate({
-//             path: 'vendor',
-//             select: 'business_name email name',
-//         })
-
-//     if (query.sort) {
-//         const sortField = query.sort.startsWith('-') ? query.sort.slice(1) : query.sort;
-//         const sortOrder = query.sort.startsWith('-') ? -1 : 1;
-//         categoryQuery = categoryQuery.sort({ [sortField]: sortOrder });
-//     }
-
-//     const page = parseInt(query.page || '1', 10);
-//     const limit = parseInt(query.limit || '10', 10);
-//     categoryQuery = categoryQuery.skip((page - 1) * limit).limit(limit);
-
-//     const result = await categoryQuery.exec();
-
-//     const total = await Event.countDocuments(filterConditions);
-//     const meta = {
-//         total,
-//         page,
-//         limit,
-//         totalPages: Math.ceil(total / limit),
-//     };
-
-//     console.log("defaultDate=========", query)
-
-//     // if (dates) {
-//     //     const event = await Event.updateMany(
-//     //         {
-//     //             active: true,
-//     //             end_date: { $lte: query?.defaultDate },
-//     //         },
-//     //         {
-//     //             $set: { active: false },
-//     //         }
-//     //     );
-//     //     if (event.modifiedCount > 0) {
-//     //         logger.info(`Set ${event.modifiedCount} inactive events.`);
-//     //     }
-//     // }
-
-//     return { result, meta };
-// };
-
 
 const getEvents = async (req: Request) => {
     let query = Object.fromEntries(
