@@ -12,10 +12,8 @@ import { EventDate } from "./event.helper";
 import { ClickOverview } from "../dashboard/dashboard.model";
 import { DateTime } from "luxon";
 
-// set inactive events
-cron.schedule("* * * * *", async () => {
+cron.schedule("*/5 * * * *", async () => {
     try {
-        // const now = new Date();
         const dates = new Date();
         dates.setHours(dates.getHours() - 6);
         console.log("=========", dates.toISOString());
@@ -23,19 +21,21 @@ cron.schedule("* * * * *", async () => {
         const result = await Event.updateMany(
             {
                 active: true,
-                end_date: { $lte: dates },
+                end_date: { $lte: dates.toISOString() },
             },
             {
                 $set: { active: false },
             }
         );
+        console.log("=================================================l")
         if (result.modifiedCount > 0) {
             logger.info(`Set ${result.modifiedCount} inactive events.`);
         }
     } catch (error) {
-        logger.error("Error set event active:", error);
+        logger.error("Error setting events to inactive:", error);
     }
 });
+
 
 cron.schedule("* * * * *", async () => {
     try {
