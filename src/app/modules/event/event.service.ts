@@ -11,7 +11,6 @@ import cron from "node-cron";
 import { EventDate } from "./event.helper";
 import { ClickOverview } from "../dashboard/dashboard.model";
 import { DateTime } from "luxon";
-import geoip from 'geoip-lite';
 
 // set inactive events
 // cron.schedule("* * * * *", async () => {
@@ -510,26 +509,8 @@ const getEvents = async (req: Request) => {
         Object.entries(req.query).filter(([_, value]) => value)
     ) as any;
 
-    const ip = req.headers['x-forwarded-for'] || req.connection.remoteAddress;
-
-    if (!ip) {
-        throw new Error('IP address is not available');
-    }
-
-    // In case there are multiple IPs in the header
-    const ipAddress = Array.isArray(ip) ? ip[0] : ip;
-
-    // Use geoip-lite to get country from the IP address
-    const geo = geoip.lookup(ipAddress);
-
-    if (!geo || !geo.country) {
-        throw new Error('Country not found for this IP address.');
-    }
-
-    // Country information is in geo.country
-    const country = geo.country;
-
-    console.log('======================= Country:', country);
+    const dates = new Date()
+    console.log("=========", dates)
 
 
     query.limit = 12;
