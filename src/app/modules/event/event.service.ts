@@ -13,26 +13,29 @@ import { ClickOverview } from "../dashboard/dashboard.model";
 import { DateTime } from "luxon";
 
 // set inactive events
-// cron.schedule("* * * * *", async () => {
-//     try {
-//         const now = new Date();
-//         const result = await Event.updateMany(
-//             {
-//                 active: true,
-//                 end_date: { $lte: now },
-//             },
-//             {
-//                 $set: { active: false },
-//             }
-//         );
-//         // console.log(`Eventsresult:`, result);
-//         if (result.modifiedCount > 0) {
-//             logger.info(`Set ${result.modifiedCount} inactive events.`);
-//         }
-//     } catch (error) {
-//         logger.error("Error set event active:", error);
-//     }
-// });
+cron.schedule("* * * * *", async () => {
+    try {
+        // const now = new Date();
+        const dates = new Date();
+        dates.setHours(dates.getHours() - 6);
+        console.log("=========", dates.toISOString());
+
+        const result = await Event.updateMany(
+            {
+                active: true,
+                end_date: { $lte: dates },
+            },
+            {
+                $set: { active: false },
+            }
+        );
+        if (result.modifiedCount > 0) {
+            logger.info(`Set ${result.modifiedCount} inactive events.`);
+        }
+    } catch (error) {
+        logger.error("Error set event active:", error);
+    }
+});
 
 cron.schedule("* * * * *", async () => {
     try {
@@ -510,7 +513,7 @@ const getEvents = async (req: Request) => {
     ) as any;
 
     const dates = new Date();
-    dates.setHours(dates.getHours() - 12);
+    dates.setHours(dates.getHours() - 6);
     console.log("=========", dates.toISOString());
 
 
@@ -535,7 +538,7 @@ const getEvents = async (req: Request) => {
     console.log("=========", query)
 
     if (query.upcoming === "upcoming") {
-        filterConditions.date = { $gte: query?.defaultDate };
+        filterConditions.date = { $gte: dates.toISOString() };
         filterConditions.category = { $ne: '677ba67ac2771b3198bcbf2c' };
     }
     if (query.date) {
@@ -610,22 +613,22 @@ const getEvents = async (req: Request) => {
         totalPages: Math.ceil(total / limit),
     };
 
-    console.log("defaultDate=========", query?.defaultDate)
+    // console.log("defaultDate=========", query?.defaultDate)
 
-    if (query?.defaultDate) {
-        const event = await Event.updateMany(
-            {
-                active: true,
-                end_date: { $lte: query?.defaultDate },
-            },
-            {
-                $set: { active: false },
-            }
-        );
-        if (event.modifiedCount > 0) {
-            logger.info(`Set ${event.modifiedCount} inactive events.`);
-        }
-    }
+    // if (dates) {
+    //     const event = await Event.updateMany(
+    //         {
+    //             active: true,
+    //             end_date: { $lte: query?.defaultDate },
+    //         },
+    //         {
+    //             $set: { active: false },
+    //         }
+    //     );
+    //     if (event.modifiedCount > 0) {
+    //         logger.info(`Set ${event.modifiedCount} inactive events.`);
+    //     }
+    // }
 
     return { result, meta };
 };
