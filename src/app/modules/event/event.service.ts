@@ -510,7 +510,7 @@ const getEvents = async (req: Request) => {
     ) as any;
 
     const dates = new Date();
-    dates.setHours(dates.getHours() - 6);
+    dates.setHours(dates.getHours() - 12);
     console.log("=========", dates.toISOString());
 
 
