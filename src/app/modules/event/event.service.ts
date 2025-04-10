@@ -509,8 +509,9 @@ const getEvents = async (req: Request) => {
         Object.entries(req.query).filter(([_, value]) => value)
     ) as any;
 
-    const dates = new Date()
-    console.log("=========", dates.setHours(dates.getHours() - 6))
+    const dates = new Date();
+    dates.setHours(dates.getHours() - 6);
+    console.log("=========", dates.toISOString());
 
 
     query.limit = 12;
