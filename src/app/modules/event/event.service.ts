@@ -11,6 +11,7 @@ import cron from "node-cron";
 import { EventDate } from "./event.helper";
 import { ClickOverview } from "../dashboard/dashboard.model";
 import { DateTime } from "luxon";
+import geoip from 'geoip-lite';
 
 // set inactive events
 // cron.schedule("* * * * *", async () => {
@@ -508,6 +509,24 @@ const getEvents = async (req: Request) => {
     let query = Object.fromEntries(
         Object.entries(req.query).filter(([_, value]) => value)
     ) as any;
+
+    const ip = req.ip || req.connection.remoteAddress;
+    if (!ip) {
+        throw new Error('IP address is not available');
+    }
+
+    // Use geoip-lite to get country from the IP address
+    const geo = geoip.lookup(ip);
+
+    if (!geo || !geo.country) {
+        throw new Error('Country not found for this IP address.');
+    }
+
+    // Country information is in geo.country
+    const country = geo.country;
+
+    console.log('=======================', country)
+
 
     query.limit = 12;
     if (!query.page) {
