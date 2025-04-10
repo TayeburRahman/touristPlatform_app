@@ -41,18 +41,18 @@ cron.schedule("*/1 * * * *", async () => {
     try {
         const dates = new Date();
         dates.setHours(dates.getHours() - 6);
+        console.log("=222==", dates)
         console.log("=========", dates.toISOString());
 
-        // Create a new date for targetDate and set it to midnight
-        const targetDate = new Date(dates);  // Clone the original date object
-        targetDate.setHours(0, 0, 0, 0);  // Set the time to midnight for date-only comparison
+        const targetDate = new Date(dates);
+        targetDate.setHours(0, 0, 0, 0);
 
         const currentTime = new Date(dates);  // Create a new date object for the current time comparison
         const hours = currentTime.getHours();
         const minutes = currentTime.getMinutes();
         const ampm = hours >= 12 ? 'PM' : 'AM';
-        const hours12 = hours % 12 || 12;  // Convert to 12-hour format
-        const formattedTime = `${hours12}:${minutes < 10 ? '0' : ''}${minutes} ${ampm}`; // Format like '06:00 PM'
+        const hours12 = hours % 12 || 12;
+        const formattedTime = `${hours12}:${minutes < 10 ? '0' : ''}${minutes} ${ampm}`;
 
         console.log("Formatted current time:", formattedTime);
 
@@ -99,6 +99,8 @@ cron.schedule("*/1 * * * *", async () => {
 cron.schedule("* * * * *", async () => {
     try {
         const now = new Date();
+        now.setHours(now.getHours() - 6);
+        console.log("=111==", now)
         const result = await Event.updateMany(
             {
                 active: false,
@@ -120,6 +122,9 @@ cron.schedule("* * * * *", async () => {
 cron.schedule("* * * * *", async () => {
     try {
         const now = new Date();
+        now.setHours(now.getHours() - 6);
+        console.log("=000==", now)
+
         const events = await Event.find({
             active: false,
             recurrence_end: { $gt: now },
