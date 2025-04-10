@@ -40,36 +40,38 @@ import { DateTime } from "luxon";
 cron.schedule("*/1 * * * *", async () => {
     try {
         const dates = new Date();
-        dates.setHours(dates.getHours() - 6);  // Adjust for 6-hour difference
+        dates.setHours(dates.getHours() - 6);
         console.log("=========", dates.toISOString());
 
-        // Dynamic current date and time
-        const targetDate = dates;
-        targetDate.setHours(0, 0, 0, 0);  // Set the current date at midnight to match only the date part
+        // Create a new date for targetDate and set it to midnight
+        const targetDate = new Date(dates);  // Clone the original date object
+        targetDate.setHours(0, 0, 0, 0);  // Set the time to midnight for date-only comparison
 
-        // Convert the current time to 12-hour format for the end_time comparison
-        const currentTime = dates;
+        const currentTime = new Date(dates);  // Create a new date object for the current time comparison
         const hours = currentTime.getHours();
         const minutes = currentTime.getMinutes();
         const ampm = hours >= 12 ? 'PM' : 'AM';
-        const hours12 = hours % 12 || 12;  // Convert to 12-hour format (12 AM for midnight)
+        const hours12 = hours % 12 || 12;  // Convert to 12-hour format
         const formattedTime = `${hours12}:${minutes < 10 ? '0' : ''}${minutes} ${ampm}`; // Format like '06:00 PM'
 
         console.log("Formatted current time:", formattedTime);
 
-        // Convert the formatted end time to a 24-hour Date object for comparison
-        const convertTo24Hr = (timeStr: any) => {
+        // Function to convert time string to 24-hour format for Date object comparison
+        const convertTo24Hr = (timeStr) => {
             const [time, modifier] = timeStr.split(' ');
             let [hours, minutes] = time.split(':');
             hours = parseInt(hours);
             if (modifier === 'PM' && hours !== 12) hours += 12; // Convert PM times to 24-hour format
             if (modifier === 'AM' && hours === 12) hours = 0;  // Convert 12 AM to 0 hours
-            return new Date(targetDate.setHours(hours, minutes, 0, 0));  // Return the time in Date object
+            const timeDate = new Date(targetDate);  // Clone targetDate so the original date isn't modified
+            timeDate.setHours(hours, minutes, 0, 0);  // Set the time on the cloned date object
+            return timeDate;
         };
 
-        const targetEndTimeObj = convertTo24Hr(formattedTime);  // Convert the dynamic formatted time to a Date object
+        const targetEndTimeObj = convertTo24Hr(formattedTime);  // Convert formatted time to Date object
 
-        console.log("=========", targetDate, targetEndTimeObj)
+        console.log("=========", targetDate, targetEndTimeObj);
+
         const result = await Event.updateMany(
             {
                 active: true,
@@ -91,6 +93,7 @@ cron.schedule("*/1 * * * *", async () => {
         logger.error("Error setting events to inactive:", error);
     }
 });
+
 
 
 
