@@ -37,7 +37,7 @@ import { DateTime } from "luxon";
 // });
 
 
-cron.schedule("*/5 * * * *", async () => {
+cron.schedule("*/1 * * * *", async () => {
     try {
         const now = new Date();
         const dates = new Date();
