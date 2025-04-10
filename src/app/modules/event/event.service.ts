@@ -507,15 +507,141 @@ const declinedEvents = async (req: Request) => {
     return result;
 };
 
+// const getEvents = async (req: Request) => {
+//     let query = Object.fromEntries(
+//         Object.entries(req.query).filter(([_, value]) => value)
+//     ) as any;
+
+//     const dates = new Date();
+//     dates.setHours(dates.getHours() - 6);
+//     console.log("=========", dates.toISOString());
+
+
+//     query.limit = 12;
+//     if (!query.page) {
+//         query.page = 1
+//     }
+
+//     let filterConditions: any = { status: 'approved', active: true };
+
+//     if (query.category) {
+//         delete query.upcoming;
+//         filterConditions.category = query.category;
+//     }
+
+//     if (query.option) {
+//         delete query.upcoming;
+//         const options = query.option.split(',');
+//         filterConditions.option = { $in: options };
+//     }
+
+//     console.log("=========", query)
+
+//     if (query.upcoming === "upcoming") {
+//         filterConditions.date = { $gte: dates.toISOString() };
+//         filterConditions.category = { $ne: '677ba67ac2771b3198bcbf2c' };
+//     }
+//     if (query.date) {
+//         delete query.upcoming;
+
+//         const dateArray = query.date.split(',').map((date: string) => date.trim());
+
+//         const validDates = dateArray.map((dateStr: string) => {
+//             const [day, month, year] = dateStr.split('-');
+//             const formattedDate = new Date(`${year}-${month}-${day}`);
+//             if (isNaN(formattedDate.getTime())) {
+//                 throw new ApiError(400, `Invalid date format: ${dateStr}`);
+//             }
+//             formattedDate.setHours(0, 0, 0, 0);
+//             return formattedDate;
+//         });
+
+//         filterConditions.$or = validDates.map((date: Date) => ({
+//             $or: [
+//                 {
+//                     $and: [
+//                         { date: { $gte: date } },
+//                         { end_date: { $lt: new Date(date.getTime() + 86400000) } }
+//                     ]
+//                 },
+//                 { date: { $lte: date }, end_date: { $gte: date } },
+//                 { date: { $gte: date }, end_date: { $lte: date } },
+//             ]
+//         }));
+//     }
+
+//     if (query.searchTerm) {
+//         delete query.upcoming;
+//         const searchRegex = new RegExp(query.searchTerm, 'i');
+//         filterConditions.$or = [
+//             { name: searchRegex },
+//             { description: searchRegex },
+//             { spanishDescription: searchRegex },
+//         ];
+//     }
+
+//     let categoryQuery = Event.find(filterConditions)
+//         .sort({ date: 1 })
+//         .select('name event_image location category address date')
+//         .populate({
+//             path: 'category',
+//             match: query.searchTerm ? { name: new RegExp(query.searchTerm, 'i') } : {},
+//             select: 'name',
+//         })
+//         .populate({
+//             path: 'vendor',
+//             select: 'business_name email name',
+//         })
+
+//     if (query.sort) {
+//         const sortField = query.sort.startsWith('-') ? query.sort.slice(1) : query.sort;
+//         const sortOrder = query.sort.startsWith('-') ? -1 : 1;
+//         categoryQuery = categoryQuery.sort({ [sortField]: sortOrder });
+//     }
+
+//     const page = parseInt(query.page || '1', 10);
+//     const limit = parseInt(query.limit || '10', 10);
+//     categoryQuery = categoryQuery.skip((page - 1) * limit).limit(limit);
+
+//     const result = await categoryQuery.exec();
+
+//     const total = await Event.countDocuments(filterConditions);
+//     const meta = {
+//         total,
+//         page,
+//         limit,
+//         totalPages: Math.ceil(total / limit),
+//     };
+
+//     console.log("defaultDate=========", query)
+
+//     // if (dates) {
+//     //     const event = await Event.updateMany(
+//     //         {
+//     //             active: true,
+//     //             end_date: { $lte: query?.defaultDate },
+//     //         },
+//     //         {
+//     //             $set: { active: false },
+//     //         }
+//     //     );
+//     //     if (event.modifiedCount > 0) {
+//     //         logger.info(`Set ${event.modifiedCount} inactive events.`);
+//     //     }
+//     // }
+
+//     return { result, meta };
+// };
+
+
 const getEvents = async (req: Request) => {
     let query = Object.fromEntries(
         Object.entries(req.query).filter(([_, value]) => value)
     ) as any;
 
     const dates = new Date();
-    dates.setHours(dates.getHours() - 6);
+    dates.setHours(dates.getHours() - 6);  // Adjust the time by -6 hours
     console.log("=========", dates.toISOString());
-
 
     query.limit = 12;
     if (!query.page) {
@@ -535,7 +661,7 @@ const getEvents = async (req: Request) => {
         filterConditions.option = { $in: options };
     }
 
-    console.log("=========", query)
+    console.log("=========", query);
 
     if (query.upcoming === "upcoming") {
         filterConditions.date = { $gte: dates.toISOString() };
@@ -591,7 +717,7 @@ const getEvents = async (req: Request) => {
         .populate({
             path: 'vendor',
             select: 'business_name email name',
-        })
+        });
 
     if (query.sort) {
         const sortField = query.sort.startsWith('-') ? query.sort.slice(1) : query.sort;
@@ -605,6 +731,16 @@ const getEvents = async (req: Request) => {
 
     const result = await categoryQuery.exec();
 
+    // Check each event if its date matches the adjusted 'dates' and add 'today: true'
+    result.forEach((event: any) => {
+        const eventDate = new Date(event.date);
+        eventDate.setHours(0, 0, 0, 0);  // Set to midnight for comparison
+
+        if (eventDate.getTime() === dates.getTime()) {
+            event.today = true;
+        }
+    });
+
     const total = await Event.countDocuments(filterConditions);
     const meta = {
         total,
@@ -612,23 +748,6 @@ const getEvents = async (req: Request) => {
         limit,
         totalPages: Math.ceil(total / limit),
     };
-
-    console.log("defaultDate=========", query)
-
-    // if (dates) {
-    //     const event = await Event.updateMany(
-    //         {
-    //             active: true,
-    //             end_date: { $lte: query?.defaultDate },
-    //         },
-    //         {
-    //             $set: { active: false },
-    //         }
-    //     );
-    //     if (event.modifiedCount > 0) {
-    //         logger.info(`Set ${event.modifiedCount} inactive events.`);
-    //     }
-    // }
 
     return { result, meta };
 };
