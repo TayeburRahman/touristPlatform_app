@@ -510,7 +510,7 @@ const getEvents = async (req: Request) => {
     ) as any;
 
     const dates = new Date()
-    console.log("=========", dates)
+    console.log("=========", dates.setHours(dates.getHours() - 6))
 
 
     query.limit = 12;
