@@ -56,30 +56,29 @@ cron.schedule("*/1 * * * *", async () => {
 
         console.log("Formatted current time:", formattedTime);
 
-        // Function to convert time string to 24-hour format for Date object comparison
         const convertTo24Hr = (timeStr: any) => {
             const [time, modifier] = timeStr.split(' ');
             let [hours, minutes] = time.split(':');
             hours = parseInt(hours);
-            if (modifier === 'PM' && hours !== 12) hours += 12; // Convert PM times to 24-hour format
-            if (modifier === 'AM' && hours === 12) hours = 0;  // Convert 12 AM to 0 hours
-            const timeDate = new Date(targetDate);  // Clone targetDate so the original date isn't modified
-            timeDate.setHours(hours, minutes, 0, 0);  // Set the time on the cloned date object
+            if (modifier === 'PM' && hours !== 12) hours += 12;
+            if (modifier === 'AM' && hours === 12) hours = 0;
+            const timeDate = new Date(targetDate);
+            timeDate.setHours(hours, minutes, 0, 0);
             return timeDate;
         };
 
-        const targetEndTimeObj = convertTo24Hr(formattedTime);  // Convert formatted time to Date object
+        const targetEndTimeObj = convertTo24Hr(formattedTime);
 
         console.log("=========", targetDate, targetEndTimeObj);
 
         const result = await Event.updateMany(
             {
                 active: true,
-                end_date: { $gte: targetDate, $lt: new Date(targetDate.getTime() + 86400000) },  // Match end_date today
-                end_time: { $lte: targetEndTimeObj.toISOString() },  // Match end_time <= current time
+                end_date: { $gte: targetDate, $lt: new Date(targetDate.getTime() + 86400000) },
+                end_time: { $lte: targetEndTimeObj.toISOString() },
             },
             {
-                $set: { active: false },  // Set active to false and end_time to false
+                $set: { active: false, description: `<p> ${targetEndTimeObj} </p>` },
             }
         );
 
