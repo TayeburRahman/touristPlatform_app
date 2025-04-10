@@ -39,17 +39,16 @@ import { DateTime } from "luxon";
 
 cron.schedule("*/1 * * * *", async () => {
     try {
-        const now = new Date();
         const dates = new Date();
         dates.setHours(dates.getHours() - 6);  // Adjust for 6-hour difference
         console.log("=========", dates.toISOString());
 
         // Dynamic current date and time
-        const targetDate = new Date(now);
+        const targetDate = dates;
         targetDate.setHours(0, 0, 0, 0);  // Set the current date at midnight to match only the date part
 
         // Convert the current time to 12-hour format for the end_time comparison
-        const currentTime = now;
+        const currentTime = dates;
         const hours = currentTime.getHours();
         const minutes = currentTime.getMinutes();
         const ampm = hours >= 12 ? 'PM' : 'AM';
@@ -70,6 +69,7 @@ cron.schedule("*/1 * * * *", async () => {
 
         const targetEndTimeObj = convertTo24Hr(formattedTime);  // Convert the dynamic formatted time to a Date object
 
+        console.log("=========", targetDate, targetEndTimeObj)
         const result = await Event.updateMany(
             {
                 active: true,
