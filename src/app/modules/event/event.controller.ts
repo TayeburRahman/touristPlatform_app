@@ -5,7 +5,7 @@ import { EventService } from "./event.service";
 import Event from "./event.model";
 import ApiError from "../../../errors/ApiError";
 
-const getEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+const getEvents: RequestHandler = catchAsync(async (req: Request, res: Response) => {
     const result = await EventService.getEvents(req)
     sendResponse(res, {
         statusCode: 200,
@@ -13,19 +13,19 @@ const getEvents : RequestHandler = catchAsync( async (req: Request, res: Respons
         message: `Event retrieved successfully`,
         data: result,
     });
-}) 
+})
 
-const getAllEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
-    const result = await EventService.getAllEvents(req); 
+const getAllEvents: RequestHandler = catchAsync(async (req: Request, res: Response) => {
+    const result = await EventService.getAllEvents(req);
     sendResponse(res, {
         statusCode: 200,
         success: true,
         message: `Event get Successfully!`,
         data: result,
     });
-}) 
+})
 
-const getPopularMostEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+const getPopularMostEvents: RequestHandler = catchAsync(async (req: Request, res: Response) => {
     const result = await EventService.getPopularMostEvents(req)
     sendResponse(res, {
         statusCode: 200,
@@ -33,9 +33,9 @@ const getPopularMostEvents : RequestHandler = catchAsync( async (req: Request, r
         message: `Event retrieved successfully`,
         data: result,
     });
-}) 
+})
 
-const createNewEvent : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+const createNewEvent: RequestHandler = catchAsync(async (req: Request, res: Response) => {
     const result = await EventService.createNewEvent(req)
     sendResponse(res, {
         statusCode: 200,
@@ -45,7 +45,7 @@ const createNewEvent : RequestHandler = catchAsync( async (req: Request, res: Re
     });
 })
 
-const createAdminNewEvent : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+const createAdminNewEvent: RequestHandler = catchAsync(async (req: Request, res: Response) => {
     const result = await EventService.createAdminNewEvent(req)
     sendResponse(res, {
         statusCode: 200,
@@ -56,9 +56,9 @@ const createAdminNewEvent : RequestHandler = catchAsync( async (req: Request, re
 })
 
 
- 
 
-const updateEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+
+const updateEvents: RequestHandler = catchAsync(async (req: Request, res: Response) => {
     const result = await EventService.updateEvents(req)
     sendResponse(res, {
         statusCode: 200,
@@ -68,7 +68,7 @@ const updateEvents : RequestHandler = catchAsync( async (req: Request, res: Resp
     });
 })
 
-const deleteEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
+const deleteEvents: RequestHandler = catchAsync(async (req: Request, res: Response) => {
     const result = await EventService.deleteEvents(req);
     sendResponse(res, {
         statusCode: 200,
@@ -78,31 +78,32 @@ const deleteEvents : RequestHandler = catchAsync( async (req: Request, res: Resp
     });
 })
 
-const approveEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
-    const result = await EventService.approveEvents(req); 
+const approveEvents: RequestHandler = catchAsync(async (req: Request, res: Response) => {
+    const result = await EventService.approveEvents(req);
     sendResponse(res, {
         statusCode: 200,
         success: true,
         message: `Event Approved Successfully!`,
         data: result,
     });
-}) 
+})
 
 const retrieveEvent: RequestHandler = catchAsync(async (req: Request, res: Response) => {
-    const eventId = req.params.eventId;  
+    const eventId = req.params.eventId;
     if (!eventId) {
         throw new ApiError(400, 'Event ID is required.');
-    } 
+    }
     const event = await Event.findById(eventId)
-    .populate('category')
-    .populate({
-        path: 'vendor',
-        select: 'name profile_image email _id business_name', 
-    });
+        .populate('category')
+        .populate({
+            path: 'vendor',
+            select: 'name profile_image email _id business_name',
+        });
 
     if (!event) {
         throw new ApiError(404, 'Event not found.');
     };
+    console.log("event==", event)
     sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -111,80 +112,80 @@ const retrieveEvent: RequestHandler = catchAsync(async (req: Request, res: Respo
     });
 });
 
-const saveUserClickEvent : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
-    const result = await EventService.saveUserClickEvent(req); 
+const saveUserClickEvent: RequestHandler = catchAsync(async (req: Request, res: Response) => {
+    const result = await EventService.saveUserClickEvent(req);
     sendResponse(res, {
         statusCode: 200,
         success: true,
         message: `Event Approved Successfully!`,
         data: result,
     });
-})  
+})
 
-const getFeaturedEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
-    const result = await EventService.getFeaturedEvents(req); 
+const getFeaturedEvents: RequestHandler = catchAsync(async (req: Request, res: Response) => {
+    const result = await EventService.getFeaturedEvents(req);
     sendResponse(res, {
         statusCode: 200,
         success: true,
         message: `Event featured get Successfully!`,
         data: result,
     });
-}) 
+})
 
 
-const getEventsByDate : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
-    const result = await EventService.getEventsByDate(req); 
+const getEventsByDate: RequestHandler = catchAsync(async (req: Request, res: Response) => {
+    const result = await EventService.getEventsByDate(req);
     sendResponse(res, {
         statusCode: 200,
         success: true,
         message: `Event get Successfully!`,
         data: result,
     });
-}) 
+})
 
 
-const getPastEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
-    const result = await EventService.getPastEvents(req); 
+const getPastEvents: RequestHandler = catchAsync(async (req: Request, res: Response) => {
+    const result = await EventService.getPastEvents(req);
     sendResponse(res, {
         statusCode: 200,
         success: true,
         message: `Event get Successfully!`,
         data: result,
     });
-}) 
+})
 
-const getVendorEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
-    const result = await EventService.getVendorEvents(req); 
+const getVendorEvents: RequestHandler = catchAsync(async (req: Request, res: Response) => {
+    const result = await EventService.getVendorEvents(req);
     sendResponse(res, {
         statusCode: 200,
         success: true,
         message: `Event get Successfully!`,
         data: result,
     });
-}) 
+})
 
-const getVendorFeatured : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
-    const result = await EventService.getVendorFeatured(req); 
+const getVendorFeatured: RequestHandler = catchAsync(async (req: Request, res: Response) => {
+    const result = await EventService.getVendorFeatured(req);
     sendResponse(res, {
         statusCode: 200,
         success: true,
         message: `Event get Successfully!`,
         data: result,
     });
-}) 
+})
 
-const declinedEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
-    const result = await EventService.declinedEvents(req); 
+const declinedEvents: RequestHandler = catchAsync(async (req: Request, res: Response) => {
+    const result = await EventService.declinedEvents(req);
     sendResponse(res, {
         statusCode: 200,
         success: true,
         message: `Cancel request successfully!`,
         data: result,
     });
-}) 
+})
 
-const duplicateEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
-    const result = await EventService.duplicateEvents(req); 
+const duplicateEvents: RequestHandler = catchAsync(async (req: Request, res: Response) => {
+    const result = await EventService.duplicateEvents(req);
     sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -193,8 +194,8 @@ const duplicateEvents : RequestHandler = catchAsync( async (req: Request, res: R
     });
 })
 
-const getMyEvents : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
-    const result = await EventService.getMyEvents(req); 
+const getMyEvents: RequestHandler = catchAsync(async (req: Request, res: Response) => {
+    const result = await EventService.getMyEvents(req);
     sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -203,8 +204,8 @@ const getMyEvents : RequestHandler = catchAsync( async (req: Request, res: Respo
     });
 })
 
-const eventClickOverview : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
-    const result = await EventService.eventClickOverview(req); 
+const eventClickOverview: RequestHandler = catchAsync(async (req: Request, res: Response) => {
+    const result = await EventService.eventClickOverview(req);
     sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -214,8 +215,8 @@ const eventClickOverview : RequestHandler = catchAsync( async (req: Request, res
 })
 
 
-const updateFeatured : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
-    const {result, massage} = await EventService.updateFeatured(req); 
+const updateFeatured: RequestHandler = catchAsync(async (req: Request, res: Response) => {
+    const { result, massage } = await EventService.updateFeatured(req);
     sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -225,8 +226,8 @@ const updateFeatured : RequestHandler = catchAsync( async (req: Request, res: Re
 })
 
 
-const getPastEventsByVendor : RequestHandler = catchAsync( async (req: Request, res: Response) =>{
-    const result  = await EventService.getPastEventsByVendor(req.query.vendor as string); 
+const getPastEventsByVendor: RequestHandler = catchAsync(async (req: Request, res: Response) => {
+    const result = await EventService.getPastEventsByVendor(req.query.vendor as string);
     sendResponse(res, {
         statusCode: 200,
         success: true,
@@ -234,22 +235,22 @@ const getPastEventsByVendor : RequestHandler = catchAsync( async (req: Request, 
         data: result,
     })
 })
- 
- 
 
- 
- 
+
+
+
+
 
 export const EventController = {
     getEvents,
-    getAllEvents,    
+    getAllEvents,
     createNewEvent,
     updateEvents,
     deleteEvents,
     retrieveEvent,
     approveEvents,
     saveUserClickEvent,
-    getPopularMostEvents, 
+    getPopularMostEvents,
     getFeaturedEvents,
     getEventsByDate,
     getPastEvents,
@@ -262,5 +263,5 @@ export const EventController = {
     updateFeatured,
     getPastEventsByVendor,
     createAdminNewEvent
-    
+
 }

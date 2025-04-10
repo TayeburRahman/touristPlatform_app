@@ -57,7 +57,7 @@ cron.schedule("*/1 * * * *", async () => {
         console.log("Formatted current time:", formattedTime);
 
         // Function to convert time string to 24-hour format for Date object comparison
-        const convertTo24Hr = (timeStr) => {
+        const convertTo24Hr = (timeStr: any) => {
             const [time, modifier] = timeStr.split(' ');
             let [hours, minutes] = time.split(':');
             hours = parseInt(hours);
@@ -79,7 +79,7 @@ cron.schedule("*/1 * * * *", async () => {
                 end_time: { $lte: targetEndTimeObj.toISOString() },  // Match end_time <= current time
             },
             {
-                $set: { active: false, end_time: false },  // Set active to false and end_time to false
+                $set: { active: false },  // Set active to false and end_time to false
             }
         );
 
