@@ -12,29 +12,86 @@ import { EventDate } from "./event.helper";
 import { ClickOverview } from "../dashboard/dashboard.model";
 import { DateTime } from "luxon";
 
+// cron.schedule("*/5 * * * *", async () => {
+//     try {
+//         const dates = new Date();
+//         dates.setHours(dates.getHours() - 6);
+//         console.log("=========", dates.toISOString());
+
+//         const result = await Event.updateMany(
+//             {
+//                 active: true,
+//                 end_date: { $lte: dates.toISOString() },
+//             },
+//             {
+//                 $set: { active: false },
+//             }
+//         );
+//         console.log("=================================================l")
+//         if (result.modifiedCount > 0) {
+//             logger.info(`Set ${result.modifiedCount} inactive events.`);
+//         }
+//     } catch (error) {
+//         logger.error("Error setting events to inactive:", error);
+//     }
+// });
+
+
 cron.schedule("*/5 * * * *", async () => {
     try {
+        const now = new Date();
         const dates = new Date();
-        dates.setHours(dates.getHours() - 6);
+        dates.setHours(dates.getHours() - 6);  // Adjust for 6-hour difference
         console.log("=========", dates.toISOString());
+
+        // Dynamic current date and time
+        const targetDate = new Date(now);
+        targetDate.setHours(0, 0, 0, 0);  // Set the current date at midnight to match only the date part
+
+        // Convert the current time to 12-hour format for the end_time comparison
+        const currentTime = now;
+        const hours = currentTime.getHours();
+        const minutes = currentTime.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const hours12 = hours % 12 || 12;  // Convert to 12-hour format (12 AM for midnight)
+        const formattedTime = `${hours12}:${minutes < 10 ? '0' : ''}${minutes} ${ampm}`; // Format like '06:00 PM'
+
+        console.log("Formatted current time:", formattedTime);
+
+        // Convert the formatted end time to a 24-hour Date object for comparison
+        const convertTo24Hr = (timeStr: any) => {
+            const [time, modifier] = timeStr.split(' ');
+            let [hours, minutes] = time.split(':');
+            hours = parseInt(hours);
+            if (modifier === 'PM' && hours !== 12) hours += 12; // Convert PM times to 24-hour format
+            if (modifier === 'AM' && hours === 12) hours = 0;  // Convert 12 AM to 0 hours
+            return new Date(targetDate.setHours(hours, minutes, 0, 0));  // Return the time in Date object
+        };
+
+        const targetEndTimeObj = convertTo24Hr(formattedTime);  // Convert the dynamic formatted time to a Date object
 
         const result = await Event.updateMany(
             {
                 active: true,
-                end_date: { $lte: dates.toISOString() },
+                end_date: { $gte: targetDate, $lt: new Date(targetDate.getTime() + 86400000) },  // Match end_date today
+                end_time: { $lte: targetEndTimeObj.toISOString() },  // Match end_time <= current time
             },
             {
-                $set: { active: false },
+                $set: { active: false, end_time: false },  // Set active to false and end_time to false
             }
         );
-        console.log("=================================================l")
+
         if (result.modifiedCount > 0) {
-            logger.info(`Set ${result.modifiedCount} inactive events.`);
+            logger.info(`Set ${result.modifiedCount} events to inactive and updated end_time.`);
+        } else {
+            logger.info("No events were modified.");
         }
+
     } catch (error) {
         logger.error("Error setting events to inactive:", error);
     }
 });
+
 
 
 cron.schedule("* * * * *", async () => {
