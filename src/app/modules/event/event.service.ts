@@ -570,8 +570,8 @@ const getEvents = async (req: Request) => {
     ) as any;
 
     const dates = new Date();
-    dates.setHours(dates.getHours() - 6);  // Adjust the time by -6 hours
-    console.log("=========", dates.toISOString());
+    dates.setHours(dates.getHours() - 6);
+    // console.log("=========", dates.toISOString());
 
     query.limit = 12;
     if (!query.page) {
@@ -591,7 +591,7 @@ const getEvents = async (req: Request) => {
         filterConditions.option = { $in: options };
     }
 
-    console.log("=========", query);
+    // console.log("=========", query);
 
     if (query.upcoming === "upcoming") {
         filterConditions.date = { $gte: dates.toISOString() };
@@ -661,10 +661,9 @@ const getEvents = async (req: Request) => {
 
     const result = await categoryQuery.exec();
 
-    // Check each event if its date matches the adjusted 'dates' and add 'today: true'
     result.forEach((event: any) => {
         const eventDate = new Date(event.date);
-        eventDate.setHours(0, 0, 0, 0);  // Set to midnight for comparison
+        eventDate.setHours(0, 0, 0, 0);
 
         if (eventDate.getTime() === dates.getTime()) {
             event.today = true;
@@ -702,7 +701,7 @@ const getPopularMostEvents = async (req: Request) => {
 const getAllEvents = async (req: Request) => {
     const query = req.query;
 
-    console.log(query.date);
+    // console.log(query.date);
     const categoryQuery = new QueryBuilder(
         Event.find()
             .populate('category', 'name')
