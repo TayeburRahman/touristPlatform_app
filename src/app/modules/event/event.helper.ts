@@ -6,7 +6,8 @@ const getDayName = (date: Date) => {
 
 const getNextWeek = (dates: Date) => {
   const nextTuesday = new Date(dates);
-  nextTuesday.setDate(dates.getDate() + 7); // Add 7 days for next week
+  nextTuesday.setDate(dates.getDate() + 7);
+  console.log("====", nextTuesday)
   return nextTuesday;
 };
 
