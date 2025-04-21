@@ -70,10 +70,11 @@ cron.schedule("* * * * *", async () => {
             {
                 active: true,
                 end_date: { $gte: targetDate, $lt: new Date(targetDate.getTime() + 86400000) },
+
                 end_time: { $lte: targetEndTimeObj.toISOString() },
             },
             {
-                $set: { active: false, description: `<p> ${targetEndTimeObj} </p>` },
+                $set: { active: false },
             }
         );
 
@@ -95,10 +96,41 @@ cron.schedule("* * * * *", async () => {
     try {
         const now = new Date();
         now.setHours(now.getHours() - 6);
+
+        const dates = new Date();
+        dates.setHours(dates.getHours() - 6);
+        console.log("=222==", dates)
+        console.log("=========", dates.toISOString());
+
+        const targetDate = new Date(dates);
+        targetDate.setHours(0, 0, 0, 0);
+
+        const currentTime = new Date(dates);
+        const hours = currentTime.getHours();
+        const minutes = currentTime.getMinutes();
+        const ampm = hours >= 12 ? 'PM' : 'AM';
+        const hours12 = hours % 12 || 12;
+        const formattedTime = `${hours12}:${minutes < 10 ? '0' : ''}${minutes} ${ampm}`;
+
+        const convertTo24Hr = (timeStr: any) => {
+            const [time, modifier] = timeStr.split(' ');
+            let [hours, minutes] = time.split(':');
+            hours = parseInt(hours);
+            if (modifier === 'PM' && hours !== 12) hours += 12;
+            if (modifier === 'AM' && hours === 12) hours = 0;
+            const timeDate = new Date(targetDate);
+            timeDate.setHours(hours, minutes, 0, 0);
+            return timeDate;
+        };
+
+        const targetEndTimeObj = convertTo24Hr(formattedTime);
+
+
         const result = await Event.updateMany(
             {
                 active: false,
                 end_date: { $gt: now },
+                end_time: { $gt: targetEndTimeObj.toISOString() },
             },
             {
                 $set: { active: true },
