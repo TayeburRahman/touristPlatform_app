@@ -113,7 +113,7 @@ cron.schedule("* * * * *", async () => {
     }
 });
 
-cron.schedule("* * * * *", async () => {
+cron.schedule("*/2 * * * *", async () => {
     try {
         const now = new Date();
         now.setHours(now.getHours() - 6);
@@ -590,8 +590,6 @@ const getEvents = async (req: Request) => {
         const options = query.option.split(',');
         filterConditions.option = { $in: options };
     }
-
-    // console.log("=========", query);
 
     if (query.upcoming === "upcoming") {
         filterConditions.date = { $gte: dates.toISOString() };
