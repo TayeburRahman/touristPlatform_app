@@ -14,49 +14,159 @@ import { DateTime } from "luxon";
 
 
 
+// cron.schedule("* * * * *", async () => {
+//     try {
+//         const dates = new Date();
+//         dates.setHours(dates.getHours() - 6);
+//         console.log("=222==", dates)
+//         console.log("=========", dates.toISOString());
+
+//         const targetDate = new Date(dates);
+//         targetDate.setHours(0, 0, 0, 0);
+
+//         const currentTime = new Date(dates);
+//         const hours = currentTime.getHours();
+//         const minutes = currentTime.getMinutes();
+//         const ampm = hours >= 12 ? 'PM' : 'AM';
+//         const hours12 = hours % 12 || 12;
+//         const formattedTime = `${hours12}:${minutes < 10 ? '0' : ''}${minutes} ${ampm}`;
+
+//         const convertTo24Hr = (timeStr: any) => {
+//             const [time, modifier] = timeStr.split(' ');
+//             let [hours, minutes] = time.split(':');
+//             hours = parseInt(hours);
+//             if (modifier === 'PM' && hours !== 12) hours += 12;
+//             if (modifier === 'AM' && hours === 12) hours = 0;
+//             const timeDate = new Date(targetDate);
+//             timeDate.setHours(hours, minutes, 0, 0);
+//             return timeDate;
+//         };
+
+//         const targetEndTimeObj = convertTo24Hr(formattedTime);
+//         const result = await Event.updateMany(
+//             {
+//                 active: true,
+//                 end_date: { $gte: targetDate, $lt: new Date(targetDate.getTime() + 86400000) },
+
+//                 end_time: { $lte: targetEndTimeObj.toISOString() },
+//             },
+//             {
+//                 $set: { active: false },
+//             }
+//         );
+
+//         if (result.modifiedCount > 0) {
+//             logger.info(`Set ${result.modifiedCount} events to inactive and updated end_time.`);
+//         } else {
+//             logger.info("No events were modified.");
+//         }
+
+//     } catch (error) {
+//         logger.error("Error setting events to inactive:", error);
+//     }
+// });
+
+
+
+
+// cron.schedule("* * * * *", async () => {
+//     try {
+//         const now = new Date();
+//         now.setHours(now.getHours() - 6);
+
+//         now.setHours(now.getHours() - 6);
+//         const targetDate = now;
+//         targetDate.setHours(0, 0, 0, 0);
+
+//         const currentTime = now;
+//         const hours = currentTime.getHours();
+//         const minutes = currentTime.getMinutes();
+//         const ampm = hours >= 12 ? 'PM' : 'AM';
+//         const hours12 = hours % 12 || 12;
+//         const formattedTime = `${hours12}:${minutes < 10 ? '0' : ''}${minutes} ${ampm}`;
+
+//         const convertTo24Hr = (timeStr: any) => {
+//             const [time, modifier] = timeStr.split(' ');
+//             let [hours, minutes] = time.split(':');
+//             hours = parseInt(hours);
+//             if (modifier === 'PM' && hours !== 12) hours += 12;
+//             if (modifier === 'AM' && hours === 12) hours = 0;
+//             const timeDate = new Date(targetDate);
+//             timeDate.setHours(hours, minutes, 0, 0);
+//             return timeDate;
+//         };
+
+//         const targetEndTimeObj = convertTo24Hr(formattedTime);
+
+//         console.log("=444==", now)
+//         console.log("=========targetEndTimeObj", targetEndTimeObj);
+//         const result = await Event.updateMany(
+//             {
+//                 active: false,
+//                 end_date: { $gt: now },
+//                 end_time: { $gt: targetEndTimeObj.toISOString() },
+//             },
+//             {
+//                 $set: { active: true },
+//             }
+//         );
+
+//         if (result.modifiedCount > 0) {
+//             logger.info(`Set ${result.modifiedCount} inactive events.`);
+//         }
+//     } catch (error) {
+//         logger.error("Error setting event active:", error);
+//     }
+// });
+
+
 cron.schedule("* * * * *", async () => {
     try {
-        const dates = new Date();
-        dates.setHours(dates.getHours() - 6);
-        console.log("=222==", dates)
-        console.log("=========", dates.toISOString());
+        const now = new Date();
+        now.setHours(now.getHours() - 6); // Convert to UTC-6
 
-        const targetDate = new Date(dates);
-        targetDate.setHours(0, 0, 0, 0);
+        const startOfToday = new Date(now);
+        startOfToday.setHours(0, 0, 0, 0);
 
-        const currentTime = new Date(dates);
+        const endOfToday = new Date(startOfToday.getTime() + 86400000);
+
+        const currentTime = new Date(now);
         const hours = currentTime.getHours();
         const minutes = currentTime.getMinutes();
         const ampm = hours >= 12 ? 'PM' : 'AM';
         const hours12 = hours % 12 || 12;
         const formattedTime = `${hours12}:${minutes < 10 ? '0' : ''}${minutes} ${ampm}`;
 
-        const convertTo24Hr = (timeStr: any) => {
+        const convertTo24Hr = (timeStr: any, baseDate: Date) => {
             const [time, modifier] = timeStr.split(' ');
-            let [hours, minutes] = time.split(':');
-            hours = parseInt(hours);
+            let [hours, minutes] = time.split(':').map(Number);
             if (modifier === 'PM' && hours !== 12) hours += 12;
             if (modifier === 'AM' && hours === 12) hours = 0;
-            const timeDate = new Date(targetDate);
+            const timeDate = new Date(baseDate);
             timeDate.setHours(hours, minutes, 0, 0);
             return timeDate;
         };
 
-        const targetEndTimeObj = convertTo24Hr(formattedTime);
-        const result = await Event.updateMany(
-            {
-                active: true,
-                end_date: { $gte: targetDate, $lt: new Date(targetDate.getTime() + 86400000) },
+        // Fetch all active events ending today
+        const events = await Event.find({
+            active: true,
+            end_date: { $gte: startOfToday, $lt: endOfToday },
+        });
 
-                end_time: { $lte: targetEndTimeObj.toISOString() },
-            },
-            {
-                $set: { active: false },
+        let updatedCount = 0;
+
+        for (const event of events) {
+            //@ts-ignore
+            const eventEndTimeObj = convertTo24Hr(event.end_time, new Date(event.end_date));
+
+            if (eventEndTimeObj <= now) {
+                await Event.updateOne({ _id: event._id }, { $set: { active: false } });
+                updatedCount++;
             }
-        );
+        }
 
-        if (result.modifiedCount > 0) {
-            logger.info(`Set ${result.modifiedCount} events to inactive and updated end_time.`);
+        if (updatedCount > 0) {
+            logger.info(`Set ${updatedCount} events to inactive.`);
         } else {
             logger.info("No events were modified.");
         }
@@ -67,57 +177,49 @@ cron.schedule("* * * * *", async () => {
 });
 
 
-
-
 cron.schedule("* * * * *", async () => {
     try {
         const now = new Date();
-        now.setHours(now.getHours() - 6);
+        now.setHours(now.getHours() - 6); // If needed for timezone only
 
-        now.setHours(now.getHours() - 6);
-        const targetDate = now;
-        targetDate.setHours(0, 0, 0, 0);
+        // Convert current time to 24hr format Date object
+        const currentHour = now.getHours();
+        const currentMinute = now.getMinutes();
 
-        const currentTime = now;
-        const hours = currentTime.getHours();
-        const minutes = currentTime.getMinutes();
-        const ampm = hours >= 12 ? 'PM' : 'AM';
-        const hours12 = hours % 12 || 12;
-        const formattedTime = `${hours12}:${minutes < 10 ? '0' : ''}${minutes} ${ampm}`;
+        // Fetch events that are inactive and end today or later
+        const events = await Event.find({
+            active: false,
+            end_date: { $gte: now.toISOString().split('T')[0] }, // compare only date
+        });
 
-        const convertTo24Hr = (timeStr: any) => {
-            const [time, modifier] = timeStr.split(' ');
-            let [hours, minutes] = time.split(':');
-            hours = parseInt(hours);
-            if (modifier === 'PM' && hours !== 12) hours += 12;
-            if (modifier === 'AM' && hours === 12) hours = 0;
-            const timeDate = new Date(targetDate);
-            timeDate.setHours(hours, minutes, 0, 0);
-            return timeDate;
-        };
+        for (const event of events) {
+            // @ts-ignore
+            const eventEndDate = new Date(event?.end_date);
 
-        const targetEndTimeObj = convertTo24Hr(formattedTime);
+            // Convert event.end_time (e.g. '02:00 PM') to Date object
+            const eventEndTimeObj = (() => {
+                const [time, modifier] = event.end_time.split(" ");
+                let [hours, minutes] = time.split(":").map(Number);
+                if (modifier === "PM" && hours !== 12) hours += 12;
+                if (modifier === "AM" && hours === 12) hours = 0;
 
-        console.log("=222==", now)
-        console.log("=========targetEndTimeObj", targetEndTimeObj);
-        const result = await Event.updateMany(
-            {
-                active: false,
-                end_date: { $gt: now },
-                end_time: { $gt: targetEndTimeObj.toISOString() },
-            },
-            {
-                $set: { active: true },
+                const dateWithTime = new Date(eventEndDate);
+                dateWithTime.setHours(hours, minutes, 0, 0);
+                return dateWithTime;
+            })();
+
+            // If event's end_time is still in the future, activate it
+            if (eventEndTimeObj > now) {
+                await Event.updateOne({ _id: event._id }, { $set: { active: true } });
+                logger.info(`Activated event: ${event.name}`);
             }
-        );
-
-        if (result.modifiedCount > 0) {
-            logger.info(`Set ${result.modifiedCount} inactive events.`);
         }
     } catch (error) {
         logger.error("Error setting event active:", error);
     }
 });
+
+
 
 cron.schedule("*/2 * * * *", async () => {
     try {
