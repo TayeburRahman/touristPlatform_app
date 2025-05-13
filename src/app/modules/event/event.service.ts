@@ -437,6 +437,7 @@ const updateEvents = async (req: Request) => {
         if (images.length > 0) existingEvent.event_image = images;
 
         existingEvent.status = 'updated';
+        existingEvent.active = true;
         const updatedEvent = await existingEvent.save();
 
         console.log("updatedEvent", updatedEvent)
