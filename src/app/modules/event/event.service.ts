@@ -12,29 +12,6 @@ import { EventDate } from "./event.helper";
 import { ClickOverview } from "../dashboard/dashboard.model";
 import { DateTime } from "luxon";
 
-// cron.schedule("*/5 * * * *", async () => {
-//     try {
-//         const dates = new Date();
-//         dates.setHours(dates.getHours() - 6);
-//         console.log("=========", dates.toISOString());
-
-//         const result = await Event.updateMany(
-//             {
-//                 active: true,
-//                 end_date: { $lte: dates.toISOString() },
-//             },
-//             {
-//                 $set: { active: false },
-//             }
-//         );
-//         console.log("=================================================l")
-//         if (result.modifiedCount > 0) {
-//             logger.info(`Set ${result.modifiedCount} inactive events.`);
-//         }
-//     } catch (error) {
-//         logger.error("Error setting events to inactive:", error);
-//     }
-// });
 
 
 cron.schedule("* * * * *", async () => {
@@ -97,15 +74,11 @@ cron.schedule("* * * * *", async () => {
         const now = new Date();
         now.setHours(now.getHours() - 6);
 
-        const dates = new Date();
-        dates.setHours(dates.getHours() - 6);
-        console.log("=222==", dates)
-        console.log("=========", dates.toISOString());
-
-        const targetDate = new Date(dates);
+        now.setHours(now.getHours() - 6);
+        const targetDate = now;
         targetDate.setHours(0, 0, 0, 0);
 
-        const currentTime = new Date(dates);
+        const currentTime = now;
         const hours = currentTime.getHours();
         const minutes = currentTime.getMinutes();
         const ampm = hours >= 12 ? 'PM' : 'AM';
@@ -125,7 +98,8 @@ cron.schedule("* * * * *", async () => {
 
         const targetEndTimeObj = convertTo24Hr(formattedTime);
 
-
+        console.log("=222==", now)
+        console.log("=========targetEndTimeObj", targetEndTimeObj);
         const result = await Event.updateMany(
             {
                 active: false,
