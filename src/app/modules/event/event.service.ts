@@ -152,6 +152,7 @@ cron.schedule("* * * * *", async () => {
             active: true,
             end_date: { $gte: startOfToday, $lt: endOfToday },
         });
+        console.log('===============11====', events)
 
         let updatedCount = 0;
 
@@ -191,7 +192,7 @@ cron.schedule("* * * * *", async () => {
             active: false,
             end_date: { $gte: now.toISOString().split('T')[0] }, // compare only date
         });
-
+        console.log('===============events====', events)
         for (const event of events) {
             // @ts-ignore
             const eventEndDate = new Date(event?.end_date);
